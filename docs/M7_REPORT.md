@@ -89,7 +89,7 @@ Current release evidence is the deterministic corpus validator, live-schema drif
 
 ## Final HTTPS target-client smoke
 
-On August 28, 2026, deployment `dpl_Bdcq6rVwWLW5LT2sY7iQFXCsBbW9` at <https://curbcut-one.vercel.app> was exercised in ChatGPT's in-app browser:
+On August 28, 2026, deployment `dpl_7Dhvy7s2y9B67iUNudo3QH9QP91D` at <https://curbcut-one.vercel.app> was exercised in ChatGPT's in-app browser:
 
 - all ten page-defined WebMCP tools were discovered with the expected schemas and annotations;
 - `list_issues` found the serious mechanical `tabindex` issue and `inspect_issue` mapped it to line 25, column 11, offsets 768–848;
