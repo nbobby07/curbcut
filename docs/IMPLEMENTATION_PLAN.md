@@ -1,6 +1,6 @@
 # Curbcut — Implementation Plan
 
-Status: M1–M6 passed; M7 eval hardening is next
+Status: M1–M7 deterministic gates passed; M8 deployment, target-client verification, media, and submission are in progress
 Baseline: the successful Spike A and Spike B code in this repository  
 Target: persistent authenticated Vercel deployment established during M1/M2, with final production freeze by September 2, 2026
 

@@ -6,7 +6,7 @@ export const CHECKOUT_HTML = `<!doctype html>
   <body>
     <main class="checkout-shell">
       <section class="checkout-copy" aria-labelledby="checkout-title">
-        <p class="eyebrow">Northwind Supply</p>
+        <p class="eyebrow">Rillstone Goods</p>
         <h1 id="checkout-title">Complete your order</h1>
         <p class="muted">Secure checkout for your studio essentials.</p>
 
@@ -16,13 +16,13 @@ export const CHECKOUT_HTML = `<!doctype html>
             <input id="email" name="email" type="email" autocomplete="email">
           </div>
 
-          <h3>Payment</h3>
+          <h2 class="payment-heading">Payment</h2>
           <label class="field">
             <span>Card number</span>
             <input name="card" inputmode="numeric" autocomplete="cc-number">
           </label>
 
-          <button class="continue" type="submit">Continue to payment</button>
+          <button class="continue" type="submit" tabindex="2">Continue to payment</button>
         </form>
       </section>
 
@@ -53,8 +53,8 @@ body { margin: 0; min-height: 100vh; background: #f4f1ea; color: #17211b; font: 
 .checkout-copy, .order-summary { background: #fff; border: 1px solid #d7dbd8; border-radius: 14px; padding: 28px; }
 .eyebrow { margin: 0; color: #315b44; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 h1 { margin: 6px 0 4px; font-size: 30px; line-height: 1.15; }
-h2, h3 { margin: 0; }
-h3 { margin-top: 12px; font-size: 17px; }
+h2 { margin: 0; }
+.payment-heading { margin-top: 12px; font-size: 17px; }
 .muted { margin: 0 0 24px; color: #a7ada9; }
 form, .field { display: grid; gap: 8px; }
 form { gap: 18px; }

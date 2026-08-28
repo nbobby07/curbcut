@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-const rules = ['button-name', 'color-contrast', 'heading-order', 'html-has-lang', 'image-alt', 'label']
+const rules = ['button-name', 'color-contrast', 'html-has-lang', 'image-alt', 'label', 'tabindex']
 
 async function scan(page: Page) {
   await page.getByRole('button', { name: /^(Run axe scan|Rescan with axe)$/ }).click()
@@ -14,12 +14,12 @@ function issue(page: Page, ruleId: string) {
 test('freezes the checkout fixture and completes label Apply/rescan/Undo', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByTestId('isolation-status')).toHaveText('Isolation: opaque (null)')
-  await scan(page)
+  await expect(page.getByRole('button', { name: 'Rescan with axe' })).toBeEnabled()
 
   await expect(page.locator('.issue-row')).toHaveCount(6)
   await expect(page.locator('.issue-row strong')).toHaveText(rules)
   await expect(page.locator('.issue-row .impact')).toHaveText([
-    'critical', 'serious', 'moderate', 'serious', 'critical', 'critical',
+    'critical', 'serious', 'serious', 'critical', 'critical', 'serious',
   ])
 
   const editor = page.getByLabel('Editable HTML source')
@@ -81,16 +81,14 @@ test('requires a human image-purpose decision and Reject is non-mutating', async
 })
 
 test('removes only positive tabindex and restores the finding after exact Undo', async ({ page }) => {
-  const source = '<!doctype html>\r\n<html lang="en">\r\n<body>\r\n<main><button class="buy" tabindex="2" data-note="é">Buy</button></main>\r\n</body>\r\n</html>'
   await page.goto('/')
   const editor = page.getByLabel('Editable HTML source')
-  await editor.fill(source)
+  await expect(page.getByRole('button', { name: 'Rescan with axe' })).toBeEnabled()
   const browserCanonical = await editor.inputValue()
-  await scan(page)
   await expect(issue(page, 'tabindex')).toContainText('serious')
   await issue(page, 'tabindex').click()
   await page.getByRole('button', { name: 'Preview repair' }).click()
-  await expect(page.getByTestId('proposal-panel')).toContainText('<button class="buy" data-note="é">')
+  await expect(page.getByTestId('proposal-panel')).toContainText('<button class="continue" type="submit">')
   await expect(page.getByTestId('apply-proposal')).toBeDisabled()
   await page.getByTestId('approve-proposal').click()
   await page.getByTestId('apply-proposal').click()

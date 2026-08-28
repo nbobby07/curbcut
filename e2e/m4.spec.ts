@@ -36,6 +36,7 @@ async function tool(page: Page, name: string, args: Record<string, unknown>, can
 }
 
 async function scanAndLabelId(page: Page) {
+  await expect(page.getByRole('button', { name: 'Rescan with axe' })).toBeEnabled()
   expect((await tool(page, 'scan_accessibility', { reason: 'initial' })).ok).toBe(true)
   const listed = await tool(page, 'list_issues', { impact: 'critical', classification: 'all', status: 'open', limit: 10 })
   return String((listed.data!.issues as Array<{ issueId: string; ruleId: string }>).find(({ ruleId }) => ruleId === 'label')!.issueId)
@@ -90,6 +91,7 @@ test('C — preview is non-mutating and apply cannot bypass visible exact approv
 
 test('image semantic values remain candidate-only until a new visible approval', async ({ page }) => {
   await page.goto('/')
+  await expect(page.getByRole('button', { name: 'Rescan with axe' })).toBeEnabled()
   await tool(page, 'scan_accessibility', { reason: 'initial' })
   const listed = await tool(page, 'list_issues', { impact: 'critical', classification: 'all', status: 'open', limit: 10 })
   const imageId = String((listed.data!.issues as Array<{ issueId: string; ruleId: string }>).find(({ ruleId }) => ruleId === 'image-alt')!.issueId)
@@ -183,6 +185,7 @@ test('G — keyboard tabs, manual-review copy, timeline focus, and app chrome st
   await expect(page.getByRole('tab', { name: 'CSS' })).toBeFocused()
   await expect(page.getByLabel('Editable CSS source')).toBeVisible()
 
+  await expect(page.getByRole('button', { name: 'Rescan with axe' })).toBeEnabled()
   await tool(page, 'scan_accessibility', { reason: 'initial' })
   const listed = await tool(page, 'list_issues', { impact: 'critical', classification: 'all', status: 'open', limit: 10 })
   const buttonIssue = (listed.data!.issues as Array<{ issueId: string; ruleId: string }>).find(({ ruleId }) => ruleId === 'button-name')!

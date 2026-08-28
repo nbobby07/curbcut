@@ -191,6 +191,7 @@ let state: WorkspaceState = {
 
 let bridge: PreviewBridge | null = null
 let activeRender: { revision: number; promise: Promise<CommandResult<{ sourceRevision: number }>> } | null = null
+let automaticInitialScanRevision: number | null = null
 let persistenceTimer: ReturnType<typeof setTimeout> | null = null
 const listeners = new Set<() => void>()
 const emit = () => listeners.forEach((listener) => listener())
@@ -211,6 +212,20 @@ const update = (patch: Partial<WorkspaceState>) => {
 
 const cancelled = (signal?: AbortSignal) => Boolean(signal?.aborted)
 const isAbortError = (error: unknown) => error instanceof DOMException && error.name === 'AbortError'
+
+function scheduleAutomaticInitialScan(revision: number) {
+  if (automaticInitialScanRevision !== null || state.scanStatus !== 'NEVER' || state.sourceRevision !== revision) return
+  automaticInitialScanRevision = revision
+  queueMicrotask(() => {
+    if (!bridge || state.sourceRevision !== revision || state.previewStatus !== 'READY' || state.scanStatus !== 'NEVER') {
+      automaticInitialScanRevision = null
+      return
+    }
+    void workspaceStore.scan('initial').then((result) => {
+      if (!result.ok && state.scanStatus === 'NEVER') automaticInitialScanRevision = null
+    })
+  })
+}
 
 async function renderCurrent(signal?: AbortSignal): Promise<CommandResult<{ sourceRevision: number }>> {
   if (cancelled(signal)) return fail('CANCELLED', 'The WebMCP execution was cancelled.')
@@ -237,6 +252,7 @@ async function renderCurrent(signal?: AbortSignal): Promise<CommandResult<{ sour
         previewStatus: 'READY',
         mapping: prepared.mapping,
       })
+      scheduleAutomaticInitialScan(revision)
       return { ok: true, data: { sourceRevision: revision } }
     } catch (error) {
       if (isAbortError(error) || cancelled(signal)) {
@@ -317,13 +333,16 @@ export const workspaceStore = {
     if (state.proposal?.status === 'PROPOSED' || state.proposal?.status === 'APPROVED') {
       return fail('PROPOSAL_EXISTS', 'Apply or reject the pending proposal before rescanning the working source.')
     }
-    const rendered = await renderCurrent(signal)
-    if (!rendered.ok && rendered.error.code === 'CANCELLED') return rendered
-    if (!rendered.ok || !bridge || !state.mapping) return fail('PREVIEW_NOT_READY', 'The current source could not be rendered safely.')
     const revision = state.sourceRevision
-    const mapping = state.mapping
     const previousStatus = state.scanStatus
     update({ scanStatus: 'RUNNING', error: null })
+    const rendered = await renderCurrent(signal)
+    if (!rendered.ok || !bridge || !state.mapping) {
+      if (state.sourceRevision === revision) update({ scanStatus: previousStatus, error: null })
+      if (!rendered.ok && rendered.error.code === 'CANCELLED') return rendered
+      return fail('PREVIEW_NOT_READY', 'The current source could not be rendered safely.')
+    }
+    const mapping = state.mapping
     try {
       const payload = await bridge.scan(revision, signal)
       if (cancelled(signal)) return fail('CANCELLED', 'The WebMCP execution was cancelled.')

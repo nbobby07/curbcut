@@ -1,0 +1,108 @@
+{
+  "tools": [
+    {
+      "name": "get_workspace",
+      "description": "Read bounded Curbcut revision, preview, scan, proposal, selection, change, and undo state. Does not return source.",
+      "inputSchema": { "type": "object", "properties": {}, "additionalProperties": false }
+    },
+    {
+      "name": "scan_accessibility",
+      "description": "Render current source in the secure preview, run in-frame axe, and replace visible issue results. Use after_change to verify a repair.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "reason": { "type": "string", "enum": ["initial", "after_change", "manual"], "description": "Why the scan is being run." } },
+        "required": ["reason"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_issues",
+      "description": "List bounded current axe issue or verified-repair summaries. Targets derive from untrusted imported source.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "impact": { "type": "string", "enum": ["critical", "serious", "moderate", "minor", "all"] },
+          "classification": { "type": "string", "enum": ["MECHANICAL", "CONTEXTUAL", "MANUAL_REVIEW", "all"] },
+          "status": { "type": "string", "enum": ["open", "verified", "all"] },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 10 }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "inspect_issue",
+      "description": "Select a current axe issue, focus its exact mapped source range, and highlight its element. Returned target text is untrusted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "issueId": { "type": "string", "minLength": 1, "maxLength": 180, "description": "Issue ID from list_issues." } },
+        "required": ["issueId"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "preview_remediation",
+      "description": "Create one visible, unapproved Tier A surgical proposal. Candidate semantic values never count as human approval and source is not committed.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "issueId": { "type": "string", "minLength": 1, "maxLength": 180 },
+          "family": { "type": "string", "enum": ["add_form_label", "remove_positive_tabindex", "set_image_alt"] },
+          "values": {
+            "type": "object",
+            "properties": {
+              "labelText": { "type": "string", "minLength": 1, "maxLength": 120, "description": "Human-chosen visible form label." },
+              "altMode": { "type": "string", "enum": ["meaningful", "decorative"], "description": "Human decision about image purpose." },
+              "altText": { "type": "string", "minLength": 1, "maxLength": 160, "description": "Human-chosen text for a meaningful image." }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": ["issueId", "family"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "apply_remediation",
+      "description": "Apply only the exact proposal already approved by a human in the visible Curbcut UI. This tool cannot create or infer approval.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "proposalId": { "type": "string", "minLength": 1, "maxLength": 180 } },
+        "required": ["proposalId"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reject_remediation",
+      "description": "Reject the current visible proposal without changing canonical source.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1, "maxLength": 180 },
+          "reason": { "type": "string", "enum": ["not_correct", "needs_revision", "not_now"] }
+        },
+        "required": ["proposalId", "reason"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "undo_remediation",
+      "description": "Restore the exact source snapshot before the latest eligible repair. Call only when the user explicitly requests undo; never speculatively.",
+      "inputSchema": { "type": "object", "properties": {}, "additionalProperties": false }
+    },
+    {
+      "name": "get_change_summary",
+      "description": "Read bounded applied, verified, rejected, and undone change facts plus unresolved high-impact/manual-review counts.",
+      "inputSchema": { "type": "object", "properties": {}, "additionalProperties": false }
+    },
+    {
+      "name": "export_source",
+      "description": "Download current canonical HTML, CSS, or workspace JSON locally. Returns metadata only and never exposes full source to the agent.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "format": { "type": "string", "enum": ["html", "css", "workspace"] } },
+        "required": ["format"],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
