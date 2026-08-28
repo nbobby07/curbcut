@@ -36,10 +36,10 @@ test('freezes the checkout fixture and completes label Apply/rescan/Undo', async
   await page.getByTestId('approve-proposal').click()
   await expect(page.getByTestId('approval-status')).toContainText('Approved by human')
   await page.getByTestId('apply-proposal').click()
-  await expect(editor).toHaveValue(before.replace(
-    '            <input id="email"',
-    '            <label for="email">Email address</label>\n            <input id="email"',
-  ))
+  await expect(editor).toHaveValue(before
+    .replace('<span>Email address</span>', '<span id="curbcut-label-1">Email address</span>')
+    .replace('<input id="email" name="email" type="email" autocomplete="email">',
+      '<input id="email" name="email" type="email" autocomplete="email" aria-labelledby="curbcut-label-1">'))
   await expect(page.getByTestId('verification-result')).toContainText('PENDING')
 
   await scan(page)

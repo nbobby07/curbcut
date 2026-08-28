@@ -156,7 +156,7 @@ function literalId(node: SourceNode): string | null {
   return id && /^[^\s"'<>`=]+$/u.test(id) ? id : null
 }
 
-function adjacentLabelCandidate(source: string, mapping: SourceMapping, target: SourceNode): string | null {
+function adjacentLabelCandidate(source: string, mapping: SourceMapping, target: SourceNode): { text: string; node: SourceNode } | null {
   const candidate = mapping.nodes
     .filter((node) => ['span', 'strong', 'b', 'p', 'small'].includes(node.tagName) && node.endTagRange &&
       node.sourceRange.endOffset <= target.startTagRange.startOffset &&
@@ -165,7 +165,8 @@ function adjacentLabelCandidate(source: string, mapping: SourceMapping, target: 
   if (!candidate?.endTagRange) return null
   const raw = source.slice(candidate.startTagRange.endOffset, candidate.endTagRange.startOffset)
   if (/[<>&]/u.test(raw)) return null
-  return visibleText(raw.trim(), 120)
+  const text = visibleText(raw.trim(), 120)
+  return text ? { text, node: candidate } : null
 }
 
 function labelRepair(
@@ -180,7 +181,8 @@ function labelRepair(
     return refuse('UNSUPPORTED_TARGET', 'Only native, visible input, select, and textarea controls are supported.')
   }
   const suppliedLabel = values.labelText !== undefined && values.labelText !== ''
-  const labelText = suppliedLabel ? visibleText(values.labelText, 120) : adjacentLabelCandidate(source, mapping, target)
+  const adjacent = suppliedLabel ? null : adjacentLabelCandidate(source, mapping, target)
+  const labelText = suppliedLabel ? visibleText(values.labelText, 120) : adjacent?.text ?? null
   if (suppliedLabel && !labelText) return refuse('INVALID_HUMAN_VALUE', 'Label text must be 1–120 visible characters without control characters or edge whitespace.')
   if (!labelText) return refuse('HUMAN_VALUE_REQUIRED', 'Provide label text because no safe adjacent visible-text candidate was found.')
   if (target.attributes['aria-label'] || target.attributes['aria-labelledby']) {
@@ -188,6 +190,41 @@ function labelRepair(
   }
 
   const existingId = target.attributes.id
+
+  if (adjacent) {
+    const existingLabelId = adjacent.node.attributes.id
+    let labelId = literalId(adjacent.node)
+    if (existingLabelId && !labelId) return refuse('NONLITERAL_ATTRIBUTE', 'The adjacent text ID is not a safe literal value.')
+    if (labelId && mapping.nodes.filter((node) => node.attributes.id === labelId).length !== 1) {
+      return refuse('DUPLICATE_ID', 'The adjacent text ID is duplicated, so an ARIA association would be ambiguous.')
+    }
+    const patches: RepairPatch[] = []
+    if (!labelId) {
+      const used = new Set(mapping.nodes.map((node) => node.attributes.id).filter(Boolean))
+      let suffix = 1
+      do {
+        labelId = `curbcut-label-${suffix++}`
+      } while (used.has(labelId))
+      const labelOffset = attributeInsertionOffset(source, adjacent.node.startTagRange)
+      patches.push({ start: labelOffset, end: labelOffset, expectedText: '', replacement: ` id="${labelId}"` })
+    }
+    const inputOffset = attributeInsertionOffset(source, target.startTagRange)
+    patches.push({ start: inputOffset, end: inputOffset, expectedText: '', replacement: ` aria-labelledby="${labelId}"` })
+    const ordinal = ordinalOf(target.nodeId)
+    return finalize(source, mapping, {
+      family: 'missing-form-label',
+      classification: 'CONTEXTUAL',
+      patches,
+      rationale: 'Associates safe adjacent visible text with the mapped form control without duplicating or changing visible content.',
+      expectedValidation: 'A real axe rescan must no longer report label for this control.',
+      semanticJudgmentRequired: true,
+      humanValues: { labelText },
+      validationTarget: { ruleId: 'label', tagName: target.tagName, ordinal },
+      restorationTarget: { ruleId: 'label', tagName: target.tagName, ordinal },
+    }, (proposed) => ordinal !== undefined && proposed.nodes[ordinal]?.attributes['aria-labelledby'] === labelId &&
+      proposed.nodes.filter((node) => node.attributes.id === labelId).length === 1)
+  }
+
   let id = literalId(target)
   if (existingId && !id) return refuse('NONLITERAL_ATTRIBUTE', 'The control ID is not a safe literal value.')
   if (id && mapping.nodes.filter((node) => node.attributes.id === id).length !== 1) {

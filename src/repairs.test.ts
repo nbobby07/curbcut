@@ -56,7 +56,10 @@ describe('missing form label repair', () => {
       ok: true,
       repair: { semanticJudgmentRequired: true, humanValues: { labelText: 'Email address' } },
     })
-    expect(result.ok && result.repair.proposedHtml).toContain('<label for="email">Email address</label>\n  <input id="email">')
+    expect(result.ok && result.repair.proposedHtml).toBe(
+      '<div class="field">\n  <span id="curbcut-label-1">Email address</span>\n  <input id="email" aria-labelledby="curbcut-label-1">\n</div>',
+    )
+    expect(result.ok && result.repair.patches).toHaveLength(2)
   })
 
   it('generates a collision-free ID with two guarded patches', () => {
