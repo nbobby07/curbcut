@@ -139,8 +139,11 @@ a { color: #155f96; text-underline-offset: 3px; }
 }
 
 @media (max-width: 960px) {
+  .app-shell { height: auto; min-height: 100vh; overflow: visible; display: block; }
   .command-bar { flex-direction: column; align-items: stretch; gap: 10px; }
   .command-actions { max-width: none; justify-content: flex-start; }
+  .workspace { grid-template-rows: minmax(520px, auto) minmax(340px, auto); overflow: visible; }
+  .source-pane, .preview-pane { min-height: 520px; }
 }
 
 @media (max-width: 760px) {
