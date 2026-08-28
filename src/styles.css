@@ -138,6 +138,11 @@ a { color: #155f96; text-underline-offset: 3px; }
   .evidence-pane { grid-column: 1 / -1; min-height: 340px; border-top: 1px solid var(--line-strong); }
 }
 
+@media (max-width: 960px) {
+  .command-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+  .command-actions { max-width: none; justify-content: flex-start; }
+}
+
 @media (max-width: 760px) {
   .app-shell { height: auto; overflow: visible; display: block; }
   .command-bar { align-items: stretch; }
