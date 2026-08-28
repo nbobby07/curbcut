@@ -279,7 +279,7 @@ function IssueList() {
         >
           <span className={`impact impact-${issue.impact ?? 'unknown'}`}>{issue.impact ?? 'unknown'}</span>
           <strong>{issue.ruleId}</strong>
-          <span>{classificationLabel(issue.classification)}</span>
+          <span>{issueActionLabel(issue)}</span>
           <span>{issue.sourceNode ? `Line ${issue.sourceNode.sourceRange.startLine}` : 'Unmapped'}</span>
         </button>
       ))}
@@ -454,9 +454,17 @@ function familyFor(issue: AccessibilityIssue): RepairFamily | null {
 }
 
 function classificationLabel(classification: AccessibilityIssue['classification']) {
-  if (classification === 'MECHANICAL') return 'Mechanical repair'
-  if (classification === 'CONTEXTUAL') return 'Needs your decision'
+  if (classification === 'MECHANICAL') return 'Mechanical'
+  if (classification === 'CONTEXTUAL') return 'Contextual'
   return 'Manual review'
+}
+
+function issueActionLabel(issue: AccessibilityIssue) {
+  const family = familyFor(issue)
+  if (family === 'positive-tabindex') return 'Code fix ready'
+  if (family) return 'Code preview · approval'
+  if (issue.classification === 'CONTEXTUAL') return 'Context needed'
+  return 'Evidence only'
 }
 
 function formatTime(timestamp: string) {

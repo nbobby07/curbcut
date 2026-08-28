@@ -6,7 +6,7 @@ Date: August 28, 2026 (PT)
 
 - **Deterministic eval corpus and conditional-authority validation: PASS**
 - **ChatGPT in-app browser discovery, scan, list, inspect, and preview: PASS**
-- **Target-client mechanical Apply and contextual approval rehearsal: pending the conditional-authority deployment**
+- **ChatGPT in-app browser mechanical Apply/rescan and contextual approval gate: PASS**
 - **Optional automated OpenAI trajectory corpus: pending a valid `OPENAI_API_KEY`**
 - **M7 deterministic release evidence: COMPLETE**
 
@@ -31,9 +31,9 @@ Each expected tool call has a bounded mock output shaped like Curbcut's parsed W
 - any count other than 27 cases / 9 intents / 3 paraphrases;
 - duplicate cases, unknown tools, malformed calls, or more than six expected steps;
 - absent, oversized, source-leaking, or invalid mock outputs;
-- baseline/Undo scan metrics that differ from 3 critical, 3 serious, 0 moderate, and 5 outstanding manual reviews;
-- post-label scan/summary metrics that differ from 2 critical, 3 serious, 0 moderate, 5 open critical-or-serious issues, and 4 outstanding manual reviews;
-- post-mechanical scan metrics that differ from 3 critical, 2 serious, 0 moderate, and 5 outstanding manual reviews;
+- baseline/Undo scan metrics that differ from 3 critical, 3 serious, 0 moderate, and 5 outstanding human-decision/manual-review items;
+- post-label scan/summary metrics that differ from 2 critical, 3 serious, 0 moderate, 5 open critical-or-serious issues, and 4 outstanding human-decision/manual-review items;
+- post-mechanical scan metrics that differ from 3 critical, 2 serious, 0 moderate, and 5 outstanding human-decision/manual-review items;
 - a six-finding high-impact list that omits the serious mechanical `tabindex` issue;
 - contextual Apply outside `apply_after_approval` or before a mocked `APPROVED` proposal;
 - mechanical Apply before a visible exact `MECHANICAL` proposal;
@@ -70,7 +70,7 @@ npm run build
 production build passed
 ```
 
-The build retains the known non-failing warning for the locally bundled axe/controller chunk: 1,045.95 kB JavaScript, 300.46 kB gzip in this run.
+The build retains the known non-failing warning for the locally bundled axe/controller chunk: 1,047.39 kB JavaScript, 300.70 kB gzip in this run.
 
 ## Optional automated OpenAI corpus
 
@@ -89,16 +89,17 @@ Current release evidence is the deterministic corpus validator, live-schema drif
 
 ## Final HTTPS target-client smoke
 
-On August 28, 2026, the previous approval-for-all production deployment at <https://curbcut-one.vercel.app> was exercised in ChatGPT's in-app browser:
+On August 28, 2026, deployment `dpl_Bdcq6rVwWLW5LT2sY7iQFXCsBbW9` at <https://curbcut-one.vercel.app> was exercised in ChatGPT's in-app browser:
 
 - all ten page-defined WebMCP tools were discovered with the expected schemas and annotations;
-- `scan_accessibility` returned 6 rules / 6 affected nodes: 3 critical, 3 serious, 0 moderate, and 0 minor;
-- `list_issues` found the serious mechanical `tabindex` issue;
-- `inspect_issue` selected and highlighted the rendered button while returning source line 25, column 11, offsets 768–848;
-- `preview_remediation` created one non-mutating `remove_positive_tabindex` patch and stopped in `PROPOSED`;
+- `list_issues` found the serious mechanical `tabindex` issue and `inspect_issue` mapped it to line 25, column 11, offsets 768–848;
+- `preview_remediation` returned `approvalRequired:false`, `agentMayApply:true`, and exposed `apply_remediation` as the next action while leaving source unchanged;
+- the agent applied the exact mechanical proposal without a redundant approval, then a real axe rescan verified the `tabindex` finding was gone: 5 rules / 5 affected nodes, 3 critical and 2 serious;
+- `get_change_summary` reported one applied and verified `positive-tabindex` change;
+- the label proposal reused adjacent visible text (`Email address`) with two surgical edits (`id` plus `aria-labelledby`) and no duplicate visible label, returned `approvalRequired:true` and `agentMayApply:false`, and did not expose Apply before visible human approval;
 - the browser console contained no errors.
 
-That smoke predates the conditional-authority change and is retained only as historical evidence. The replacement deployment must prove direct mechanical Apply/rescan/Undo and a separately blocked contextual Apply before this section can be marked current.
+The target browser separately refused a speculative Undo because the user had not requested it. This is expected client safety behavior, not a Curbcut error; explicit-user Undo remains covered by the 15-test browser suite and the final narrated rehearsal.
 
 ## Limits
 

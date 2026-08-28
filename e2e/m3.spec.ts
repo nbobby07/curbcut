@@ -21,6 +21,10 @@ test('freezes the checkout fixture and completes label Apply/rescan/Undo', async
   await expect(page.locator('.issue-row .impact')).toHaveText([
     'critical', 'serious', 'serious', 'critical', 'critical', 'serious',
   ])
+  await expect(issue(page, 'tabindex')).toContainText('Code fix ready')
+  await expect(issue(page, 'label')).toContainText('Code preview · approval')
+  await expect(issue(page, 'button-name')).toContainText('Context needed')
+  await expect(issue(page, 'color-contrast')).toContainText('Evidence only')
 
   const editor = page.getByLabel('Editable HTML source')
   const before = await editor.inputValue()

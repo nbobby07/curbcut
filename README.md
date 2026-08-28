@@ -23,7 +23,17 @@ The agent handles repetitive scanning, filtering, source lookup, proposal prepar
 
 ![Curbcut scanned workspace](./docs/curbcut-scanned-workspace.png)
 
+Mechanical proposal: visible exact diff, immediately agent-applicable, and reversible.
+
+![Curbcut mechanical remediation preview](./docs/curbcut-mechanical-preview.png)
+
+Contextual proposal: code is prepared from a safe visible-text candidate, but semantic approval remains human-only.
+
 ![Curbcut non-mutating remediation preview](./docs/curbcut-remediation-preview.png)
+
+Mechanical verification: the real axe rescan removes the repaired finding and records the change in the shared timeline.
+
+![Curbcut verified mechanical repair](./docs/curbcut-verified-mechanical.png)
 
 ## Judge quick start
 

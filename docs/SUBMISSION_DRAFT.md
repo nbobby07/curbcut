@@ -85,8 +85,9 @@ TODO before submission: insert measured WebMCP evaluation results only after the
 - [ ] Show real tool discovery/calls, not a simulated invocation.
 - [ ] Show scan evidence, synchronized source/preview focus, direct mechanical Apply, contextual visible approval, rescan, semantic review, and summary/export or Undo.
 - [x] Capture a current scanned-workspace screenshot.
+- [x] Capture a current mechanical-diff/direct-Apply screenshot.
 - [x] Capture a current proposed-diff/render/approval screenshot.
-- [ ] Capture a current verified-result/timeline screenshot.
+- [x] Capture a current verified-result/timeline screenshot.
 - [ ] Use narration only or properly licensed audio; do not add third-party trademarks or copyrighted music.
 
 ## Final submission checklist
