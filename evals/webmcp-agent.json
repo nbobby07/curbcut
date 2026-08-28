@@ -363,14 +363,14 @@
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "targetSummary": ".continue", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
-        "functionName": "inspect_issue",
-        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17" },
-        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "help": "Elements should not have tabindex greater than zero", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/tabindex", "wcagTags": ["best-practice"], "classification": "MECHANICAL", "classificationReason": "The source-backed attribute can be removed without inventing meaning.", "target": ".continue", "sourceLocation": { "line": 25, "column": 11, "startOffset": 768, "endOffset": 848 }, "repairFamily": "remove_positive_tabindex", "requiredInputs": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
-      },
-      {
         "functionName": "preview_remediation",
         "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex" },
-        "mockOutput": { "ok": true, "data": { "proposalId": "66666666-6666-4666-8666-666666666666", "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex", "classification": "MECHANICAL", "semanticJudgmentRequired": false, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report tabindex for this element.", "approvalRequired": false, "approvalState": "PROPOSED" }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
+        "mockOutput": { "ok": true, "data": { "proposalId": "66666666-6666-4666-8666-666666666666", "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex", "classification": "MECHANICAL", "semanticJudgmentRequired": false, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report tabindex for this element.", "approvalRequired": false, "agentMayApply": true, "approvalState": "PROPOSED", "proposalPreviewStatus": "RENDERING", "next": "Poll get_workspace until proposalPreviewStatus is READY before Apply." }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      },
+      {
+        "functionName": "get_workspace",
+        "arguments": {},
+        "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 1, "scanId": "11111111-1111-4111-8111-111111111111", "proposalId": "66666666-6666-4666-8666-666666666666", "proposalStatus": "PROPOSED", "proposalPreviewStatus": "READY", "mutationStatus": "IDLE", "canUndo": false, "webMcpAvailable": true }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED", "proposalPreviewStatus": "READY", "mutationStatus": "IDLE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
       },
       {
         "functionName": "apply_remediation",
@@ -400,14 +400,14 @@
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "targetSummary": ".continue", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
-        "functionName": "inspect_issue",
-        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17" },
-        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "help": "Elements should not have tabindex greater than zero", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/tabindex", "wcagTags": ["best-practice"], "classification": "MECHANICAL", "classificationReason": "The source-backed attribute can be removed without inventing meaning.", "target": ".continue", "sourceLocation": { "line": 25, "column": 11, "startOffset": 768, "endOffset": 848 }, "repairFamily": "remove_positive_tabindex", "requiredInputs": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
-      },
-      {
         "functionName": "preview_remediation",
         "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex" },
-        "mockOutput": { "ok": true, "data": { "proposalId": "66666666-6666-4666-8666-666666666666", "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex", "classification": "MECHANICAL", "semanticJudgmentRequired": false, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report tabindex for this element.", "approvalRequired": false, "approvalState": "PROPOSED" }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
+        "mockOutput": { "ok": true, "data": { "proposalId": "66666666-6666-4666-8666-666666666666", "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex", "classification": "MECHANICAL", "semanticJudgmentRequired": false, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report tabindex for this element.", "approvalRequired": false, "agentMayApply": true, "approvalState": "PROPOSED", "proposalPreviewStatus": "RENDERING", "next": "Poll get_workspace until proposalPreviewStatus is READY before Apply." }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      },
+      {
+        "functionName": "get_workspace",
+        "arguments": {},
+        "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 1, "scanId": "11111111-1111-4111-8111-111111111111", "proposalId": "66666666-6666-4666-8666-666666666666", "proposalStatus": "PROPOSED", "proposalPreviewStatus": "READY", "mutationStatus": "IDLE", "canUndo": false, "webMcpAvailable": true }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED", "proposalPreviewStatus": "READY", "mutationStatus": "IDLE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
       },
       {
         "functionName": "apply_remediation",
@@ -437,14 +437,14 @@
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "targetSummary": ".continue", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
-        "functionName": "inspect_issue",
-        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17" },
-        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "help": "Elements should not have tabindex greater than zero", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/tabindex", "wcagTags": ["best-practice"], "classification": "MECHANICAL", "classificationReason": "The source-backed attribute can be removed without inventing meaning.", "target": ".continue", "sourceLocation": { "line": 25, "column": 11, "startOffset": 768, "endOffset": 848 }, "repairFamily": "remove_positive_tabindex", "requiredInputs": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
-      },
-      {
         "functionName": "preview_remediation",
         "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex" },
-        "mockOutput": { "ok": true, "data": { "proposalId": "66666666-6666-4666-8666-666666666666", "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex", "classification": "MECHANICAL", "semanticJudgmentRequired": false, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report tabindex for this element.", "approvalRequired": false, "approvalState": "PROPOSED" }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
+        "mockOutput": { "ok": true, "data": { "proposalId": "66666666-6666-4666-8666-666666666666", "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex", "classification": "MECHANICAL", "semanticJudgmentRequired": false, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report tabindex for this element.", "approvalRequired": false, "agentMayApply": true, "approvalState": "PROPOSED", "proposalPreviewStatus": "RENDERING", "next": "Poll get_workspace until proposalPreviewStatus is READY before Apply." }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      },
+      {
+        "functionName": "get_workspace",
+        "arguments": {},
+        "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 1, "scanId": "11111111-1111-4111-8111-111111111111", "proposalId": "66666666-6666-4666-8666-666666666666", "proposalStatus": "PROPOSED", "proposalPreviewStatus": "READY", "mutationStatus": "IDLE", "canUndo": false, "webMcpAvailable": true }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED", "proposalPreviewStatus": "READY", "mutationStatus": "IDLE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
       },
       {
         "functionName": "apply_remediation",
@@ -628,7 +628,7 @@
       {
         "functionName": "get_change_summary",
         "arguments": {},
-        "mockOutput": { "ok": true, "data": { "sourceRevision": 2, "appliedCount": 1, "verifiedCount": 1, "undoneCount": 0, "openCriticalSerious": 5, "manualReviewsOutstanding": 4, "changes": [{ "changeId": "33333333-3333-4333-8333-333333333333", "family": "missing-form-label", "ruleId": "label", "status": "VERIFIED", "sourceLine": 16 }] }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
+        "mockOutput": { "ok": true, "data": { "sourceRevision": 2, "appliedCount": 1, "verifiedCount": 1, "undoneCount": 0, "countsStatus": "CURRENT", "openCriticalSerious": 5, "manualReviewsOutstanding": 4, "changes": [{ "changeId": "33333333-3333-4333-8333-333333333333", "family": "missing-form-label", "ruleId": "label", "status": "VERIFIED", "sourceLine": 16 }] }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
       },
       {
         "functionName": "export_source",
@@ -645,7 +645,7 @@
       {
         "functionName": "get_change_summary",
         "arguments": {},
-        "mockOutput": { "ok": true, "data": { "sourceRevision": 2, "appliedCount": 1, "verifiedCount": 1, "undoneCount": 0, "openCriticalSerious": 5, "manualReviewsOutstanding": 4, "changes": [{ "changeId": "33333333-3333-4333-8333-333333333333", "family": "missing-form-label", "ruleId": "label", "status": "VERIFIED", "sourceLine": 16 }] }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
+        "mockOutput": { "ok": true, "data": { "sourceRevision": 2, "appliedCount": 1, "verifiedCount": 1, "undoneCount": 0, "countsStatus": "CURRENT", "openCriticalSerious": 5, "manualReviewsOutstanding": 4, "changes": [{ "changeId": "33333333-3333-4333-8333-333333333333", "family": "missing-form-label", "ruleId": "label", "status": "VERIFIED", "sourceLine": 16 }] }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
       },
       {
         "functionName": "export_source",
@@ -662,12 +662,174 @@
       {
         "functionName": "get_change_summary",
         "arguments": {},
-        "mockOutput": { "ok": true, "data": { "sourceRevision": 2, "appliedCount": 1, "verifiedCount": 1, "undoneCount": 0, "openCriticalSerious": 5, "manualReviewsOutstanding": 4, "changes": [{ "changeId": "33333333-3333-4333-8333-333333333333", "family": "missing-form-label", "ruleId": "label", "status": "VERIFIED", "sourceLine": 16 }] }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
+        "mockOutput": { "ok": true, "data": { "sourceRevision": 2, "appliedCount": 1, "verifiedCount": 1, "undoneCount": 0, "countsStatus": "CURRENT", "openCriticalSerious": 5, "manualReviewsOutstanding": 4, "changes": [{ "changeId": "33333333-3333-4333-8333-333333333333", "family": "missing-form-label", "ruleId": "label", "status": "VERIFIED", "sourceLine": 16 }] }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
       },
       {
         "functionName": "export_source",
         "arguments": { "format": "html" },
         "mockOutput": { "ok": true, "data": { "success": true, "format": "html", "filename": "curbcut.html", "sourceRevision": 2, "sourceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "mappingMetadataPresent": false }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
+      }
+    ]
+  },
+  {
+    "name": "Button name — remove product",
+    "intent": "preview_button_name",
+    "messages": [{ "role": "user", "type": "message", "content": "The unnamed × button removes the Canvas desk organizer. Scan and inspect it, then preview the human-confirmed accessible name “Remove Canvas desk organizer.” Stop before Apply so I can approve it in Curbcut." }],
+    "expectedCall": [
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "initial" },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "sourceRevision": 1, "ruleCount": 6, "affectedNodeCount": 6, "critical": 3, "serious": 3, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5 }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "list_issues",
+        "arguments": { "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": ".icon-button", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "help": "Buttons must have discernible text", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name", "wcagTags": ["wcag2a", "wcag412"], "classification": "CONTEXTUAL", "classificationReason": "The button purpose and accessible name require a human decision.", "target": ".icon-button", "sourceLocation": { "line": 32, "column": 11, "startOffset": 1048, "endOffset": 1134 }, "repairFamily": "name_button", "requiredInputs": ["buttonName"] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "preview_remediation",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "family": "name_button", "values": { "buttonName": "Remove Canvas desk organizer" } },
+        "mockOutput": { "ok": true, "data": { "proposalId": "99999999-9999-4999-8999-999999999991", "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "family": "name_button", "classification": "CONTEXTUAL", "semanticJudgmentRequired": true, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report button-name for this button.", "approvalRequired": true, "agentMayApply": false, "approvalState": "PROPOSED", "proposalPreviewStatus": "RENDERING", "next": "Poll get_workspace until proposalPreviewStatus is READY before Apply." }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      }
+    ]
+  },
+  {
+    "name": "Button name — close summary",
+    "intent": "preview_button_name",
+    "messages": [{ "role": "user", "type": "message", "content": "I confirm the icon button closes the order summary. Use the WebMCP workflow to find it and preview “Close order summary,” but leave the proposal uncommitted for my visible review." }],
+    "expectedCall": [
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "initial" },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "sourceRevision": 1, "ruleCount": 6, "affectedNodeCount": 6, "critical": 3, "serious": 3, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5 }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "list_issues",
+        "arguments": { "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": ".icon-button", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "target": ".icon-button", "sourceLocation": { "line": 32, "column": 11, "startOffset": 1048, "endOffset": 1134 }, "repairFamily": "name_button", "requiredInputs": ["buttonName"] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "preview_remediation",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "family": "name_button", "values": { "buttonName": "Close order summary" } },
+        "mockOutput": { "ok": true, "data": { "proposalId": "99999999-9999-4999-8999-999999999992", "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "family": "name_button", "classification": "CONTEXTUAL", "semanticJudgmentRequired": true, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report button-name for this button.", "approvalRequired": true, "agentMayApply": false, "approvalState": "PROPOSED", "proposalPreviewStatus": "RENDERING", "next": "Poll get_workspace until proposalPreviewStatus is READY before Apply." }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      }
+    ]
+  },
+  {
+    "name": "Button name — dismiss item",
+    "intent": "preview_button_name",
+    "messages": [{ "role": "user", "type": "message", "content": "Find the critical unnamed native button. Its human-confirmed purpose is “Dismiss item.” Preview that surgical repair and ask for approval instead of applying it." }],
+    "expectedCall": [
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "initial" },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "sourceRevision": 1, "ruleCount": 6, "affectedNodeCount": 6, "critical": 3, "serious": 3, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5 }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "list_issues",
+        "arguments": { "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": ".icon-button", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "target": ".icon-button", "sourceLocation": { "line": 32, "column": 11, "startOffset": 1048, "endOffset": 1134 }, "repairFamily": "name_button", "requiredInputs": ["buttonName"] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "preview_remediation",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "family": "name_button", "values": { "buttonName": "Dismiss item" } },
+        "mockOutput": { "ok": true, "data": { "proposalId": "99999999-9999-4999-8999-999999999993", "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "family": "name_button", "classification": "CONTEXTUAL", "semanticJudgmentRequired": true, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report button-name for this button.", "approvalRequired": true, "agentMayApply": false, "approvalState": "PROPOSED", "proposalPreviewStatus": "RENDERING", "next": "Poll get_workspace until proposalPreviewStatus is READY before Apply." }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      }
+    ]
+  },
+  {
+    "name": "Document language — US English",
+    "intent": "preview_document_language",
+    "messages": [{ "role": "user", "type": "message", "content": "This checkout is written in US English. Scan and inspect the missing document-language issue, then preview en-US without applying it; I will approve the visible diff." }],
+    "expectedCall": [
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "initial" },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "sourceRevision": 1, "ruleCount": 6, "affectedNodeCount": 6, "critical": 3, "serious": 3, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5 }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "list_issues",
+        "arguments": { "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "html", "sourceLine": 2 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "help": "The html element must have a lang attribute", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/html-has-lang", "wcagTags": ["wcag2a", "wcag311"], "classification": "CONTEXTUAL", "classificationReason": "Document language requires a human decision.", "target": "html", "sourceLocation": { "line": 2, "column": 1, "startOffset": 16, "endOffset": 22 }, "repairFamily": "set_document_language", "requiredInputs": ["languageTag"] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "preview_remediation",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "family": "set_document_language", "values": { "languageTag": "en-US" } },
+        "mockOutput": { "ok": true, "data": { "proposalId": "99999999-9999-4999-8999-999999999994", "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "family": "set_document_language", "classification": "CONTEXTUAL", "semanticJudgmentRequired": true, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report html-has-lang for this document.", "approvalRequired": true, "agentMayApply": false, "approvalState": "PROPOSED", "proposalPreviewStatus": "RENDERING", "next": "Poll get_workspace until proposalPreviewStatus is READY before Apply." }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      }
+    ]
+  },
+  {
+    "name": "Document language — English",
+    "intent": "preview_document_language",
+    "messages": [{ "role": "user", "type": "message", "content": "I confirm the whole page is English. Find the axe language finding and create a visible proposal using the BCP 47 tag en. Do not commit the semantic choice." }],
+    "expectedCall": [
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "initial" },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "sourceRevision": 1, "ruleCount": 6, "affectedNodeCount": 6, "critical": 3, "serious": 3, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5 }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "list_issues",
+        "arguments": { "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "html", "sourceLine": 2 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "target": "html", "sourceLocation": { "line": 2, "column": 1, "startOffset": 16, "endOffset": 22 }, "repairFamily": "set_document_language", "requiredInputs": ["languageTag"] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "preview_remediation",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "family": "set_document_language", "values": { "languageTag": "en" } },
+        "mockOutput": { "ok": true, "data": { "proposalId": "99999999-9999-4999-8999-999999999995", "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "family": "set_document_language", "classification": "CONTEXTUAL", "semanticJudgmentRequired": true, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report html-has-lang for this document.", "approvalRequired": true, "agentMayApply": false, "approvalState": "PROPOSED", "proposalPreviewStatus": "RENDERING", "next": "Poll get_workspace until proposalPreviewStatus is READY before Apply." }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      }
+    ]
+  },
+  {
+    "name": "Document language — Canadian English",
+    "intent": "preview_document_language",
+    "messages": [{ "role": "user", "type": "message", "content": "The checkout copy is Canadian English, so the language tag should be en-CA. Use the tools to scan, inspect, and preview that change, then wait for my UI approval." }],
+    "expectedCall": [
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "initial" },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "sourceRevision": 1, "ruleCount": 6, "affectedNodeCount": 6, "critical": 3, "serious": 3, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5 }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "list_issues",
+        "arguments": { "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "html", "sourceLine": 2 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "target": "html", "sourceLocation": { "line": 2, "column": 1, "startOffset": 16, "endOffset": 22 }, "repairFamily": "set_document_language", "requiredInputs": ["languageTag"] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "preview_remediation",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "family": "set_document_language", "values": { "languageTag": "en-CA" } },
+        "mockOutput": { "ok": true, "data": { "proposalId": "99999999-9999-4999-8999-999999999996", "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "family": "set_document_language", "classification": "CONTEXTUAL", "semanticJudgmentRequired": true, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report html-has-lang for this document.", "approvalRequired": true, "agentMayApply": false, "approvalState": "PROPOSED", "proposalPreviewStatus": "RENDERING", "next": "Poll get_workspace until proposalPreviewStatus is READY before Apply." }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
       }
     ]
   }

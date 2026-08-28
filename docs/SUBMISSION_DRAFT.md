@@ -1,6 +1,6 @@
 # Curbcut — Devpost submission draft
 
-Status: draft for final verification. Replace only the explicit TODO items after the corresponding public asset or measured result exists.
+Status: draft for final verification. The current five-family source is not yet frozen or redeployed; replace pending evidence only after the exact production artifact, client run, or public asset exists.
 
 ## Submission fields
 
@@ -8,7 +8,7 @@ Status: draft for final verification. Replace only the explicit TODO items after
 
 **Tagline:** A browser-native accessibility repair workbench where a developer and browser agent safely repair the same live HTML/CSS artifact.
 
-**Live application:** <https://curbcut-one.vercel.app>
+**Live application:** <https://curbcut-one.vercel.app> — last verified M7 deployment; current-source production redeploy and final smoke pending.
 
 **Public repository:** <https://github.com/nbobby07/curbcut>
 
@@ -28,9 +28,9 @@ Curbcut turns that handoff into one visible, reversible workspace.
 
 Curbcut is a local-first workbench for editable static HTML and CSS. It keeps source, a securely rendered preview, factual axe-core findings, mapped source evidence, a proposed code diff, a proposed visual result, calibrated human/agent authority, verification results, exact Undo, export, and an agent-action timeline in one browser tab.
 
-The built-in checkout fixture contains deterministic accessibility failures. A developer can also edit the source directly. axe runs against the real isolated preview rather than a stored result. Selecting an issue focuses its exact source range and highlights the corresponding rendered element. Every remediation first enters a visible, non-mutating proposed state. An exact mechanical patch can then apply directly; a contextual patch remains blocked until the developer supplies meaning and approves the exact diff. A real rescan verifies whether the intended axe finding disappeared, and Undo restores the exact prior source.
+The built-in checkout fixture contains deterministic accessibility failures. A developer can also edit the source directly. axe runs against the real isolated preview rather than a stored result. Selecting an issue focuses its exact source range and highlights the corresponding rendered element. Every remediation first enters a visible, non-mutating proposed state. After that exact proposed iframe reports `READY`, a mechanical patch can apply directly; a contextual patch remains blocked until the developer supplies meaning and approves the exact diff. A real rescan verifies whether the intended axe finding disappeared, and Undo restores the exact prior source.
 
-The current deterministic repair families are missing form labels, positive `tabindex`, and missing image alternatives. A label proposal may automatically reuse a safe adjacent visible-text candidate, but its wording remains contextual and approval-gated. Image purpose and alternative text also remain human decisions. Other findings, including contrast, remain visible evidence/manual-review work rather than being silently “fixed.”
+The current source ships five bounded repair families. Positive `tabindex` is mechanical. Form labels, image alternatives, button accessible names, and document language are contextual: their patch shapes are deterministic, but their meaning is human-confirmed and exact-diff approval-gated. A label proposal can associate safe adjacent visible text by adding a collision-free ID when needed plus `aria-labelledby`, avoiding a duplicate visible label. Image purpose/alternative text, button purpose, and document language remain human decisions. Other findings, including contrast, remain visible evidence/manual-review work rather than being silently “fixed.”
 
 ### Why WebMCP is the right interface
 
@@ -52,7 +52,7 @@ parse5 8.0.1 parses canonical HTML with source locations and assigns revision-bo
 
 Untrusted HTML is sanitized with DOMPurify and rendered into an iframe with `sandbox="allow-scripts"` but no same-origin permission. A nonce-based CSP blocks network access, navigation, forms, embeds, and untrusted scripts. axe-core 4.13.0 executes inside that opaque preview realm. A secret-channel, request-ID, source-revision `postMessage` protocol carries validated render, scan, and highlight commands back to the React store.
 
-The top document registers exactly ten imperative WebMCP tools. Inputs are runtime-validated, responses are bounded, read-only and untrusted-content annotations are applied, stale revisions are rejected, and cancellation is handled. Apply accepts only the current exact proposal: mechanical proposals can proceed directly after preview, while contextual proposals require an approval token created only by the visible UI.
+The top document registers exactly ten imperative WebMCP tools. Inputs are runtime-validated, responses are bounded, read-only and untrusted-content annotations are applied, stale revisions are rejected, and cancellation is handled. Every new proposal first reports its proposed iframe as `RENDERING`; `get_workspace` must report that exact proposal `READY` before Apply is exposed. Mechanical proposals can then proceed without semantic approval, while contextual proposals additionally require an approval token created only by the visible UI.
 
 ### Responsible scope
 
@@ -60,20 +60,20 @@ Curbcut does not claim automated WCAG compliance. axe-core covers only part of a
 
 ### Evidence
 
-The current M7 release gate validates 27 WebMCP trajectory cases across nine intents, with 55 passing unit checks and 15 passing Playwright browser checks. Coverage includes both direct mechanical Apply and contextual approval, the opaque-origin boundary, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, semantic input gates, conditional authority enforcement, Apply/rescan, Undo/rescan, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between the live tool schemas and the eval snapshot.
+The current source gate validates 33 WebMCP trajectory cases across eleven intents and all ten tools, with 84 passing Vitest checks. The current Playwright suite contains 24 browser checks and still needs its final full run. Coverage includes all five repair families, proposal-readiness and concurrent-mutation guards, the real offscreen mobile iframe/requestAnimationFrame scan regression and zero horizontal overflow, direct mechanical Apply and contextual approval, the opaque-origin boundary, configured production headers, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, Apply/rescan, Undo/rescan, local import, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between registered tool schemas and the eval snapshot. The complete suite, production build, and target-client journey must be rerun from the frozen commit before these become final submission evidence.
 
 TODO before submission: insert measured WebMCP evaluation results only after the final corpus has run on the named client/model/build. Do not replace this sentence with an estimate.
 
 ## Judge testing instructions
 
-1. Open <https://curbcut-one.vercel.app> in ChatGPT's in-app browser or Chrome 149+ with WebMCP testing enabled.
+1. Open <https://curbcut-one.vercel.app> in ChatGPT's in-app browser or a WebMCP-enabled Chrome build. Chrome 151 is the recorded standalone test client; replace this sentence with the exact final judging client/build after the frozen-release smoke.
 2. Choose **Reset demo** if needed.
 3. Send this prompt to the browser agent:
 
    > Fix the critical and serious accessibility issues in this checkout without changing the overall visual design. Preview each change before applying it, and ask me about anything that requires semantic judgment.
 
 4. Confirm that scan/list/inspect calls populate the visible issue list, focus an exact source range, highlight the same rendered node, and appear in the local timeline.
-5. Confirm the mechanical `tabindex` proposal is visible, applies without a redundant approval click, and clears after rescan.
+5. Confirm the mechanical `tabindex` proposal is visible, reports `RENDERING`, becomes `READY` through `get_workspace`, then applies without a redundant semantic-approval click and clears after rescan.
 6. For a label or image proposal, supply semantic text only if you agree with it. Review the working/proposed renders and exact diff, then choose **Approve this exact change**.
 7. Confirm the intended finding disappears. Ask: **Undo the last repair and rescan.** Confirm exact source and the original finding return.
 8. Ask: **Summarize the current changes and export the HTML.** Confirm a local canonical-source download with no Curbcut mapping attribute.
@@ -84,18 +84,18 @@ TODO before submission: insert measured WebMCP evaluation results only after the
 - [ ] Verify the video and audio from a signed-out browser.
 - [ ] Show real tool discovery/calls, not a simulated invocation.
 - [ ] Show scan evidence, synchronized source/preview focus, direct mechanical Apply, contextual visible approval, rescan, semantic review, and summary/export or Undo.
-- [x] Capture a current scanned-workspace screenshot.
-- [x] Capture a current mechanical-diff/direct-Apply screenshot.
-- [x] Capture a current proposed-diff/render/approval screenshot.
-- [x] Capture a current verified-result/timeline screenshot.
+- [ ] Recapture the scanned workspace from the frozen production deployment.
+- [ ] Recapture the mechanical diff and `RENDERING → READY → Apply` state from the frozen production deployment.
+- [ ] Recapture the contextual proposed diff/render/approval state from the frozen production deployment.
+- [ ] Recapture a distinct verified-result/timeline image from the frozen production deployment; do not reuse the scanned-workspace file.
 - [ ] Use narration only or properly licensed audio; do not add third-party trademarks or copyrighted music.
 
 ## Final submission checklist
 
 - [ ] Join/registration status is confirmed in the submitting Devpost account.
-- [x] Live URL works in a clean target-client session and remains available without payment or credentials.
+- [ ] Frozen current-source build is live in a clean target-client session and remains available without payment or credentials.
 - [x] GitHub repository is public; root license is detected; About description and homepage are set.
-- [x] `npm test`, `npm run test:e2e`, and `npm run build` pass from the frozen commit.
+- [ ] `npm test`, all 24 Playwright checks, and `npm run build` pass from the frozen commit.
 - [ ] Final browser/client/build, prompt, limitations, and measured eval results agree across README, reports, video, and Devpost text.
 - [ ] Every public screenshot and the video depict the frozen deployment.
 - [ ] All URLs work from a signed-out browser.

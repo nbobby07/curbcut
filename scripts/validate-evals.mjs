@@ -3,6 +3,10 @@ import { readFileSync } from 'node:fs'
 const tools = JSON.parse(readFileSync(new URL('../evals/tools.json', import.meta.url), 'utf8')).tools
 const cases = JSON.parse(readFileSync(new URL('../evals/webmcp-agent.json', import.meta.url), 'utf8'))
 const names = new Set(tools.map(({ name }) => name))
+const expectedTools = new Set([
+  'get_workspace', 'scan_accessibility', 'list_issues', 'inspect_issue', 'preview_remediation',
+  'apply_remediation', 'reject_remediation', 'undo_remediation', 'get_change_summary', 'export_source',
+])
 const expectedIntents = new Set([
   'find_high_impact',
   'inspect_email',
@@ -13,6 +17,8 @@ const expectedIntents = new Set([
   'wrong_order_recovery',
   'undo',
   'export_summary',
+  'preview_button_name',
+  'preview_document_language',
 ])
 const intents = new Map()
 const caseNames = new Set()
@@ -53,8 +59,17 @@ const assertMetrics = (caseName, outputName, actual, expected) => {
   }
 }
 
-if (!Array.isArray(tools) || tools.length !== 10 || names.size !== 10) fail('Eval schema must contain exactly ten unique tools.')
+if (!Array.isArray(tools) || tools.length !== 10 || names.size !== 10 || [...expectedTools].some((name) => !names.has(name))) {
+  fail('Eval schema must contain exactly the ten Curbcut tools.')
+}
 if ([...names].some((name) => typeof name !== 'string' || name.length > 30)) fail('Eval tool names must be non-empty and at most 30 characters.')
+const previewSchema = tools.find(({ name }) => name === 'preview_remediation')?.inputSchema
+const families = previewSchema?.properties?.family?.enum
+const valueProperties = previewSchema?.properties?.values?.properties
+if (JSON.stringify(families) !== JSON.stringify(['add_form_label', 'remove_positive_tabindex', 'set_image_alt', 'name_button', 'set_document_language']) ||
+  valueProperties?.buttonName?.maxLength !== 120 || valueProperties?.languageTag?.maxLength !== 35) {
+  fail('Eval preview schema must expose all five bounded repair families and their semantic inputs.')
+}
 
 for (const test of cases) {
   if (!test.name || !test.intent || !Array.isArray(test.messages) || !test.messages.length || !Array.isArray(test.expectedCall) || !test.expectedCall.length) {
@@ -73,6 +88,7 @@ for (const test of cases) {
 
   let approvedStateSeen = false
   let mechanicalProposalSeen = false
+  let mechanicalPreviewReady = false
   for (const call of test.expectedCall) {
     if (!call || typeof call !== 'object' || typeof call.functionName !== 'string' || !names.has(call.functionName)) {
       fail(`${test.name} contains an invalid expected tool call.`)
@@ -90,6 +106,8 @@ for (const test of cases) {
       fail(`${test.name} has an invalid bounded success output for ${call.functionName}.`)
     }
     if (call.mockOutput.data?.proposalStatus === 'APPROVED') approvedStateSeen = true
+    if (call.functionName === 'get_workspace' && call.mockOutput.data?.proposalPreviewStatus === 'READY' &&
+      call.mockOutput.allowedNextActions.includes('apply_remediation')) mechanicalPreviewReady = true
     if (call.functionName === 'scan_accessibility') {
       const isVerifiedScan = typeof call.mockOutput.data?.verifiedChangeId === 'string'
       const expectedMetrics = !isVerifiedScan
@@ -104,6 +122,7 @@ for (const test of cases) {
     }
     if (call.functionName === 'get_change_summary') {
       assertMetrics(test.name, 'post-label change summary', call.mockOutput.data, postLabelSummaryMetrics)
+      if (call.mockOutput.data?.countsStatus !== 'CURRENT') fail(`${test.name} current change summary must identify its scan counts as CURRENT.`)
     }
     if (call.functionName === 'list_issues' && call.mockOutput.data?.totalMatching === 6) {
       const listedIssues = call.mockOutput.data?.issues
@@ -115,16 +134,17 @@ for (const test of cases) {
     }
     if (call.functionName === 'apply_remediation' &&
       !((test.intent === 'apply_after_approval' && approvedStateSeen) ||
-        (test.intent === 'mechanical_apply' && mechanicalProposalSeen))) {
+        (test.intent === 'mechanical_apply' && mechanicalProposalSeen && mechanicalPreviewReady))) {
       fail(`${test.name} may apply only after visible approval for contextual work or a visible mechanical proposal.`)
     }
     if (call.functionName === 'preview_remediation') {
       const mechanical = call.mockOutput.data?.classification === 'MECHANICAL'
       const applyEnabled = call.mockOutput.allowedNextActions.includes('apply_remediation')
       if (call.mockOutput.data?.approvalState !== 'PROPOSED' ||
-        (mechanical && (call.mockOutput.data?.approvalRequired !== false || !applyEnabled)) ||
+        (call.mockOutput.data?.proposalPreviewStatus !== undefined && call.mockOutput.data.proposalPreviewStatus !== 'RENDERING') ||
+        (mechanical && (call.mockOutput.data?.approvalRequired !== false || applyEnabled)) ||
         (!mechanical && (call.mockOutput.data?.approvalRequired !== true || applyEnabled))) {
-        fail(`${test.name} preview must enable exact mechanical Apply and gate contextual Apply on visible approval.`)
+        fail(`${test.name} preview must remain non-applicable while its visible iframe is rendering and contextual work awaits approval.`)
       }
       if (mechanical) mechanicalProposalSeen = true
     }
@@ -143,15 +163,31 @@ for (const test of cases) {
     (test.expectedCall.some(({ functionName }) => functionName === 'apply_remediation') || !seededApplies.length)) {
     fail(`${test.name} must recover from one injected Apply refusal and stop before Apply.`)
   }
+  if (test.intent === 'mechanical_apply' &&
+    test.expectedCall.map(({ functionName }) => functionName).join('>') !==
+      'scan_accessibility>list_issues>preview_remediation>get_workspace>apply_remediation>scan_accessibility') {
+    fail(`${test.name} must poll get_workspace for a READY visible preview before mechanical Apply.`)
+  }
   if (test.intent === 'human_judgment' &&
     test.expectedCall.some(({ functionName }) => ['preview_remediation', 'apply_remediation'].includes(functionName))) {
     fail(`${test.name} must stop for human judgment before preview or Apply.`)
   }
+  if (test.intent === 'preview_button_name' || test.intent === 'preview_document_language') {
+    const expectedFamily = test.intent === 'preview_button_name' ? 'name_button' : 'set_document_language'
+    const expectedValue = test.intent === 'preview_button_name' ? 'buttonName' : 'languageTag'
+    const sequence = test.expectedCall.map(({ functionName }) => functionName).join('>')
+    const preview = test.expectedCall.find(({ functionName }) => functionName === 'preview_remediation')
+    if (sequence !== 'scan_accessibility>list_issues>inspect_issue>preview_remediation' ||
+      preview?.arguments?.family !== expectedFamily || typeof preview?.arguments?.values?.[expectedValue] !== 'string' ||
+      test.expectedCall.some(({ functionName }) => functionName === 'apply_remediation')) {
+      fail(`${test.name} must scan, list, inspect, and preview ${expectedFamily} with explicit human input, then stop before Apply.`)
+    }
+  }
 }
 
-if (!Array.isArray(cases) || cases.length !== 27 || intents.size !== expectedIntents.size ||
+if (!Array.isArray(cases) || cases.length !== 33 || intents.size !== expectedIntents.size ||
   [...expectedIntents].some((intent) => intents.get(intent) !== 3)) {
-  fail('Eval corpus must contain exactly three paraphrases for each of the nine required intents.')
+  fail('Eval corpus must contain exactly three paraphrases for each of the eleven required intents.')
 }
 
 console.log(`Eval corpus valid: ${cases.length} cases, ${intents.size} intents, ${tools.length} tools.`)

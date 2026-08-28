@@ -22,23 +22,40 @@ const FAMILY = {
   add_form_label: { internal: 'missing-form-label', rule: 'label' },
   remove_positive_tabindex: { internal: 'positive-tabindex', rule: 'tabindex' },
   set_image_alt: { internal: 'image-alternative', rule: 'image-alt' },
+  name_button: { internal: 'button-accessible-name', rule: 'button-name' },
+  set_document_language: { internal: 'document-language', rule: 'html-has-lang' },
 } as const
 type PublicFamily = keyof typeof FAMILY
+
+const visibleText = (value: unknown, max: number) => typeof value === 'string' && value === value.trim() &&
+  Array.from(value).length >= 1 && Array.from(value).length <= max && !/[\u0000-\u001f\u007f]/u.test(value)
+const validLanguageTag = (value: unknown) => {
+  if (!visibleText(value, 35) || !/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/u.test(value as string)) return false
+  try {
+    return Intl.getCanonicalLocales(value as string).length === 1
+  } catch {
+    return false
+  }
+}
 
 const proposalStatus = (state: WorkspaceState) => state.proposal?.status ?? 'NONE'
 const stateSummary = (state = workspaceStore.getSnapshot()) => ({
   sourceRevision: state.sourceRevision,
   scanStatus: state.scanStatus,
   proposalStatus: proposalStatus(state),
+  proposalPreviewStatus: state.proposalPreview.status,
+  mutationStatus: state.mutationStatus,
 })
 
 export function allowedNextActions(state = workspaceStore.getSnapshot()): WebMcpToolName[] {
   const actions: WebMcpToolName[] = ['get_workspace', 'get_change_summary']
   if (state.htmlSource.trim() || state.cssSource.trim()) actions.push('export_source')
+  if (state.mutationStatus !== 'IDLE') return actions
   const pending = state.proposal && (state.proposal.status === 'PROPOSED' || state.proposal.status === 'APPROVED')
   if (pending) {
     actions.push('reject_remediation')
-    if (state.proposal?.status === 'APPROVED' || (state.proposal?.status === 'PROPOSED' && !requiresHumanApproval(state.proposal))) {
+    const rendered = state.proposalPreview.proposalId === state.proposal?.proposalId && state.proposalPreview.status === 'READY'
+    if (rendered && (state.proposal?.status === 'APPROVED' || (state.proposal?.status === 'PROPOSED' && !requiresHumanApproval(state.proposal)))) {
       actions.push('apply_remediation')
     }
   } else if (state.workspaceStatus === 'READY' && state.scanStatus !== 'RUNNING') {
@@ -55,7 +72,7 @@ export function allowedNextActions(state = workspaceStore.getSnapshot()): WebMcp
 const success = (data: Record<string, unknown>): ToolOutput => ({ ok: true, data, state: stateSummary(), allowedNextActions: allowedNextActions() })
 const requiredState: Partial<Record<CommandErrorCode, string>> = {
   APPROVAL_REQUIRED: 'APPROVED', SCAN_REQUIRED: 'CURRENT_SCAN', STALE_SCAN: 'CURRENT_SCAN',
-  PROPOSAL_NOT_FOUND: 'VISIBLE_PROPOSAL', PREVIEW_NOT_READY: 'READY_PREVIEW',
+  PROPOSAL_NOT_FOUND: 'VISIBLE_PROPOSAL', PREVIEW_NOT_READY: 'READY_PREVIEW', CHANGE_IN_PROGRESS: 'IDLE_CHANGE_STATE',
 }
 const failure = (code: CommandErrorCode, message: string, recoverable = code !== 'INTERNAL_ERROR'): ToolOutput => ({
   ok: false,
@@ -77,7 +94,17 @@ function publicFamily(issue: AccessibilityIssue): PublicFamily | null {
   if (issue.ruleId === 'label' && issue.sourceNode && ['input', 'select', 'textarea'].includes(issue.sourceNode.tagName)) return 'add_form_label'
   if (issue.ruleId === 'tabindex' && issue.sourceNode) return 'remove_positive_tabindex'
   if (issue.ruleId === 'image-alt' && issue.sourceNode?.tagName === 'img') return 'set_image_alt'
+  if (issue.ruleId === 'button-name' && issue.sourceNode?.tagName === 'button') return 'name_button'
+  if (issue.ruleId === 'html-has-lang' && issue.sourceNode?.tagName === 'html') return 'set_document_language'
   return null
+}
+
+function requiredInputs(family: PublicFamily): string[] {
+  if (family === 'add_form_label') return ['labelText only when no safe adjacent visible-text candidate exists']
+  if (family === 'set_image_alt') return ['altMode', 'altText when meaningful']
+  if (family === 'name_button') return ['buttonName']
+  if (family === 'set_document_language') return ['languageTag']
+  return []
 }
 
 const handlers: Record<WebMcpToolName, ToolHandler> = {
@@ -86,9 +113,15 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
     const latest = state.history.at(-1)
     return success({
       workspaceStatus: state.workspaceStatus, previewStatus: state.previewStatus, scanStatus: state.scanStatus,
-      sourceRevision: state.sourceRevision, ...(state.scan ? { scanId: state.scan.scanId, counts: state.scan.metrics } : {}),
+      sourceRevision: state.sourceRevision, ...(state.scan ? {
+        scanId: state.scan.scanId,
+        counts: state.scan.metrics,
+        countsStatus: state.scan.coverage.truncated ? 'LOWER_BOUND' : 'COMPLETE',
+        scanCoverage: state.scan.coverage,
+      } : {}),
       ...(state.selectedIssueId ? { selectedIssueId: state.selectedIssueId } : {}),
       ...(state.proposal ? { proposalId: state.proposal.proposalId } : {}), proposalStatus: proposalStatus(state),
+      proposalPreviewStatus: state.proposalPreview.status, mutationStatus: state.mutationStatus,
       ...(latest ? { latestChangeId: latest.changeId } : {}),
       canUndo: Boolean(latest && !latest.undoneAt && latest.afterHtml === state.htmlSource && latest.afterCss === state.cssSource),
       webMcpAvailable: typeof document !== 'undefined' && Boolean(document.modelContext),
@@ -99,6 +132,8 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
     const notice = workspaceStore.getSnapshot().verificationNotice
     return fromCommand(result, (scan) => ({
       scanId: scan.scanId, sourceRevision: scan.sourceRevision, ...scan.metrics,
+      countsStatus: scan.coverage.truncated ? 'LOWER_BOUND' : 'COMPLETE',
+      scanCoverage: scan.coverage,
       ...(notice?.outcome === 'VERIFIED' ? { verifiedChangeId: notice.changeId } : {}),
     }))
   },
@@ -121,7 +156,13 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
       .map((change) => ({ issueId: change.issueId, ruleId: change.ruleId, impact: null, classification: change.classification,
         status: 'verified', sourceLine: change.sourceLine, changeId: change.changeId }))
     const issues = [...open, ...verified]
-    return success({ scanId: state.scan!.scanId, totalMatching: issues.length, issues: issues.slice(0, limit) })
+    return success({
+      scanId: state.scan!.scanId,
+      totalMatching: issues.length,
+      countsStatus: state.scan!.coverage.truncated ? 'LOWER_BOUND' : 'COMPLETE',
+      scanCoverage: state.scan!.coverage,
+      issues: issues.slice(0, limit),
+    })
   },
   async inspect_issue(args, signal) {
     const result = await workspaceStore.inspectIssue(String(args.issueId), signal)
@@ -131,8 +172,7 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
       classificationReason: issue.classificationReason.slice(0, 180), target: issue.target.join(' ').slice(0, 120),
       sourceLocation: issue.sourceNode ? { line: issue.sourceNode.sourceRange.startLine, column: issue.sourceNode.sourceRange.startColumn,
         startOffset: issue.sourceNode.sourceRange.startOffset, endOffset: issue.sourceNode.sourceRange.endOffset } : null,
-      ...(publicFamily(issue) ? { repairFamily: publicFamily(issue), requiredInputs: publicFamily(issue) === 'add_form_label'
-        ? ['labelText only when no safe adjacent visible-text candidate exists'] : publicFamily(issue) === 'set_image_alt' ? ['altMode', 'altText when meaningful'] : [] } : {}),
+      ...(publicFamily(issue) ? { repairFamily: publicFamily(issue), requiredInputs: requiredInputs(publicFamily(issue)!) } : {}),
     }))
   },
   async preview_remediation(args, signal) {
@@ -141,7 +181,7 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
     const issue = workspaceStore.getSnapshot().issues.find((item) => item.issueId === args.issueId)
     if (!issue) return failure('ISSUE_NOT_FOUND', 'That issue is not part of the current scan.')
     const family = args.family as PublicFamily
-    if (!publicFamily(issue) || publicFamily(issue) !== family) return failure('ISSUE_NOT_REPAIRABLE', 'That issue and repair family are not a supported Tier A match.')
+    if (!publicFamily(issue) || publicFamily(issue) !== family) return failure('ISSUE_NOT_REPAIRABLE', 'That issue and repair family are not a supported match.')
     const selected = await workspaceStore.inspectIssue(issue.issueId, signal)
     if (!selected.ok) return failure(selected.error.code, selected.error.message, selected.error.recoverable)
     const result = await workspaceStore.previewRepair(issue.issueId, FAMILY[family].internal as RepairFamily, (args.values ?? {}) as HumanValues, signal)
@@ -151,7 +191,9 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
       semanticJudgmentRequired: proposal.semanticJudgmentRequired, editCount: proposal.patches.length,
       diffSummary: `${proposal.patches.length} surgical source edit${proposal.patches.length === 1 ? '' : 's'}; exact diff is visible in Curbcut.`,
       validationTarget: proposal.expectedValidation.slice(0, 160), approvalRequired: requiresHumanApproval(proposal),
-      agentMayApply: !requiresHumanApproval(proposal), approvalState: proposal.status })
+      agentMayApply: !requiresHumanApproval(proposal), approvalState: proposal.status,
+      proposalPreviewStatus: workspaceStore.getSnapshot().proposalPreview.status,
+      next: 'Poll get_workspace until proposalPreviewStatus is READY before Apply.' })
   },
   async apply_remediation(args, signal) {
     const result = await workspaceStore.applyProposal(String(args.proposalId), signal)
@@ -167,6 +209,7 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
   },
   async get_change_summary() {
     const state = workspaceStore.getSnapshot()
+    const countsCurrent = state.scanStatus === 'CURRENT' && state.scan?.sourceRevision === state.sourceRevision
     const changes = state.history.slice(-10).map((change) => ({ changeId: change.changeId, family: change.family, ruleId: change.ruleId,
       status: change.undoneAt ? 'UNDONE' : change.verification, sourceLine: change.sourceLine }))
     if (state.proposal?.status === 'REJECTED') changes.push({ changeId: state.proposal.proposalId, family: state.proposal.family,
@@ -175,8 +218,13 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
     return success({ sourceRevision: state.sourceRevision, appliedCount: state.history.length,
       verifiedCount: state.history.filter((change) => change.verification === 'VERIFIED').length,
       undoneCount: state.history.filter((change) => change.undoneAt).length,
-      openCriticalSerious: state.issues.filter((issue) => issue.resultKind === 'violation' && (issue.impact === 'critical' || issue.impact === 'serious')).length,
-      manualReviewsOutstanding: state.scan?.metrics.manualReviewsOutstanding ?? 0, changes: changes.slice(-10) })
+      countsStatus: countsCurrent ? 'CURRENT' : 'STALE',
+      ...(countsCurrent ? { scanCoverageStatus: state.scan!.coverage.truncated ? 'LOWER_BOUND' : 'COMPLETE' } : {}),
+      ...(countsCurrent ? {
+        openCriticalSerious: state.issues.filter((issue) => issue.resultKind === 'violation' && (issue.impact === 'critical' || issue.impact === 'serious')).length,
+        manualReviewsOutstanding: state.scan!.metrics.manualReviewsOutstanding,
+      } : {}),
+      changes: changes.slice(-10) })
   },
   async export_source(args) {
     return fromCommand(await workspaceStore.exportSource(args.format as 'html' | 'css' | 'workspace'), (metadata) => ({
@@ -217,17 +265,23 @@ function validate(name: WebMcpToolName, value: unknown): CommandResult<Record<st
   if (name === 'export_source') return hasOnly(args, ['format']) && ['html', 'css', 'workspace'].includes(String(args.format))
     ? { ok: true, data: args } : invalid('format must be html, css, or workspace.')
   if (name === 'preview_remediation') {
-    if (!hasOnly(args, ['issueId', 'family', 'values']) || !validString(args.issueId, 180) || !(String(args.family) in FAMILY) ||
-      (args.values !== undefined && (!isRecord(args.values) || !hasOnly(args.values, ['labelText', 'altMode', 'altText'])))) return invalid('The issue, Tier A family, or values object is invalid.')
+    if (!hasOnly(args, ['issueId', 'family', 'values']) || !validString(args.issueId, 180) || !Object.hasOwn(FAMILY, String(args.family)) ||
+      (args.values !== undefined && (!isRecord(args.values) || !hasOnly(args.values, ['labelText', 'altMode', 'altText', 'buttonName', 'languageTag'])))) return invalid('The issue, repair family, or values object is invalid.')
     const family = args.family as PublicFamily
     const values = (args.values ?? {}) as Record<string, unknown>
-    if (family === 'add_form_label' && values.labelText !== undefined && !validString(values.labelText, 120)) return invalid('labelText must be 1–120 characters when provided.')
+    if (family === 'add_form_label' && values.labelText !== undefined && !visibleText(values.labelText, 120)) return invalid('labelText must be 1–120 visible characters without edge whitespace.')
     if (family === 'set_image_alt' && values.altMode !== 'meaningful' && values.altMode !== 'decorative') return invalid('A human must choose meaningful or decorative image purpose.', 'INPUT_REQUIRED')
-    if (family === 'set_image_alt' && values.altMode === 'meaningful' && !validString(values.altText, 160)) return invalid('Human-chosen altText is required for a meaningful image.', 'INPUT_REQUIRED')
-    if ((family === 'add_form_label' && (values.altMode !== undefined || values.altText !== undefined)) ||
+    if (family === 'set_image_alt' && values.altMode === 'meaningful' && !visibleText(values.altText, 160)) return invalid('Human-chosen altText is required for a meaningful image.', 'INPUT_REQUIRED')
+    if (family === 'name_button' && values.buttonName === undefined) return invalid('A human-confirmed buttonName is required.', 'INPUT_REQUIRED')
+    if (family === 'name_button' && !visibleText(values.buttonName, 120)) return invalid('buttonName must be 1–120 visible characters without edge whitespace.')
+    if (family === 'set_document_language' && values.languageTag === undefined) return invalid('A human-confirmed languageTag is required.', 'INPUT_REQUIRED')
+    if (family === 'set_document_language' && !validLanguageTag(values.languageTag)) return invalid('languageTag must be one valid 1–35 character BCP 47 language tag.')
+    if ((family === 'add_form_label' && Object.keys(values).some((key) => key !== 'labelText')) ||
       (family === 'remove_positive_tabindex' && Object.keys(values).length > 0) ||
-      (family === 'set_image_alt' && values.labelText !== undefined) ||
-      (family === 'set_image_alt' && values.altMode === 'decorative' && values.altText !== undefined)) return invalid('values contains fields that do not apply to this repair family.')
+      (family === 'set_image_alt' && Object.keys(values).some((key) => !['altMode', 'altText'].includes(key))) ||
+      (family === 'set_image_alt' && values.altMode === 'decorative' && values.altText !== undefined) ||
+      (family === 'name_button' && Object.keys(values).some((key) => key !== 'buttonName')) ||
+      (family === 'set_document_language' && Object.keys(values).some((key) => key !== 'languageTag'))) return invalid('values contains fields that do not apply to this repair family.')
     return { ok: true, data: args }
   }
   return invalid('Unknown tool input.')
@@ -278,14 +332,16 @@ const valuesSchema = { type: 'object', properties: {
   labelText: { type: 'string', minLength: 1, maxLength: 120, description: 'Optional label override. When omitted, Curbcut may reuse safe adjacent visible text as a candidate.' },
   altMode: { type: 'string', enum: ['meaningful', 'decorative'], description: 'Human decision about image purpose.' },
   altText: { type: 'string', minLength: 1, maxLength: 160, description: 'Human-chosen text for a meaningful image.' },
+  buttonName: { type: 'string', minLength: 1, maxLength: 120, description: 'Human-confirmed purpose of the unnamed native button.' },
+  languageTag: { type: 'string', minLength: 1, maxLength: 35, description: 'Human-confirmed BCP 47 document language tag.' },
 }, additionalProperties: false } as const
 
 export const WEBMCP_TOOL_DEFINITIONS: readonly Omit<WebMCP.ModelContextTool, 'execute'>[] = [
-  { name: 'get_workspace', title: 'Get workspace', description: 'Read bounded Curbcut revision, preview, scan, proposal, selection, change, and undo state. Does not return source.', inputSchema: emptySchema, annotations: { readOnlyHint: true, untrustedContentHint: false } },
-  { name: 'scan_accessibility', title: 'Scan accessibility', description: 'Render current source in the secure preview, run in-frame axe, and replace visible issue results. Use after_change to verify a repair.', inputSchema: { type: 'object', properties: { reason: { type: 'string', enum: ['initial', 'after_change', 'manual'], description: 'Why the scan is being run.' } }, required: ['reason'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
-  { name: 'list_issues', title: 'List issues', description: 'List bounded current axe issue or verified-repair summaries. Targets derive from untrusted imported source.', inputSchema: { type: 'object', properties: { impact: { type: 'string', enum: ['critical', 'serious', 'moderate', 'minor', 'all'] }, classification: { type: 'string', enum: ['MECHANICAL', 'CONTEXTUAL', 'MANUAL_REVIEW', 'all'] }, status: { type: 'string', enum: ['open', 'verified', 'all'] }, limit: { type: 'integer', minimum: 1, maximum: 10 } }, additionalProperties: false }, annotations: { readOnlyHint: true, untrustedContentHint: true } },
+  { name: 'get_workspace', title: 'Get workspace', description: 'Read bounded Curbcut revision, preview, scan coverage, proposal, selection, change, and undo state. Does not return source.', inputSchema: emptySchema, annotations: { readOnlyHint: true, untrustedContentHint: false } },
+  { name: 'scan_accessibility', title: 'Scan accessibility', description: 'Render current source in the secure preview, run in-frame axe, and replace visible issue results. Use after_change to verify a repair. Capped scans explicitly report LOWER_BOUND counts.', inputSchema: { type: 'object', properties: { reason: { type: 'string', enum: ['initial', 'after_change', 'manual'], description: 'Why the scan is being run.' } }, required: ['reason'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
+  { name: 'list_issues', title: 'List issues', description: 'List bounded current axe issue or verified-repair summaries with explicit scan coverage. Targets derive from untrusted imported source.', inputSchema: { type: 'object', properties: { impact: { type: 'string', enum: ['critical', 'serious', 'moderate', 'minor', 'all'] }, classification: { type: 'string', enum: ['MECHANICAL', 'CONTEXTUAL', 'MANUAL_REVIEW', 'all'] }, status: { type: 'string', enum: ['open', 'verified', 'all'] }, limit: { type: 'integer', minimum: 1, maximum: 10 } }, additionalProperties: false }, annotations: { readOnlyHint: true, untrustedContentHint: true } },
   { name: 'inspect_issue', title: 'Inspect issue', description: 'Select a current axe issue, focus its exact mapped source range, and highlight its element. Returned target text is untrusted.', inputSchema: { type: 'object', properties: { issueId: { type: 'string', minLength: 1, maxLength: 180, description: 'Issue ID from list_issues.' } }, required: ['issueId'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: true } },
-  { name: 'preview_remediation', title: 'Preview remediation', description: 'Create one visible, non-mutating Tier A surgical proposal. Mechanical proposals may be applied next; contextual proposals require human approval.', inputSchema: { type: 'object', properties: { issueId: { type: 'string', minLength: 1, maxLength: 180 }, family: { type: 'string', enum: Object.keys(FAMILY) }, values: valuesSchema }, required: ['issueId', 'family'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: true } },
+  { name: 'preview_remediation', title: 'Preview remediation', description: 'Create one visible, non-mutating surgical proposal. Mechanical proposals may be applied next; contextual proposals require human approval.', inputSchema: { type: 'object', properties: { issueId: { type: 'string', minLength: 1, maxLength: 180 }, family: { type: 'string', enum: Object.keys(FAMILY) }, values: valuesSchema }, required: ['issueId', 'family'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: true } },
   { name: 'apply_remediation', title: 'Apply remediation', description: 'Apply the exact visible mechanical proposal, or a contextual proposal approved by a human in the Curbcut UI. Never invent semantic approval.', inputSchema: { type: 'object', properties: { proposalId: { type: 'string', minLength: 1, maxLength: 180 } }, required: ['proposalId'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
   { name: 'reject_remediation', title: 'Reject remediation', description: 'Reject the current visible proposal without changing canonical source.', inputSchema: { type: 'object', properties: { proposalId: { type: 'string', minLength: 1, maxLength: 180 }, reason: { type: 'string', enum: ['not_correct', 'needs_revision', 'not_now'] } }, required: ['proposalId', 'reason'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
   { name: 'undo_remediation', title: 'Undo remediation', description: 'Restore the exact source snapshot before the latest eligible repair. Call only when the user explicitly requests undo; never speculatively.', inputSchema: emptySchema, annotations: { readOnlyHint: false, untrustedContentHint: false } },
@@ -304,11 +360,15 @@ export function useWorkspaceWebMcpTools() {
       try {
         for (const definition of WEBMCP_TOOL_DEFINITIONS) {
           const name = definition.name as WebMcpToolName
-          await document.modelContext!.registerTool({ ...definition, execute: (args, { signal }) => executeWorkspaceTool(name, args, signal) }, { signal: controller.signal })
+          await document.modelContext!.registerTool({ ...definition, execute: (args, context) =>
+            executeWorkspaceTool(name, args, context?.signal ?? new AbortController().signal) }, { signal: controller.signal })
         }
         workspaceStore.setWebMcpRegistration(WEBMCP_TOOL_NAMES)
       } catch (error) {
-        if (!controller.signal.aborted) workspaceStore.setWebMcpRegistration([], error instanceof Error ? error.message : String(error))
+        if (!controller.signal.aborted) {
+          controller.abort()
+          workspaceStore.setWebMcpRegistration([], error instanceof Error ? error.message : String(error))
+        }
       }
     })()
     return () => controller.abort()

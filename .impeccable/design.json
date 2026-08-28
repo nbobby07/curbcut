@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-28T00:00:00-07:00",
+  "title": "Design System: Curbcut",
+  "extensions": {
+    "colorMeta": {
+      "ink": { "role": "neutral", "displayName": "Ledger Ink", "canonical": "#111827", "tonalRamp": ["oklch(15% 0.025 260)", "oklch(25% 0.025 260)", "oklch(38% 0.022 260)", "oklch(52% 0.018 260)", "oklch(65% 0.014 260)", "oklch(76% 0.010 260)", "oklch(87% 0.006 260)", "oklch(95% 0.003 260)"] },
+      "muted-ink": { "role": "neutral", "displayName": "Secondary Ink", "canonical": "#526072", "tonalRamp": ["oklch(15% 0.025 255)", "oklch(25% 0.025 255)", "oklch(38% 0.023 255)", "oklch(52% 0.020 255)", "oklch(65% 0.016 255)", "oklch(76% 0.012 255)", "oklch(87% 0.007 255)", "oklch(95% 0.003 255)"] },
+      "rule": { "role": "neutral", "displayName": "Ledger Rule", "canonical": "#d8dee8", "tonalRamp": ["oklch(15% 0.012 255)", "oklch(25% 0.012 255)", "oklch(38% 0.011 255)", "oklch(52% 0.010 255)", "oklch(65% 0.009 255)", "oklch(76% 0.008 255)", "oklch(87% 0.006 255)", "oklch(95% 0.003 255)"] },
+      "rule-strong": { "role": "neutral", "displayName": "Strong Ledger Rule", "canonical": "#c6cfdb", "tonalRamp": ["oklch(15% 0.015 255)", "oklch(25% 0.015 255)", "oklch(38% 0.014 255)", "oklch(52% 0.012 255)", "oklch(65% 0.010 255)", "oklch(76% 0.008 255)", "oklch(87% 0.006 255)", "oklch(95% 0.003 255)"] },
+      "canvas": { "role": "neutral", "displayName": "Cool Canvas", "canonical": "#f4f7fb", "tonalRamp": ["oklch(15% 0.010 255)", "oklch(25% 0.010 255)", "oklch(38% 0.009 255)", "oklch(52% 0.008 255)", "oklch(65% 0.007 255)", "oklch(76% 0.006 255)", "oklch(87% 0.004 255)", "oklch(95% 0.002 255)"] },
+      "surface": { "role": "neutral", "displayName": "Paper Surface", "canonical": "#ffffff", "tonalRamp": ["oklch(15% 0 0)", "oklch(25% 0 0)", "oklch(38% 0 0)", "oklch(52% 0 0)", "oklch(65% 0 0)", "oklch(76% 0 0)", "oklch(87% 0 0)", "oklch(95% 0 0)"] },
+      "surface-subtle": { "role": "neutral", "displayName": "Ruled Field", "canonical": "#f7f9fc", "tonalRamp": ["oklch(15% 0.008 255)", "oklch(25% 0.008 255)", "oklch(38% 0.007 255)", "oklch(52% 0.006 255)", "oklch(65% 0.005 255)", "oklch(76% 0.004 255)", "oklch(87% 0.003 255)", "oklch(95% 0.002 255)"] },
+      "selected": { "role": "primary", "displayName": "Selected Wash", "canonical": "#eef4ff", "tonalRamp": ["oklch(15% 0.055 255)", "oklch(25% 0.055 255)", "oklch(38% 0.050 255)", "oklch(52% 0.043 255)", "oklch(65% 0.034 255)", "oklch(76% 0.025 255)", "oklch(87% 0.014 255)", "oklch(95% 0.007 255)"] },
+      "action-cobalt": { "role": "primary", "displayName": "Action Cobalt", "canonical": "#0b5ed7", "tonalRamp": ["oklch(15% 0.16 255)", "oklch(25% 0.18 255)", "oklch(38% 0.20 255)", "oklch(52% 0.20 255)", "oklch(65% 0.17 255)", "oklch(76% 0.12 255)", "oklch(87% 0.065 255)", "oklch(95% 0.025 255)"] },
+      "action-cobalt-hover": { "role": "primary", "displayName": "Deep Action Cobalt", "canonical": "#084eb5", "tonalRamp": ["oklch(15% 0.15 255)", "oklch(25% 0.17 255)", "oklch(38% 0.19 255)", "oklch(52% 0.19 255)", "oklch(65% 0.16 255)", "oklch(76% 0.11 255)", "oklch(87% 0.06 255)", "oklch(95% 0.025 255)"] },
+      "proposal-amber": { "role": "secondary", "displayName": "Proposal Amber", "canonical": "#9f4f00", "tonalRamp": ["oklch(15% 0.10 60)", "oklch(25% 0.13 60)", "oklch(38% 0.15 60)", "oklch(52% 0.15 60)", "oklch(65% 0.13 60)", "oklch(76% 0.09 60)", "oklch(87% 0.05 60)", "oklch(95% 0.02 60)"] },
+      "proposal-field": { "role": "secondary", "displayName": "Proposal Field", "canonical": "#fff4df", "tonalRamp": ["oklch(15% 0.08 75)", "oklch(25% 0.09 75)", "oklch(38% 0.10 75)", "oklch(52% 0.09 75)", "oklch(65% 0.07 75)", "oklch(76% 0.05 75)", "oklch(87% 0.03 75)", "oklch(95% 0.012 75)"] },
+      "verification-emerald": { "role": "secondary", "displayName": "Verification Emerald", "canonical": "#087a50", "tonalRamp": ["oklch(15% 0.08 155)", "oklch(25% 0.10 155)", "oklch(38% 0.12 155)", "oklch(52% 0.12 155)", "oklch(65% 0.10 155)", "oklch(76% 0.07 155)", "oklch(87% 0.04 155)", "oklch(95% 0.015 155)"] },
+      "verification-field": { "role": "secondary", "displayName": "Verification Field", "canonical": "#e8f7f0", "tonalRamp": ["oklch(15% 0.06 155)", "oklch(25% 0.07 155)", "oklch(38% 0.075 155)", "oklch(52% 0.07 155)", "oklch(65% 0.055 155)", "oklch(76% 0.04 155)", "oklch(87% 0.025 155)", "oklch(95% 0.01 155)"] },
+      "severity-red": { "role": "tertiary", "displayName": "Severity Red", "canonical": "#b4232c", "tonalRamp": ["oklch(15% 0.10 25)", "oklch(25% 0.13 25)", "oklch(38% 0.16 25)", "oklch(52% 0.16 25)", "oklch(65% 0.13 25)", "oklch(76% 0.09 25)", "oklch(87% 0.05 25)", "oklch(95% 0.02 25)"] },
+      "severity-field": { "role": "tertiary", "displayName": "Severity Field", "canonical": "#feecee", "tonalRamp": ["oklch(15% 0.07 25)", "oklch(25% 0.08 25)", "oklch(38% 0.09 25)", "oklch(52% 0.08 25)", "oklch(65% 0.065 25)", "oklch(76% 0.045 25)", "oklch(87% 0.025 25)", "oklch(95% 0.01 25)"] }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "Workspace Title", "purpose": "Product and selected evidence identity." },
+      "body": { "displayName": "Compact Body", "purpose": "Explanations, guidance, and decision copy." },
+      "label": { "displayName": "Operational Label", "purpose": "Controls, statuses, field labels, and ledger headers." },
+      "evidence": { "displayName": "Evidence Mono", "purpose": "Source, exact diffs, selectors, revisions, offsets, and timestamps." }
+    },
+    "shadows": [
+      { "name": "preview-containment", "value": "0 1px 2px rgb(17 24 39 / .04)", "purpose": "Barely lifts the rendered artifact from the cool canvas." },
+      { "name": "mapped-selection", "value": "inset 0 0 0 1px #0b5ed7", "purpose": "Binds selected evidence to the active issue or mapped source region." }
+    ],
+    "motion": [
+      { "name": "reduced-motion", "value": "prefers-reduced-motion: reduce", "purpose": "Disables transitions, animation, and smooth scrolling when requested." }
+    ],
+    "breakpoints": [
+      { "name": "compact-desktop", "value": "1280px" },
+      { "name": "stacked-workspace", "value": "1040px" },
+      { "name": "single-pane", "value": "720px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The current workflow-advancing action, led by Scan.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Scan</button>",
+      "css": ".ds-btn-primary { min-height: 32px; border: 1px solid var(--accent, #0b5ed7); border-radius: 5px; background: var(--accent, #0b5ed7); padding: 6px 10px; color: #fff; font: 720 12px/1.35 Inter, Aptos, ui-sans-serif, system-ui, sans-serif; cursor: pointer; } .ds-btn-primary:hover { background: var(--accent-hover, #084eb5); border-color: var(--accent-hover, #084eb5); } .ds-btn-primary:focus-visible { outline: 2px solid var(--focus, #0b5ed7); outline-offset: 2px; } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Secondary Action",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A reversible or supporting command such as Undo, Import, or Reject.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Undo</button>",
+      "css": ".ds-btn-secondary { min-height: 32px; border: 1px solid #b7c1ce; border-radius: 5px; background: var(--surface, #fff); padding: 6px 10px; color: var(--ink, #111827); font: 620 12px/1.35 Inter, Aptos, ui-sans-serif, system-ui, sans-serif; cursor: pointer; } .ds-btn-secondary:hover { background: #f0f4fa; border-color: #9eabbc; } .ds-btn-secondary:focus-visible { outline: 2px solid var(--focus, #0b5ed7); outline-offset: 2px; } .ds-btn-secondary:active { background: var(--selected, #eef4ff); }"
+    },
+    {
+      "name": "Context Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Collects the human meaning required for a contextual repair.",
+      "html": "<label class=\"ds-field\">Button purpose<input value=\"Close order summary\" /></label>",
+      "css": ".ds-field { display: grid; gap: 4px; color: var(--ink, #111827); font: 700 11px/1.35 Inter, Aptos, ui-sans-serif, system-ui, sans-serif; } .ds-field input { width: 100%; border: 1px solid #aab5c3; border-radius: 4px; background: var(--surface, #fff); padding: 7px 8px; color: var(--ink, #111827); font: 400 12px/1.45 Inter, Aptos, ui-sans-serif, system-ui, sans-serif; } .ds-field input:hover { border-color: #8995a5; } .ds-field input:focus-visible { outline: 2px solid var(--focus, #0b5ed7); outline-offset: 2px; }"
+    },
+    {
+      "name": "Ledger Tabs",
+      "kind": "nav",
+      "description": "Flush source or preview-state switching without card-like separation.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\" aria-label=\"Source file\"><button role=\"tab\" aria-selected=\"true\">HTML</button><button role=\"tab\" aria-selected=\"false\">CSS</button></div>",
+      "css": ".ds-tabs { display: flex; background: var(--surface, #fff); } .ds-tabs button { min-height: 30px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; padding: 5px 10px; color: var(--muted, #526072); font: 620 12px/1.35 Inter, Aptos, ui-sans-serif, system-ui, sans-serif; cursor: pointer; } .ds-tabs button:hover { background: #f0f4fa; } .ds-tabs button[aria-selected=\"true\"] { border-bottom-color: var(--accent, #0b5ed7); background: var(--selected, #eef4ff); color: var(--accent, #0b5ed7); font-weight: 750; } .ds-tabs button:focus-visible { outline: 2px solid var(--focus, #0b5ed7); outline-offset: -2px; }"
+    },
+    {
+      "name": "Proposal Status",
+      "kind": "chip",
+      "refersTo": "status-proposal",
+      "description": "Declares that a rendered result is proposed and working source is unchanged.",
+      "html": "<span class=\"ds-status-proposal\">Proposed preview · <strong>Not applied</strong></span>",
+      "css": ".ds-status-proposal { display: inline-flex; align-items: center; border: 1px solid #ebcf9e; border-radius: 4px; background: var(--proposal-bg, #fff4df); padding: 4px 7px; color: var(--proposal, #9f4f00); font: 700 11px/1.35 Inter, Aptos, ui-sans-serif, system-ui, sans-serif; } .ds-status-proposal:hover { border-color: #d8ae66; } .ds-status-proposal:focus-visible { outline: 2px solid var(--focus, #0b5ed7); outline-offset: 2px; }"
+    },
+    {
+      "name": "Verified Status",
+      "kind": "chip",
+      "refersTo": "status-verified",
+      "description": "Records successful verification, restoration, or healthy connectivity.",
+      "html": "<span class=\"ds-status-verified\"><span aria-hidden=\"true\"></span>Verified</span>",
+      "css": ".ds-status-verified { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #bfe3d2; border-radius: 4px; background: var(--verified-bg, #e8f7f0); padding: 4px 7px; color: var(--verified, #087a50); font: 700 11px/1.35 Inter, Aptos, ui-sans-serif, system-ui, sans-serif; } .ds-status-verified > span { width: 7px; height: 7px; border-radius: 50%; background: var(--verified, #087a50); } .ds-status-verified:hover { border-color: #91cdb2; } .ds-status-verified:focus-visible { outline: 2px solid var(--focus, #0b5ed7); outline-offset: 2px; }"
+    },
+    {
+      "name": "Inspection Row",
+      "kind": "custom",
+      "description": "The signature synchronized record for severity, rule, action, and source mapping.",
+      "html": "<button class=\"ds-inspection-row\" type=\"button\"><span class=\"ds-impact\">Serious</span><strong>button-name</strong><span>Code preview · approval</span><span>Line 24</span></button>",
+      "css": ".ds-inspection-row { width: 100%; min-height: 44px; border: 0; border-bottom: 1px solid #e6eaf0; background: var(--surface, #fff); padding: 7px 11px; display: grid; grid-template-columns: 68px minmax(76px, .6fr) minmax(120px, 1.4fr) auto; align-items: center; gap: 8px; text-align: left; color: var(--ink, #111827); cursor: pointer; } .ds-inspection-row:hover, .ds-inspection-row:focus-visible { background: var(--selected, #eef4ff); box-shadow: inset 0 0 0 1px var(--accent, #0b5ed7); outline: none; } .ds-inspection-row:active { background: #e2ecff; } .ds-inspection-row strong { font: 700 12px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace; } .ds-inspection-row > span:not(.ds-impact) { overflow: hidden; color: var(--muted, #526072); font: 400 11.5px/1.35 Inter, Aptos, ui-sans-serif, system-ui, sans-serif; text-overflow: ellipsis; white-space: nowrap; } .ds-impact { justify-self: start; border-radius: 4px; background: #fff0df; padding: 3px 5px; color: #9a4b00; font: 820 8.5px/1.2 Inter, Aptos, ui-sans-serif, system-ui, sans-serif; letter-spacing: .035em; text-transform: uppercase; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Inspection Ledger",
+    "overview": "Curbcut is a cool-white, ruled developer workspace where source, rendered target, factual evidence, and an exact patch read as one inspection record. The system is compact, restrained, and operational: near-black ink carries facts, cobalt marks action and focus, amber separates proposals from mutations, emerald records verification, and red communicates severity or failure.\n\nThe visual world refuses the scanner-dashboard default. It uses panes, rows, footers, and ledgers instead of card grids, scores, charts, or theatrical security chrome. Human judgment remains visible in the sequence from evidence to proposed meaning to exact diff, apply, verification, and undo.",
+    "keyCharacteristics": [
+      "Cool white ruled panes with almost no decorative surface treatment.",
+      "Dense system sans for operation and monospace for source, evidence, revisions, and diffs.",
+      "Cobalt action, amber proposal, emerald verification, and restrained severity red.",
+      "One synchronized workspace record rather than a collection of dashboard widgets.",
+      "Text and structure always accompany color-coded state."
+    ],
+    "rules": [
+      { "name": "The State-Is-Meaning Rule", "body": "Cobalt means action or focus, amber means proposed and unapplied, emerald means verified or healthy, and red means severity or failure; never swap these roles for variety.", "section": "colors" },
+      { "name": "The Redundancy Rule", "body": "Every colored state also carries explicit text, structure, or an icon so color is never the only evidence.", "section": "colors" },
+      { "name": "The Evidence Voice Rule", "body": "Use monospace only where exact characters, offsets, selectors, revisions, or machine evidence matter.", "section": "typography" },
+      { "name": "The One Record Rule", "body": "Source location, rendered target, axe evidence, proposal, diff, and verification must stay visibly mappable through shared selection and aligned pane state.", "section": "layout" },
+      { "name": "The Flat-Ledger Rule", "body": "Surfaces remain flat at rest; use rules and tonal fields before shadow.", "section": "elevation" },
+      { "name": "The Joined-Surface Rule", "body": "Do not round each pane, row, or diff half into an independent card; shared borders should make related evidence feel physically connected.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do keep source, preview, evidence, and timeline in one ruled workspace.",
+      "Do make Scan the leading action and keep approval visually distinct from Apply.",
+      "Do label proposed content as unapplied and verified content as verified or restored.",
+      "Do preserve exact source, selector, diff, revision, and timestamp text in monospace.",
+      "Do keep keyboard focus conspicuous and provide redundant state text."
+    ],
+    "donts": [
+      "Don't turn the workspace into a scanner dashboard of scores, charts, or floating cards.",
+      "Don't use gradients, neon security styling, glass effects, or a chatbot panel.",
+      "Don't imply WCAG compliance from axe results or invent synthetic scores.",
+      "Don't use amber, emerald, or red as decorative accents outside their semantic states.",
+      "Don't separate a proposal from its exact diff, approval state, and rendered result."
+    ]
+  }
+}

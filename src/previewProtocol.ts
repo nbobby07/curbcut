@@ -1,6 +1,8 @@
 export const MAX_HTML_BYTES = 500_000
 export const MAX_CSS_BYTES = 250_000
 export const MAX_FRAME_MESSAGE_BYTES = 750_000
+export const MAX_AXE_RULES = 40
+export const MAX_AXE_NODES = 100
 
 export type DocumentMeta = {
   lang?: string
@@ -27,6 +29,15 @@ export type AxeRulePayload = {
 export type ScanResultPayload = {
   violations: AxeRulePayload[]
   incomplete: AxeRulePayload[]
+  coverage: {
+    truncated: boolean
+    totalRuleCount: number
+    totalNodeCount: number
+    returnedRuleCount: number
+    returnedNodeCount: number
+    maxRules: number
+    maxNodes: number
+  }
 }
 
 export type FrameMessage = {
@@ -68,9 +79,32 @@ function isAxeRule(value: unknown): value is AxeRulePayload {
     value.tags.length <= 50 &&
     value.tags.every((tag) => isBoundedString(tag, 100)) &&
     Array.isArray(value.nodes) &&
-    value.nodes.length <= 2_000 &&
+    value.nodes.length <= MAX_AXE_NODES &&
     value.nodes.every(isAxeNode)
   )
+}
+
+function isAxeScanPayload(payload: Record<string, unknown>) {
+  if (!Array.isArray(payload.violations) || !Array.isArray(payload.incomplete)) return false
+  if (!isRecord(payload.coverage)) return false
+  const rules = [...payload.violations, ...payload.incomplete]
+  if (rules.length > MAX_AXE_RULES) return false
+
+  let nodeCount = 0
+  for (const rule of rules) {
+    if (!isRecord(rule) || !Array.isArray(rule.nodes)) return false
+    nodeCount += rule.nodes.length
+    if (nodeCount > MAX_AXE_NODES) return false
+  }
+
+  const coverage = payload.coverage
+  return payload.violations.every(isAxeRule) && payload.incomplete.every(isAxeRule) &&
+    typeof coverage.truncated === 'boolean' &&
+    coverage.maxRules === MAX_AXE_RULES && coverage.maxNodes === MAX_AXE_NODES &&
+    coverage.returnedRuleCount === rules.length && coverage.returnedNodeCount === nodeCount &&
+    Number.isSafeInteger(coverage.totalRuleCount) && Number(coverage.totalRuleCount) >= rules.length &&
+    Number.isSafeInteger(coverage.totalNodeCount) && Number(coverage.totalNodeCount) >= nodeCount &&
+    coverage.truncated === (Number(coverage.totalRuleCount) > rules.length || Number(coverage.totalNodeCount) > nodeCount)
 }
 
 export function isFrameMessage(value: unknown): value is FrameMessage {
@@ -85,6 +119,7 @@ export function isFrameMessage(value: unknown): value is FrameMessage {
     !isRecord(value.payload)
   ) return false
 
+  if (value.type === 'SCAN_RESULT' && !isAxeScanPayload(value.payload)) return false
   if (JSON.stringify(value).length > MAX_FRAME_MESSAGE_BYTES) return false
   if (value.type === 'READY') {
     return isBoundedString(value.payload.reportedOrigin, 100) && typeof value.payload.parentAccessBlocked === 'boolean'
@@ -96,12 +131,7 @@ export function isFrameMessage(value: unknown): value is FrameMessage {
   if (value.type === 'ERROR') {
     return isBoundedString(value.payload.code, 100) && isBoundedString(value.payload.message, 500)
   }
-  return (
-    Array.isArray(value.payload.violations) &&
-    value.payload.violations.every(isAxeRule) &&
-    Array.isArray(value.payload.incomplete) &&
-    value.payload.incomplete.every(isAxeRule)
-  )
+  return isAxeScanPayload(value.payload)
 }
 
 const CONTROLLER_SOURCE = String.raw`(() => {
@@ -109,6 +139,8 @@ const CONTROLLER_SOURCE = String.raw`(() => {
   const CHANNEL = __CURBCUT_CHANNEL__;
   const MAX_HTML = 500000;
   const MAX_CSS = 250000;
+  const MAX_AXE_RULES = __CURBCUT_MAX_AXE_RULES__;
+  const MAX_AXE_NODES = __CURBCUT_MAX_AXE_NODES__;
   const root = document.getElementById('curbcut-preview-root');
   const userStyle = document.getElementById('curbcut-user-style');
   let currentRevision = -1;
@@ -140,22 +172,60 @@ const CONTROLLER_SOURCE = String.raw`(() => {
       return undefined;
     }
   };
-  const serializeRules = rules => rules.slice(0, 500).map(rule => ({
-    id: String(rule.id || '').slice(0, 100),
-    help: String(rule.help || '').slice(0, 500),
-    helpUrl: String(rule.helpUrl || '').slice(0, 500),
-    tags: Array.isArray(rule.tags) ? rule.tags.slice(0, 50).map(tag => String(tag).slice(0, 100)) : [],
-    nodes: Array.isArray(rule.nodes) ? rule.nodes.slice(0, 2000).map(node => {
-      const target = Array.isArray(node.target) ? node.target.slice(0, 12).map(part => String(part).slice(0, 300)) : [];
-      const nodeId = findMappedNode(target);
-      return {
-        impact: ['critical', 'serious', 'moderate', 'minor'].includes(node.impact) ? node.impact : null,
-        target,
-        html: String(node.html || '').slice(0, 1000),
-        ...(nodeId ? { nodeId } : {}),
-      };
-    }) : [],
-  }));
+  const serializeScan = (violations, incomplete) => {
+    const violationRules = Array.isArray(violations) ? violations : [];
+    const incompleteRules = Array.isArray(incomplete) ? incomplete : [];
+    const totalRuleCount = violationRules.length + incompleteRules.length;
+    const totalNodeCount = [...violationRules, ...incompleteRules]
+      .reduce((count, rule) => count + (Array.isArray(rule.nodes) ? rule.nodes.length : 0), 0);
+    let remainingRules = MAX_AXE_RULES;
+    let remainingNodes = MAX_AXE_NODES;
+    const serializeRules = rules => {
+      const output = [];
+      if (!Array.isArray(rules)) return output;
+      for (const rule of rules) {
+        if (remainingRules === 0 || remainingNodes === 0) break;
+        const rawNodes = Array.isArray(rule.nodes) ? rule.nodes : [];
+        const nodes = rawNodes.slice(0, remainingNodes).map(node => {
+          const target = Array.isArray(node.target) ? node.target.slice(0, 12).map(part => String(part).slice(0, 300)) : [];
+          const nodeId = findMappedNode(target);
+          return {
+            impact: ['critical', 'serious', 'moderate', 'minor'].includes(node.impact) ? node.impact : null,
+            target,
+            html: String(node.html || '').slice(0, 1000),
+            ...(nodeId ? { nodeId } : {}),
+          };
+        });
+        remainingRules -= 1;
+        remainingNodes -= nodes.length;
+        output.push({
+          id: String(rule.id || '').slice(0, 100),
+          help: String(rule.help || '').slice(0, 500),
+          helpUrl: String(rule.helpUrl || '').slice(0, 500),
+          tags: Array.isArray(rule.tags) ? rule.tags.slice(0, 50).map(tag => String(tag).slice(0, 100)) : [],
+          nodes,
+        });
+      }
+      return output;
+    };
+    const serializedViolations = serializeRules(violationRules);
+    const serializedIncomplete = serializeRules(incompleteRules);
+    const returnedRules = [...serializedViolations, ...serializedIncomplete];
+    const returnedNodeCount = returnedRules.reduce((count, rule) => count + rule.nodes.length, 0);
+    return {
+      violations: serializedViolations,
+      incomplete: serializedIncomplete,
+      coverage: {
+        truncated: totalRuleCount > returnedRules.length || totalNodeCount > returnedNodeCount,
+        totalRuleCount,
+        totalNodeCount,
+        returnedRuleCount: returnedRules.length,
+        returnedNodeCount,
+        maxRules: MAX_AXE_RULES,
+        maxNodes: MAX_AXE_NODES,
+      },
+    };
+  };
 
   addEventListener('submit', event => event.preventDefault(), true);
   addEventListener('click', event => {
@@ -195,14 +265,10 @@ const CONTROLLER_SOURCE = String.raw`(() => {
 
       if (message.type === 'SCAN') {
         if (!window.axe || typeof window.axe.run !== 'function') throw new Error('axe-core is unavailable');
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         if (message.sourceRevision !== currentRevision) throw new Error('Stale source revision');
         const result = await window.axe.run(document, { rules: { tabindex: { enabled: true } } });
         if (message.sourceRevision !== currentRevision) return;
-        send('SCAN_RESULT', message.requestId, currentRevision, {
-          violations: serializeRules(result.violations || []),
-          incomplete: serializeRules(result.incomplete || []),
-        });
+        send('SCAN_RESULT', message.requestId, currentRevision, serializeScan(result.violations, result.incomplete));
         return;
       }
 
@@ -251,7 +317,10 @@ export function buildTrustedSrcdoc(axeSource: string, nonce: string, channel: st
     "base-uri 'none'",
     "form-action 'none'",
   ].join('; ')
-  const controller = CONTROLLER_SOURCE.replace('__CURBCUT_CHANNEL__', JSON.stringify(channel))
+  const controller = CONTROLLER_SOURCE
+    .replace('__CURBCUT_CHANNEL__', JSON.stringify(channel))
+    .replace('__CURBCUT_MAX_AXE_RULES__', String(MAX_AXE_RULES))
+    .replace('__CURBCUT_MAX_AXE_NODES__', String(MAX_AXE_NODES))
 
   return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${csp}"><title>Curbcut preview</title><style nonce="${nonce}" id="curbcut-user-style"></style><style nonce="${nonce}">[data-curbcut-highlight]{outline:4px solid #f0b429!important;outline-offset:3px!important}</style><script nonce="${nonce}">${escapeScript(axeSource)}</script></head><body><div id="curbcut-preview-root"></div><script nonce="${nonce}">${escapeScript(controller)}</script></body></html>`
 }

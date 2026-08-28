@@ -188,6 +188,122 @@ describe('image alternative repair', () => {
   })
 })
 
+describe('button accessible name repair', () => {
+  it('adds one escaped human-confirmed aria-label without changing unrelated bytes', () => {
+    const source = '<main>\r\n  <button class="icon"><svg aria-hidden="true"></svg></button>\r\n  <p>Crème</p>\r\n</main>'
+    const result = repair(source, 'button-name', 'button', 'button-accessible-name', {
+      buttonName: 'Open cart & "review"',
+    })
+
+    expect(result).toMatchObject({
+      ok: true,
+      repair: {
+        classification: 'CONTEXTUAL',
+        semanticJudgmentRequired: true,
+        humanValues: { buttonName: 'Open cart & "review"' },
+        validationTarget: { ruleId: 'button-name', tagName: 'button' },
+      },
+    })
+    if (!result.ok) return
+    expect(result.repair.proposedHtml).toBe(
+      '<main>\r\n  <button class="icon" aria-label="Open cart &amp; &quot;review&quot;"><svg aria-hidden="true"></svg></button>\r\n  <p>Crème</p>\r\n</main>',
+    )
+    expect(result.repair.patches).toEqual([{
+      start: source.indexOf('><svg'),
+      end: source.indexOf('><svg'),
+      expectedText: '',
+      replacement: ' aria-label="Open cart &amp; &quot;review&quot;"',
+    }])
+  })
+
+  it('changes only the mapped native button when similar buttons exist', () => {
+    const source = '<button class="icon"><svg></svg></button><button class="icon"><svg></svg></button>\n'
+    const result = repair(source, 'button-name', 'button', 'button-accessible-name', { buttonName: 'Delete item' }, 1)
+    expect(result.ok && result.repair.proposedHtml).toBe(
+      '<button class="icon"><svg></svg></button><button class="icon" aria-label="Delete item"><svg></svg></button>\n',
+    )
+  })
+
+  it.each([
+    ['missing name', '<button><svg></svg></button>', {}, 'HUMAN_VALUE_REQUIRED'],
+    ['edge whitespace', '<button><svg></svg></button>', { buttonName: ' Save ' }, 'INVALID_HUMAN_VALUE'],
+    ['control character', '<button><svg></svg></button>', { buttonName: 'Save\nitem' }, 'INVALID_HUMAN_VALUE'],
+    ['existing aria-label', '<button aria-label="Save"><svg></svg></button>', { buttonName: 'Save' }, 'EXISTING_ACCESSIBLE_NAME'],
+    ['existing aria-labelledby', '<button aria-labelledby="name"><svg></svg></button>', { buttonName: 'Save' }, 'EXISTING_ACCESSIBLE_NAME'],
+    ['existing title', '<button title="Save"><svg></svg></button>', { buttonName: 'Save' }, 'EXISTING_ACCESSIBLE_NAME'],
+    ['template syntax', '<button data-action="{{ action }}"><svg></svg></button>', { buttonName: 'Save' }, 'NONLITERAL_ATTRIBUTE'],
+  ])('refuses %s', (_name, source, values, code) => {
+    expect(repair(source as string, 'button-name', 'button', 'button-accessible-name', values)).toMatchObject({
+      ok: false,
+      refusal: { code },
+    })
+  })
+
+  it('refuses non-native button targets and mismatched axe rules', () => {
+    expect(repair('<div role="button"></div>', 'button-name', 'div', 'button-accessible-name', { buttonName: 'Save' })).toMatchObject({
+      ok: false,
+      refusal: { code: 'UNSUPPORTED_TARGET' },
+    })
+    expect(repair('<button></button>', 'label', 'button', 'button-accessible-name', { buttonName: 'Save' })).toMatchObject({
+      ok: false,
+      refusal: { code: 'UNSUPPORTED_RULE' },
+    })
+  })
+})
+
+describe('document language repair', () => {
+  it('adds a canonical BCP 47 tag to the explicit html start tag and preserves all other bytes', () => {
+    const source = '<!doctype html>\r\n<html dir="ltr">\r\n<head><title>Café</title></head>\r\n<body>Crème</body>\r\n</html>\r\n'
+    const result = repair(source, 'html-has-lang', 'html', 'document-language', { languageTag: 'EN-us' })
+
+    expect(result).toMatchObject({
+      ok: true,
+      repair: {
+        classification: 'CONTEXTUAL',
+        semanticJudgmentRequired: true,
+        humanValues: { languageTag: 'en-US' },
+        validationTarget: { ruleId: 'html-has-lang', tagName: 'html' },
+      },
+    })
+    if (!result.ok) return
+    expect(result.repair.proposedHtml).toBe(
+      '<!doctype html>\r\n<html dir="ltr" lang="en-US">\r\n<head><title>Café</title></head>\r\n<body>Crème</body>\r\n</html>\r\n',
+    )
+    expect(result.repair.patches).toEqual([{
+      start: source.indexOf('>\r\n<head>'),
+      end: source.indexOf('>\r\n<head>'),
+      expectedText: '',
+      replacement: ' lang="en-US"',
+    }])
+  })
+
+  it.each([
+    ['missing tag', '<html><body></body></html>', {}, 'HUMAN_VALUE_REQUIRED'],
+    ['edge whitespace', '<html><body></body></html>', { languageTag: ' en ' }, 'INVALID_HUMAN_VALUE'],
+    ['underscore syntax', '<html><body></body></html>', { languageTag: 'en_US' }, 'INVALID_HUMAN_VALUE'],
+    ['invalid subtag', '<html><body></body></html>', { languageTag: 'en-123456789' }, 'INVALID_HUMAN_VALUE'],
+    ['existing lang', '<html lang=""><body></body></html>', { languageTag: 'en' }, 'EXISTING_DOCUMENT_LANGUAGE'],
+    ['existing xml:lang', '<html xml:lang="en"><body></body></html>', { languageTag: 'en' }, 'EXISTING_DOCUMENT_LANGUAGE'],
+    ['template syntax', '<html data-locale="${locale}"><body></body></html>', { languageTag: 'en' }, 'NONLITERAL_ATTRIBUTE'],
+  ])('refuses %s', (_name, source, values, code) => {
+    expect(repair(source as string, 'html-has-lang', 'html', 'document-language', values)).toMatchObject({
+      ok: false,
+      refusal: { code },
+    })
+  })
+
+  it('refuses a mapped non-document target and a mismatched axe rule', () => {
+    expect(repair('<div></div>', 'html-has-lang', 'div', 'document-language', { languageTag: 'en' })).toMatchObject({
+      ok: false,
+      refusal: { code: 'UNSUPPORTED_TARGET' },
+    })
+    expect(repair('<html><body></body></html>', 'label', 'html', 'document-language', { languageTag: 'en' })).toMatchObject({
+      ok: false,
+      refusal: { code: 'UNSUPPORTED_RULE' },
+    })
+  })
+})
+
 describe('common refusal boundary', () => {
   it('refuses stale and unmapped axe targets before dispatch', () => {
     const source = '<input id="email">'

@@ -42,6 +42,13 @@ async function scanAndLabelId(page: Page) {
   return String((listed.data!.issues as Array<{ issueId: string; ruleId: string }>).find(({ ruleId }) => ruleId === 'label')!.issueId)
 }
 
+async function waitForProposalReady(page: Page) {
+  await expect(page.getByTestId('proposed-preview-stage')).toContainText('READY')
+  const workspace = await tool(page, 'get_workspace', {})
+  expect(workspace).toMatchObject({ ok: true, data: { proposalPreviewStatus: 'READY' } })
+  return workspace
+}
+
 test.beforeEach(async ({ page }) => installWebMcp(page))
 
 test('A — registers exactly ten static tools with exact annotations and survives reload', async ({ page }) => {
@@ -78,10 +85,11 @@ test('C — preview is non-mutating and apply cannot bypass visible exact approv
   const editor = page.getByLabel('Editable HTML source')
   const before = await editor.inputValue()
   const preview = await tool(page, 'preview_remediation', { issueId, family: 'add_form_label', values: { labelText: 'Email address' } })
-  expect(preview).toMatchObject({ ok: true, data: { approvalRequired: true, semanticJudgmentRequired: true } })
+  expect(preview).toMatchObject({ ok: true, data: { approvalRequired: true, semanticJudgmentRequired: true, proposalPreviewStatus: 'RENDERING' } })
   expect(await editor.inputValue()).toBe(before)
   await expect(page.getByTestId('apply-proposal')).toBeDisabled()
   const proposalId = String(preview.data!.proposalId)
+  await waitForProposalReady(page)
   expect(await tool(page, 'apply_remediation', { proposalId })).toMatchObject({ ok: false, error: { code: 'APPROVAL_REQUIRED' } })
   expect(await editor.inputValue()).toBe(before)
   await page.getByTestId('approve-proposal').click()
@@ -97,18 +105,102 @@ test('mechanical proposal is visible, agent-applicable, rescannable, and undoabl
   const editor = page.getByLabel('Editable HTML source')
   const before = await editor.inputValue()
   const preview = await tool(page, 'preview_remediation', { issueId, family: 'remove_positive_tabindex' })
-  expect(preview).toMatchObject({ ok: true, data: { approvalRequired: false, agentMayApply: true, semanticJudgmentRequired: false } })
-  expect(preview.allowedNextActions).toContain('apply_remediation')
+  expect(preview).toMatchObject({ ok: true, data: { approvalRequired: false, agentMayApply: true, semanticJudgmentRequired: false, proposalPreviewStatus: 'RENDERING' } })
+  expect(preview.allowedNextActions).not.toContain('apply_remediation')
   expect(await editor.inputValue()).toBe(before)
   await expect(page.getByTestId('approve-proposal')).toHaveCount(0)
 
   const proposalId = String(preview.data!.proposalId)
+  expect((await waitForProposalReady(page)).allowedNextActions).toContain('apply_remediation')
   expect(await tool(page, 'apply_remediation', { proposalId })).toMatchObject({ ok: true, data: { scanStatus: 'STALE' } })
   await expect(editor).toHaveValue(before.replace(' tabindex="2"', ''))
   await tool(page, 'scan_accessibility', { reason: 'after_change' })
   await expect(page.locator('.issue-row strong').filter({ hasText: /^tabindex$/ })).toHaveCount(0)
   expect(await tool(page, 'undo_remediation', {})).toMatchObject({ ok: true })
   await expect(editor).toHaveValue(before)
+})
+
+test('concurrent Apply and Undo calls commit at most one exact source transition', async ({ page }) => {
+  await page.goto('/')
+  await tool(page, 'scan_accessibility', { reason: 'initial' })
+  const listed = await tool(page, 'list_issues', { impact: 'serious', classification: 'MECHANICAL', status: 'open', limit: 10 })
+  const issueId = String((listed.data!.issues as Array<{ issueId: string }>)[0].issueId)
+  const preview = await tool(page, 'preview_remediation', { issueId, family: 'remove_positive_tabindex' })
+  expect(preview).toMatchObject({ ok: true, data: { proposalPreviewStatus: 'RENDERING' } })
+  await waitForProposalReady(page)
+  const proposalId = String(preview.data!.proposalId)
+
+  const applies = await page.evaluate(async (id) => {
+    const tools = (window as typeof window & { __curbcutWebMcpTools: Map<string, WebMCP.ModelContextTool> }).__curbcutWebMcpTools
+    const execute = tools.get('apply_remediation')!.execute
+    const first = execute({ proposalId: id }, { signal: new AbortController().signal })
+    const second = execute({ proposalId: id }, { signal: new AbortController().signal })
+    return await Promise.all([first, second].map(async (result) => JSON.parse(String(await result)) as ToolResult))
+  }, proposalId)
+  expect(applies.filter(({ ok }) => ok)).toHaveLength(1)
+  expect(applies.find(({ ok }) => !ok)).toMatchObject({ error: { code: 'CHANGE_IN_PROGRESS' } })
+  expect(await tool(page, 'get_change_summary', {})).toMatchObject({ ok: true, data: { appliedCount: 1 } })
+
+  const undos = await page.evaluate(async () => {
+    const tools = (window as typeof window & { __curbcutWebMcpTools: Map<string, WebMCP.ModelContextTool> }).__curbcutWebMcpTools
+    const execute = tools.get('undo_remediation')!.execute
+    const first = execute({}, { signal: new AbortController().signal })
+    const second = execute({}, { signal: new AbortController().signal })
+    return await Promise.all([first, second].map(async (result) => JSON.parse(String(await result)) as ToolResult))
+  })
+  expect(undos.filter(({ ok }) => ok)).toHaveLength(1)
+  expect(undos.find(({ ok }) => !ok)).toMatchObject({ error: { code: 'CHANGE_IN_PROGRESS' } })
+  expect(await tool(page, 'get_change_summary', {})).toMatchObject({ ok: true, data: { appliedCount: 1, undoneCount: 1 } })
+})
+
+test('a manual source edit invalidates an in-flight Apply without overwriting newer bytes', async ({ page }) => {
+  await page.goto('/')
+  await tool(page, 'scan_accessibility', { reason: 'initial' })
+  const listed = await tool(page, 'list_issues', { impact: 'serious', classification: 'MECHANICAL', status: 'open', limit: 10 })
+  const issueId = String((listed.data!.issues as Array<{ issueId: string }>)[0].issueId)
+  const preview = await tool(page, 'preview_remediation', { issueId, family: 'remove_positive_tabindex' })
+  const proposalId = String(preview.data!.proposalId)
+  await waitForProposalReady(page)
+  const editor = page.getByLabel('Editable HTML source')
+  const manualSource = `${await editor.inputValue()}\n<!-- newer manual edit -->`
+
+  const result = await page.evaluate(async ({ id, nextSource }) => {
+    const tools = (window as typeof window & { __curbcutWebMcpTools: Map<string, WebMCP.ModelContextTool> }).__curbcutWebMcpTools
+    const pending = tools.get('apply_remediation')!.execute({ proposalId: id }, { signal: new AbortController().signal })
+    const textarea = document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Editable HTML source"]')!
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(textarea, nextSource)
+    textarea.dispatchEvent(new Event('input', { bubbles: true }))
+    return JSON.parse(String(await pending)) as ToolResult
+  }, { id: proposalId, nextSource: manualSource })
+
+  expect(result).toMatchObject({ ok: false, error: { code: 'STALE_PROPOSAL' } })
+  await expect(editor).toHaveValue(manualSource)
+  expect(await tool(page, 'get_change_summary', {})).toMatchObject({ ok: true, data: { appliedCount: 0 } })
+})
+
+test('a manual source edit invalidates an in-flight Undo without restoring stale bytes', async ({ page }) => {
+  await page.goto('/')
+  await tool(page, 'scan_accessibility', { reason: 'initial' })
+  const listed = await tool(page, 'list_issues', { impact: 'serious', classification: 'MECHANICAL', status: 'open', limit: 10 })
+  const issueId = String((listed.data!.issues as Array<{ issueId: string }>)[0].issueId)
+  const preview = await tool(page, 'preview_remediation', { issueId, family: 'remove_positive_tabindex' })
+  await waitForProposalReady(page)
+  await tool(page, 'apply_remediation', { proposalId: String(preview.data!.proposalId) })
+  const editor = page.getByLabel('Editable HTML source')
+  const manualSource = `${await editor.inputValue()}\n<!-- newer manual edit -->`
+
+  const result = await page.evaluate(async (nextSource) => {
+    const tools = (window as typeof window & { __curbcutWebMcpTools: Map<string, WebMCP.ModelContextTool> }).__curbcutWebMcpTools
+    const pending = tools.get('undo_remediation')!.execute({}, { signal: new AbortController().signal })
+    const textarea = document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Editable HTML source"]')!
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(textarea, nextSource)
+    textarea.dispatchEvent(new Event('input', { bubbles: true }))
+    return JSON.parse(String(await pending)) as ToolResult
+  }, manualSource)
+
+  expect(result).toMatchObject({ ok: false, error: { code: 'STALE_UNDO' } })
+  await expect(editor).toHaveValue(manualSource)
+  expect(await tool(page, 'get_change_summary', {})).toMatchObject({ ok: true, data: { appliedCount: 1, undoneCount: 0 } })
 })
 
 test('image semantic values remain candidate-only until a new visible approval', async ({ page }) => {
@@ -123,6 +215,7 @@ test('image semantic values remain candidate-only until a new visible approval',
   const first = await tool(page, 'preview_remediation', { issueId: imageId, family: 'set_image_alt', values: { altMode: 'meaningful', altText: 'Canvas organizer' } })
   expect(first).toMatchObject({ ok: true, data: { approvalState: 'PROPOSED', approvalRequired: true } })
   const firstId = String(first.data!.proposalId)
+  await waitForProposalReady(page)
   expect(await tool(page, 'apply_remediation', { proposalId: firstId })).toMatchObject({ ok: false, error: { code: 'APPROVAL_REQUIRED' } })
   await page.getByTestId('approve-proposal').click()
   await tool(page, 'reject_remediation', { proposalId: firstId, reason: 'needs_revision' })
@@ -168,6 +261,7 @@ test('E — apply/rescan/summary/undo/rescan completes the exact shared workflow
   const issueId = await scanAndLabelId(page)
   const preview = await tool(page, 'preview_remediation', { issueId, family: 'add_form_label', values: { labelText: 'Email address' } })
   const proposalId = String(preview.data!.proposalId)
+  await waitForProposalReady(page)
   await page.getByTestId('approve-proposal').click()
   const applied = await tool(page, 'apply_remediation', { proposalId })
   expect(applied.ok).toBe(true)
@@ -212,18 +306,21 @@ test('G — keyboard tabs, manual-review copy, timeline focus, and app chrome st
   const listed = await tool(page, 'list_issues', { impact: 'critical', classification: 'all', status: 'open', limit: 10 })
   const buttonIssue = (listed.data!.issues as Array<{ issueId: string; ruleId: string }>).find(({ ruleId }) => ruleId === 'button-name')!
   await tool(page, 'inspect_issue', { issueId: buttonIssue.issueId })
-  await expect(page.getByRole('heading', { name: 'Context needed' })).toBeVisible()
-  await expect(page.getByText('Curbcut mapped this issue to source, but the MVP has no bounded repair for it.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Contextual code fix' })).toBeVisible()
+  await expect(page.getByLabel('Button purpose')).toBeVisible()
   await page.getByRole('button', { name: /All issues/ }).click()
   await page.getByTestId('activity-timeline').locator('button').first().click()
   await expect(page.getByTestId('selected-issue')).toContainText('button-name')
 
   await page.addScriptTag({ path: resolve('node_modules/axe-core/axe.min.js') })
-  const highImpact = await page.evaluate(async () => {
-    const results = await (window as typeof window & { axe: { run: (root: Document, options: object) => Promise<{ violations: Array<{ id: string; impact: string }> }> } }).axe.run(document, { iframes: false })
-    return results.violations.filter(({ impact }) => impact === 'critical' || impact === 'serious')
+  const shellAxe = await page.evaluate(async () => {
+    const results = await (window as typeof window & { axe: { run: (root: Document, options: object) => Promise<{ violations: Array<{ id: string }>; incomplete: Array<{ id: string }> }> } }).axe.run(document, { iframes: false })
+    return {
+      violations: results.violations.map(({ id }) => id),
+      incomplete: results.incomplete.map(({ id }) => id).filter((id) => id !== 'frame-tested'),
+    }
   })
-  expect(highImpact).toEqual([])
+  expect(shellAxe).toEqual({ violations: [], incomplete: [] })
 })
 
 test('H — reload restores canonical local source and clean WebMCP registration', async ({ page }) => {

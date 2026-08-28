@@ -2,6 +2,8 @@
 
 Test date: August 26, 2026 (PT)
 
+> Historical scope: this report records the August 26 feasibility spikes. Its temporary deployment, two spike-only WebMCP tools, ID-based mapping, and one repair family were accurate for that test and are superseded by the current product requirements, implementation plan, and M7 report. Do not use those spike limitations as current release status.
+
 ## Result
 
 - **SPIKE A: PASS**

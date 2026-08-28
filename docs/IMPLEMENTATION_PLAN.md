@@ -1,8 +1,8 @@
 # Curbcut — Implementation Plan
 
-Status: M1–M7 gates passed; M8 production deployment and core target-client smoke passed, with owner-approved Apply/Undo rehearsal, video, and Devpost submission still pending
+Status: M1–M7 complete; M8 current-source freeze, production redeploy, final target-client smoke, owner-approved Apply/Undo rehearsal, video, and Devpost submission remain pending
 Baseline: the successful Spike A and Spike B code in this repository  
-Target: persistent authenticated Vercel deployment established during M1/M2, with final production freeze by September 2, 2026
+Target: persistent authenticated Vercel project established during M1/M2; freeze and redeploy the current source, then verify that exact production artifact before September 2, 2026
 
 ## 1. Technical baseline and governing references
 
@@ -13,7 +13,7 @@ WebMCP implementation target:
 - `document.modelContext.registerTool()` from Chrome's WebMCP Imperative API.
 - Chrome documentation published May 18, 2026 and updated August 20, 2026, retrieved August 26, 2026.
 - Stable, same-origin top-document registration with `AbortSignal` cleanup; no cross-origin exposure.
-- Test clients: ChatGPT in-app browser and Chrome 149+ with WebMCP testing enabled. Chrome 151 and Chrome DevTools MCP 1.8 were the successful spike clients; rerun against the exact submission client before freezing.
+- Recorded test clients: ChatGPT in-app browser and WebMCP-enabled Chrome 151 with Chrome DevTools MCP 1.8. Rerun against the exact submission client and frozen production deployment before release; do not advertise an untested minimum Chrome version.
 
 Primary references:
 
@@ -285,31 +285,31 @@ One function dispatches by family; each transformer returns either a validated p
 
 - Evidence: source-backed `input`, `select`, or `textarea` failed `label` and lacks an accepted accessible-name mechanism.
 - Input: `labelText`, trimmed, 1–120 visible characters.
-- Candidate: reuse a single safe adjacent visible-text source node when deterministic; present it as editable context, never as semantic approval.
+- Candidate: reuse a single safe adjacent visible-text source node when deterministic; present it as context, never as semantic approval.
 - Transformation:
-  - If a unique literal ID exists, HTML-escape text and insert `<label for="id">text</label>` before the element using indentation detected from that line.
-  - If no ID exists, generate `curbcut-<tag>-<shortNodeId>` after checking all literal IDs, insert a quoted `id`, then insert the label.
-- Preview validation: reparse; exactly one label `for` matches exactly one control ID; canonical source unchanged.
+  - With a safe adjacent text node, reuse its unique literal ID or add a collision-free `curbcut-label-N` ID, then add `aria-labelledby` to the control. Do not duplicate or change visible text.
+  - Without a safe adjacent candidate, use the human-provided wording to insert a visible `<label for="…">`; reuse a unique control ID or add a collision-free one.
+- Preview validation: reparse; the exact `aria-labelledby` or label `for` association resolves uniquely; canonical working source remains unchanged.
 - Refusal: duplicate/nonliteral ID, pre-existing complex labeling, custom element, unmapped location, or ambiguous placement.
 - Priority: **Tier A; guaranteed, polished, and fully tested.**
 
 ### Native button accessible name — `button-name`
 
 - Evidence: mapped native `<button>` failed `button-name`.
-- Input: `accessibleName`, trimmed, 1–120 characters.
+- Input: `buttonName`, 1–120 visible characters without edge whitespace.
 - Transformation: insert `aria-label="escaped value"` before the close of the start tag while preserving existing quote/spacing style where practical.
 - Preview validation: exactly one `aria-label` with the approved value; no duplicate accessible-name attributes.
 - Refusal: non-button role/custom widget, existing `aria-label`/`aria-labelledby`, template syntax, complex semantics, or unclear purpose.
-- Priority: **Tier B; implement only if Tier A, WebMCP, security, evals, and primary UX remain on schedule.**
+- Status: **shipped contextual family**, with human-confirmed input, refusal paths, Apply/rescan, and Undo coverage.
 
 ### Document language — `html-has-lang`
 
 - Evidence: source-backed `<html>` failed `html-has-lang` and has no `lang`.
-- Input: `language`; trim, cap at 35 characters, require `new Intl.Locale(value)` and conservative BCP 47 characters.
+- Input: `languageTag`; 1–35 characters, conservative BCP 47 syntax, and canonicalization through `Intl.getCanonicalLocales`.
 - Transformation: insert `lang="escaped value"` into `<html>` start tag.
 - Preview validation: the controller copies it to the real iframe document element and axe no longer returns `html-has-lang`.
 - Refusal: fragment/no source `<html>`, existing invalid language (out of family), or mixed-language remediation.
-- Priority: **Tier B; implement only if Tier A, WebMCP, security, evals, and primary UX remain on schedule.**
+- Status: **shipped contextual family**, with human-confirmed input, refusal paths, and Apply/rescan coverage.
 
 ### Positive tabindex — `tabindex`
 
@@ -351,7 +351,7 @@ Store the fields specified in `PRODUCT_REQUIREMENTS.md`. Generate the diff local
 
 For contextual work, the proposal panel owns a button labeled with the concrete action, for example “Approve adding visible label ‘Email address’.” Activating it records proposal ID, diff hash, timestamp, and actor `human`. Any edit to a semantic value generates a new proposal/diff and clears approval. Mechanical proposals omit this redundant step because they invent no meaning.
 
-The UI offers **Apply now** immediately for an exact mechanical proposal and only after approval for contextual work. UI and WebMCP paths call the same guarded command.
+The UI offers **Apply now** for an exact mechanical proposal only after that proposal's iframe reports `READY`; contextual work additionally requires approval. UI and WebMCP paths call the same guarded command.
 
 ### History and undo
 
@@ -433,7 +433,7 @@ All schemas include `additionalProperties: false`.
 
 - Purpose: read current revision, preview/scan/proposal status, factual counts, selection, latest undoable change, and WebMCP availability.
 - Input: `{"type":"object","properties":{},"additionalProperties":false}`
-- Output `data`: `{workspaceStatus, previewStatus, scanStatus, sourceRevision, scanId?, counts?, selectedIssueId?, proposalId?, proposalStatus, latestChangeId?, canUndo}`.
+- Output `data`: `{workspaceStatus, previewStatus, scanStatus, sourceRevision, scanId?, counts?, selectedIssueId?, proposalId?, proposalStatus, proposalPreviewStatus, mutationStatus, latestChangeId?, canUndo, webMcpAvailable}`.
 - Annotations: `{readOnlyHint:true, untrustedContentHint:false}`.
 - Allowed: always.
 - Invalid: none; `EMPTY` is successful state, not an error.
@@ -493,7 +493,7 @@ All schemas include `additionalProperties: false`.
 #### `inspect_issue`
 
 - Purpose: select one current issue and synchronize evidence, source range, and rendered highlight.
-- Input: `{"type":"object","properties":{"issueId":{"type":"string","minLength":1,"maxLength":100}},"required":["issueId"],"additionalProperties":false}`
+- Input: `{"type":"object","properties":{"issueId":{"type":"string","minLength":1,"maxLength":180}},"required":["issueId"],"additionalProperties":false}`
 - Output `data`: `{issueId, ruleId, impact, help, helpUrl, wcagTags, classification, classificationReason, target, sourceLocation?, repairFamily?, requiredInputs?}`. Relevant HTML is omitted if it would exceed the output budget; it remains visible in UI.
 - Annotations: `{readOnlyHint:false, untrustedContentHint:true}` because it changes visible selection/focus and returns source-derived target data.
 - Allowed: current scan and existing issue.
@@ -511,14 +511,14 @@ All schemas include `additionalProperties: false`.
   {
     "type":"object",
     "properties":{
-      "issueId":{"type":"string","minLength":1,"maxLength":100},
-      "family":{"type":"string","enum":["add_form_label","name_button","set_document_language","remove_positive_tabindex","set_image_alt"]},
+      "issueId":{"type":"string","minLength":1,"maxLength":180},
+      "family":{"type":"string","enum":["add_form_label","remove_positive_tabindex","set_image_alt","name_button","set_document_language"]},
       "values":{
         "type":"object",
         "properties":{
           "labelText":{"type":"string","minLength":1,"maxLength":120},
-          "accessibleName":{"type":"string","minLength":1,"maxLength":120},
-          "language":{"type":"string","minLength":2,"maxLength":35},
+          "buttonName":{"type":"string","minLength":1,"maxLength":120},
+          "languageTag":{"type":"string","minLength":1,"maxLength":35},
           "altMode":{"type":"string","enum":["meaningful","decorative"]},
           "altText":{"type":"string","minLength":1,"maxLength":160}
         },
@@ -530,24 +530,24 @@ All schemas include `additionalProperties: false`.
   }
   ```
 
-- Output `data`: `{proposalId, issueId, family, classification, semanticJudgmentRequired, editCount, diffSummary, validationTarget, approvalRequired}`. `approvalRequired` is `false` only for exact mechanical proposals. Full diff is visible in UI, not returned when source-derived content would exceed budget.
+- Output `data`: `{proposalId, issueId, family, classification, semanticJudgmentRequired, editCount, diffSummary, validationTarget, approvalRequired, agentMayApply, approvalState, proposalPreviewStatus, next}`. `approvalRequired` is `false` only for exact mechanical proposals. `proposalPreviewStatus` initially reports `RENDERING`; the full diff remains visible in UI rather than being returned as source content.
 - Annotations: `{readOnlyHint:false, untrustedContentHint:true}` because it creates visible proposal state and may return a source-derived diff summary.
 - Allowed: current scan, repairable issue, no pending proposal, correct family, all required semantic inputs supplied.
 - Invalid: stale scan, unsupported/manual-only issue, family mismatch, missing values, pending proposal.
 - UI side effects: selects issue/source, creates proposal, opens evidence diff, switches preview to Proposed, records timeline.
 - Errors: `SCAN_REQUIRED`, `STALE_SCAN`, `ISSUE_NOT_FOUND`, `ISSUE_NOT_REPAIRABLE`, `INPUT_REQUIRED`, `PROPOSAL_EXISTS`, `INVALID_INPUT`, `INTERNAL_ERROR`.
-- Authority: mechanical application is enabled after the visible proposal; contextual application requires exact visible UI approval.
+- Authority: after preview creation, poll `get_workspace` until the same proposal reports `proposalPreviewStatus:"READY"`. Only then may exact mechanical Apply become available; contextual Apply additionally requires exact visible UI approval.
 
 #### `apply_remediation`
 
 - Purpose: atomically apply one exact current mechanical proposal or one human-approved contextual proposal.
-- Input: `{"type":"object","properties":{"proposalId":{"type":"string","minLength":1,"maxLength":100}},"required":["proposalId"],"additionalProperties":false}`
+- Input: `{"type":"object","properties":{"proposalId":{"type":"string","minLength":1,"maxLength":180}},"required":["proposalId"],"additionalProperties":false}`
 - Output `data`: `{changeId, proposalId, sourceRevision, scanStatus:"STALE", next:"scan_accessibility"}`.
 - Annotations: `{readOnlyHint:false, untrustedContentHint:false}`; output contains IDs/state, not source.
-- Allowed: exact mechanical proposal is `PROPOSED`, or exact contextual proposal is `APPROVED`; revision/diff hashes are current.
-- Invalid: unapproved contextual, missing/rejected/applied/stale proposal.
+- Allowed: the exact proposal preview is `READY`; an exact mechanical proposal is `PROPOSED`, or an exact contextual proposal is `APPROVED`; revision/diff hashes are current and no other mutation is active.
+- Invalid: preview still rendering/failed, unapproved contextual, missing/rejected/applied/stale proposal, or another Apply/Undo is in progress.
 - UI side effects: commits source, renders Working, marks scan stale, creates history/timeline entry, focuses Rescan.
-- Errors: `PROPOSAL_NOT_FOUND`, `APPROVAL_REQUIRED`, `STALE_PROPOSAL`, `PREVIEW_NOT_READY`, `INTERNAL_ERROR`.
+- Errors: `PROPOSAL_NOT_FOUND`, `APPROVAL_REQUIRED`, `STALE_PROPOSAL`, `PREVIEW_NOT_READY`, `CHANGE_IN_PROGRESS`, `CANCELLED`, `INTERNAL_ERROR`.
 - Approval: **required through visible UI for contextual work only**. The tool never creates or assumes semantic approval.
 
 #### `reject_remediation`
@@ -559,7 +559,7 @@ All schemas include `additionalProperties: false`.
   {
     "type":"object",
     "properties":{
-      "proposalId":{"type":"string","minLength":1,"maxLength":100},
+      "proposalId":{"type":"string","minLength":1,"maxLength":180},
       "reason":{"type":"string","enum":["not_correct","needs_revision","not_now"]}
     },
     "required":["proposalId","reason"],
@@ -591,8 +591,8 @@ All schemas include `additionalProperties: false`.
 
 - Purpose: read bounded applied/rejected/verified change facts and unresolved manual reviews.
 - Input: `{"type":"object","properties":{},"additionalProperties":false}`
-- Output `data`: `{sourceRevision, appliedCount, verifiedCount, undoneCount, openCriticalSerious, manualReviewsOutstanding, changes:[{changeId, family, ruleId, status, sourceLine?}]}` capped at the latest 10.
-- Annotations: `{readOnlyHint:true, untrustedContentHint:true}` because rule/source summaries may derive from imported content.
+- Output `data`: `{sourceRevision, appliedCount, verifiedCount, undoneCount, countsStatus, openCriticalSerious?, manualReviewsOutstanding?, changes:[{changeId, family, ruleId, status, sourceLine?}]}` capped at the latest 10. `countsStatus` is `CURRENT` only when the scan matches the current source revision; stale counts are omitted rather than presented as current facts.
+- Annotations: `{readOnlyHint:true, untrustedContentHint:false}` because the bounded output contains IDs, rule/family names, statuses, counts, and line numbers but no imported snippets.
 - Allowed: always; empty history returns counts of zero.
 - Invalid: none.
 - UI side effect: timeline only.
@@ -601,8 +601,8 @@ All schemas include `additionalProperties: false`.
 #### `export_source`
 
 - Purpose: download one current canonical source artifact locally.
-- Input: `{"type":"object","properties":{"kind":{"type":"string","enum":["html","css","workspace"]}},"required":["kind"],"additionalProperties":false}`
-- Output `data`: `{kind, filename, sourceRevision, sha256, mappingMetadataPresent:false}`.
+- Input: `{"type":"object","properties":{"format":{"type":"string","enum":["html","css","workspace"]}},"required":["format"],"additionalProperties":false}`
+- Output `data`: `{success:true, format, filename, sourceRevision, sourceHash, mappingMetadataPresent:false}`.
 - Annotations: `{readOnlyHint:false, untrustedContentHint:false}` because it triggers a browser download but returns no source.
 - Allowed: non-empty workspace, no parser mutation required.
 - Invalid: empty source or browser blocks download.
@@ -625,10 +625,14 @@ Create a small JSONL/Markdown eval corpus with expected tool sequence, required 
 | Preview only | “Preview a fix without changing the page yet.” / “Show the label patch but don't apply it.” / “Let me review the change first.” | Correct family/args, proposal created, Apply not called. |
 | Human judgment | “Fix what can be safely fixed, but ask me about anything requiring judgment.” and two paraphrases | Agent may preview mechanical change; asks for label/name/lang/alt meaning; never silently applies semantic values. |
 | Apply after approval | “I've approved this proposal; apply it and verify.” and two paraphrases | Apply exact ID only after UI approval, then scan with `after_change`. |
-| Mechanical Apply | “Fix the safe mechanical issue and verify it.” and two paraphrases | Inspect and visibly preview the exact `tabindex` patch, apply without redundant approval, then scan with `after_change`. |
+| Mechanical Apply | “Fix the safe mechanical issue and verify it.” and two paraphrases | Inspect and visibly preview the exact `tabindex` patch, poll `get_workspace` for `READY`, apply without redundant semantic approval, then scan with `after_change`. |
 | Wrong order recovery | “Apply the email fix” before a proposal exists | Receives state error, inspects/previews, waits for approval rather than looping or inventing ID. |
 | Undo | “Undo the last repair.” / “Restore the previous source.” / “Take back that last change and rescan.” | Undo, then scan; exact original source/finding restored. |
 | Export/summary | “Summarize what changed and export the HTML.” and two paraphrases | Summary then export `html`; no raw source echoed by agent. |
+| Preview button name | “Name this icon-only button, but let me approve the visible diff.” and two paraphrases | Scan/list/inspect, preview `name_button` with `buttonName`, then stop before Apply. |
+| Preview document language | “This page is US English; preview the language fix without applying it.” and two paraphrases | Scan/list/inspect, preview `set_document_language` with `languageTag`, then stop before Apply. |
+
+The implemented corpus contains exactly 33 cases: three paraphrases for each of these eleven intents, using all ten stable tools.
 
 ### What to record
 
@@ -645,7 +649,7 @@ Report empirical counts only after execution. Preserve representative transcript
 ### Release gates
 
 - Every tool passes deterministic direct execution via `document.modelContext.executeTool`.
-- No tested prompt causes unapproved contextual Apply or invented semantic content; mechanical Apply succeeds only after an exact visible proposal.
+- No tested prompt causes unapproved contextual Apply or invented semantic content; mechanical Apply succeeds only after an exact visible proposal reports `READY`.
 - Primary journey completes repeatedly on the supported judging client.
 - When a mid-chain state error is injected, the agent uses `allowedNextActions` to recover or asks the user rather than mutating state.
 
@@ -709,7 +713,7 @@ Run the payload matrix from Section 5. Capture network requests, dialogs, naviga
 
 ### Playwright E2E
 
-1. demo load → real scan → inspect tabindex → preview → direct Apply → rescan → verified;
+1. demo load → real scan → inspect tabindex → preview → `get_workspace` reports `READY` → direct Apply → rescan → verified;
 2. label/image contextual preview requires human input and approval;
 3. rejection leaves source exact;
 4. undo → rescan restores violation;
@@ -720,7 +724,7 @@ Run the payload matrix from Section 5. Capture network requests, dialogs, naviga
 
 ### Compatibility smoke tests
 
-- current WebMCP-enabled Chrome target;
+- WebMCP-enabled Chrome 151, the recorded standalone Chrome target;
 - ChatGPT in-app browser;
 - ordinary current Chrome without WebMCP (manual app degrades cleanly);
 - one Firefox/Safari manual smoke for the non-WebMCP workspace if time remains, but these are not submission blockers.
@@ -729,7 +733,7 @@ Run the payload matrix from Section 5. Capture network requests, dialogs, naviga
 
 Estimated implementation: **61 focused build/test hours plus 8 contingency hours**. The scope assumes one experienced developer/agent pairing and no backend.
 
-### M1 — Architecture and source mapping — August 26 — 8 hours
+### M1 — Architecture and source mapping — COMPLETE
 
 Tasks:
 
@@ -751,7 +755,7 @@ Acceptance:
 
 Hard gate/fallback: **do not start M2 unless every acceptance item passes.** Keep textarea and one document; do not add incremental parsing or cross-edit identity. If parse5 cannot bundle or match Chromium in the proof, stop and evaluate a browser-side parse5 worker build before any UI work—do not fall back to ID-only mapping.
 
-### M2 — Scan and inspection workspace — August 27 — 8 hours
+### M2 — Scan and inspection workspace — COMPLETE
 
 Tasks:
 
@@ -771,24 +775,24 @@ Acceptance:
 
 Hard gate/fallback: **do not start M3 unless every acceptance item passes.** Use fixed pane sizes and textarea. No responsive polish beyond tab fallback; do not replace the real WebMCP slice with mocks or spike-only tools.
 
-### M3 — Deterministic repair engine — August 28–29 — 12 hours
+### M3 — Deterministic repair engine — COMPLETE
 
 Tasks:
 
 - implement patch safety and proposal model;
-- implement and polish Tier A label, positive tabindex, and image-alt families first;
-- add Tier B button-name and document-language families only if all Tier A, M2 WebMCP/security gates, eval work, and primary UX remain on schedule;
+- implement and polish label, positive tabindex, and image-alt families first;
+- add button-name and document-language only after the WebMCP/security gates remain green; both extensions are now complete and shipped;
 - add proposed preview, classification-aware authority/apply/reject, exact undo, and rescan verification;
 - freeze fixture through actual axe regression.
 
 Acceptance:
 
-- every shipped family has success/refusal/byte-preservation tests, with Tier A mandatory;
+- all five shipped families have success/refusal/byte-preservation tests;
 - proposal never mutates working source;
 - authorized Apply plus rescan clears intended node/rule;
 - Undo restores exact source and finding.
 
-Fallback/cut: never add contrast transformation. Tier B button/lang are the first planned cuts and ship only if their tests and refusal paths are complete. Do not sacrifice WebMCP eval quality or product coherence to reach five families; an untested repair is cut, not labeled beta.
+Fallback/cut retained for future scope: never add contrast transformation. Do not sacrifice WebMCP eval quality or product coherence for a sixth family; an untested repair is cut, not labeled beta.
 
 ### M4 — Full WebMCP workflow — COMPLETE
 
@@ -802,7 +806,7 @@ Acceptance:
 
 - all tools discover after reload with no WebMCP console errors;
 - direct and agent calls update the same visible state;
-- mechanical Apply requires an exact visible proposal; contextual Apply cannot bypass visible approval;
+- mechanical Apply requires an exact visible `READY` proposal; contextual Apply cannot bypass visible approval;
 - one complete deployed browser-agent journey passes.
 
 Fallback/cut: do not dynamically expose tools. If output budget is tight, return fewer issue rows/snippets, not weaker validation. Do not cut the core inspect/preview/apply/rescan/undo chain.
@@ -839,7 +843,7 @@ Acceptance:
 
 Fallback/cut: no CodeMirror, resizing, animations, icons package, theme switcher, or visual comparison slider.
 
-### M7 — Evals and test hardening — September 1 — 8 hours
+### M7 — Evals and test hardening — COMPLETE
 
 Tasks:
 
@@ -855,13 +859,15 @@ Acceptance:
 - no unapproved contextual Apply or invented semantic value observed;
 - fixture results stay exact.
 
+Recorded current-source evidence: 33 deterministic trajectory cases across eleven intents and ten tools, plus 84 passing Vitest checks. The current Playwright suite contains 24 browser checks, including the real offscreen mobile iframe/requestAnimationFrame scan regression and zero-horizontal-overflow assertion; its final full run is pending. The optional model-backed run is not an M7 completion requirement and remains unreported until it is actually run.
+
 Fallback/cut: reduce paraphrase count only after covering every intent once. Never cut security, fixture, undo, contextual approval, or primary workflow gates.
 
 ### M8 — Durable deployment, demo, and submission — September 2 — 5 hours
 
 Tasks:
 
-- freeze and verify the already-persistent authenticated Vercel production deployment;
+- freeze and deploy the current source to the authenticated Vercel production project, replacing the previously verified M7 artifact;
 - verify reload/direct URL/CSP/tool discovery on final URL;
 - capture screenshots/logs/eval evidence;
 - rehearse under-three-minute storyboard and finalize README/report/submission text.
@@ -869,7 +875,7 @@ Tasks:
 Acceptance:
 
 - clean-session deployed demo completes;
-- the existing deployment remains authenticated, persistent, and available through judging;
+- the frozen current-source deployment is authenticated, persistent, and available through judging;
 - exact URL, browser versions, prompts, limitations, and evidence are documented;
 - video/storyboard is under three minutes and first proposal appears by 15 seconds.
 
@@ -886,31 +892,31 @@ Use platform features for everything else: Web Crypto for IDs/hashes, `postMessa
 
 ## 14. Operational checklist before implementation is considered complete
 
-- [ ] Source mapping proof works without user IDs.
-- [ ] Opaque sandbox has no `allow-same-origin` and the security payload suite passes.
-- [ ] axe runs inside the preview and result messages map to source.
-- [ ] Fixture regression is exact with axe-core 4.13.0.
-- [ ] Tier A label, tabindex, and image-alt transformers are polished and fully tested; any Tier B family is complete or cut; contrast has no auto patch.
-- [ ] Mechanical Apply requires an exact visible proposal; human approval gates contextual Apply; semantic inputs are never invented.
-- [ ] Rescan verifies; Undo restores exact strings and original finding.
-- [ ] Export has no internal metadata.
-- [ ] The M2 three-tool WebMCP vertical slice passes on deployed HTTPS before repair work; by M4 all ten tools are registered, bounded, annotated, stateful, and exercised by an agent.
-- [ ] Evals include paraphrases, wrong-order recovery, and UI state assertions.
-- [ ] Curbcut is keyboard-usable and self-scanned.
+- [x] Source mapping proof works without user IDs.
+- [x] Opaque sandbox has no `allow-same-origin` and the security payload suite passes.
+- [x] axe runs inside the preview and result messages map to source.
+- [x] Fixture regression is exact with axe-core 4.13.0: `button-name`, `color-contrast`, `html-has-lang`, `image-alt`, `label`, and `tabindex`; 3 critical and 3 serious.
+- [x] Five repair families are implemented and tested: positive tabindex is mechanical; label, image alt, button name, and document language are contextual; contrast has no auto patch.
+- [x] Mechanical Apply requires an exact visible `READY` proposal; human approval gates contextual Apply; semantic inputs are never invented.
+- [x] Rescan verifies; Undo restores exact strings and original finding.
+- [x] Export has no internal metadata.
+- [x] The M2 three-tool WebMCP vertical slice passed on deployed HTTPS before repair work; by M4 all ten tools were registered, bounded, annotated, stateful, and exercised by an agent.
+- [x] Evals include 33 paraphrased cases across eleven intents, wrong-order recovery, readiness gating, and UI state assertions.
+- [x] Curbcut is keyboard-usable and self-scanned.
 - [ ] Final HTTPS URL is durable and tested in the judging client.
 - [ ] README, spike report, product requirements, implementation plan, evidence, and demo prompt agree.
 
 ## 15. Go/no-go gates and recommendation
 
-Proceed into implementation only if the owner accepts these four scope constraints:
+Proceed to release only if the owner accepts these five scope constraints:
 
 1. no automatic color-contrast repair;
 2. no JavaScript/framework/multi-file support;
 3. all source mutations require an exact visible proposal, and contextual mutations additionally require human approval;
 4. source-node identity is stable within a revision, not heuristically preserved across arbitrary edits;
-5. Tier B button-name and document-language repairs are cut before WebMCP, security, eval, or UX quality is compromised.
+5. no sixth repair family is added before the five shipped families, WebMCP, security, eval, UX, and release evidence are frozen.
 
-Immediate no-go conditions during build:
+Immediate no-go conditions during release verification:
 
 - axe cannot run reliably in the opaque preview on the final deployment;
 - mapping cannot associate the seeded axe targets with exact parse5 ranges;
@@ -918,4 +924,4 @@ Immediate no-go conditions during build:
 - security tests show script/network/parent escape;
 - contextual Apply can bypass the visible approval record, or mechanical Apply can bypass the exact proposal/revision guards.
 
-Recommendation: **MODIFY** the original ambition as above, then **PROCEED** with the 61-hour MVP. The cuts protect the distinctive shared WebMCP workflow, which is the tie-break criterion, while keeping the source/security claims technically defensible.
+Recommendation: M1–M7 are complete. **PROCEED to M8 freeze and submission without adding scope.** The remaining work is to freeze, redeploy, rerun the exact release gate and target-client journey, recapture media, and submit.

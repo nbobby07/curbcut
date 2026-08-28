@@ -8,7 +8,12 @@ import {
   type SourcePatch,
 } from './sourceMap'
 
-export type RepairFamily = 'missing-form-label' | 'positive-tabindex' | 'image-alternative'
+export type RepairFamily =
+  | 'missing-form-label'
+  | 'positive-tabindex'
+  | 'image-alternative'
+  | 'button-accessible-name'
+  | 'document-language'
 
 export type RepairPatch = {
   start: number
@@ -21,10 +26,12 @@ export type HumanValues = {
   labelText?: string
   altMode?: 'meaningful' | 'decorative'
   altText?: string
+  buttonName?: string
+  languageTag?: string
 }
 
 export type ValidationTarget = {
-  ruleId: 'label' | 'tabindex' | 'image-alt'
+  ruleId: 'label' | 'tabindex' | 'image-alt' | 'button-name' | 'html-has-lang'
   tagName: string
   id?: string
   ordinal?: number
@@ -60,6 +67,8 @@ export type RepairRefusalCode =
   | 'AMBIGUOUS_IMAGE_PURPOSE'
   | 'UNSUPPORTED_IMAGE'
   | 'CONFLICTING_ARIA'
+  | 'EXISTING_ACCESSIBLE_NAME'
+  | 'EXISTING_DOCUMENT_LANGUAGE'
   | 'STRUCTURAL_VALIDATION_FAILED'
 
 export type RepairDecision =
@@ -96,6 +105,20 @@ function visibleText(value: unknown, maximum: number): string | null {
   if (Array.from(value).length < 1 || Array.from(value).length > maximum) return null
   if (/[\u0000-\u001f\u007f]/u.test(value)) return null
   return value
+}
+
+function hasTemplateSyntax(source: string, node: SourceNode) {
+  return /\{\{|\}\}|<%|%>|\$\{/u.test(source.slice(node.startTagRange.startOffset, node.startTagRange.endOffset))
+}
+
+function canonicalLanguageTag(value: unknown): string | null {
+  if (typeof value !== 'string' || value !== value.trim() || value.length < 1 || value.length > 35) return null
+  if (!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/u.test(value)) return null
+  try {
+    return Intl.getCanonicalLocales(value)[0] ?? null
+  } catch {
+    return null
+  }
 }
 
 function compactDiff(source: string, proposed: string, patches: readonly RepairPatch[]) {
@@ -395,6 +418,99 @@ function imageRepair(
   }, (proposed) => ordinal !== undefined && proposed.nodes[ordinal]?.tagName === 'img' && proposed.nodes[ordinal].attributes.alt === altText)
 }
 
+function buttonNameRepair(
+  source: string,
+  mapping: SourceMapping,
+  issue: AccessibilityIssue,
+  target: SourceNode,
+  values: HumanValues,
+): RepairDecision {
+  if (issue.ruleId !== 'button-name') return refuse('UNSUPPORTED_RULE', 'This repair only handles axe button-name findings.')
+  if (target.tagName !== 'button') return refuse('UNSUPPORTED_TARGET', 'Only native button elements are supported.')
+  if (hasTemplateSyntax(source, target)) {
+    return refuse('NONLITERAL_ATTRIBUTE', 'Template syntax in the button start tag cannot be patched safely.')
+  }
+  if (target.attributes['aria-label'] !== undefined || target.attributes['aria-labelledby'] !== undefined ||
+    target.attributes.title !== undefined) {
+    return refuse('EXISTING_ACCESSIBLE_NAME', 'The button already has naming markup that needs contextual review.')
+  }
+  if (values.buttonName === undefined || values.buttonName === '') {
+    return refuse('HUMAN_VALUE_REQUIRED', 'A human must provide the button purpose as its accessible name.')
+  }
+  const buttonName = visibleText(values.buttonName, 120)
+  if (!buttonName) {
+    return refuse('INVALID_HUMAN_VALUE', 'Button name must be 1–120 visible characters without control characters or edge whitespace.')
+  }
+
+  const offset = attributeInsertionOffset(source, target.startTagRange)
+  const patch: RepairPatch = {
+    start: offset,
+    end: offset,
+    expectedText: '',
+    replacement: ` aria-label="${escapeAttribute(buttonName)}"`,
+  }
+  const ordinal = ordinalOf(target.nodeId)
+  return finalize(source, mapping, {
+    family: 'button-accessible-name',
+    classification: 'CONTEXTUAL',
+    patches: [patch],
+    rationale: 'Adds the human-confirmed purpose as an accessible name on the exact mapped native button.',
+    expectedValidation: 'A real axe rescan must no longer report button-name for this button.',
+    semanticJudgmentRequired: true,
+    humanValues: { buttonName },
+    validationTarget: { ruleId: 'button-name', tagName: 'button', ordinal },
+    restorationTarget: { ruleId: 'button-name', tagName: 'button', ordinal },
+  }, (proposed) => ordinal !== undefined && proposed.nodes[ordinal]?.tagName === 'button' &&
+    proposed.nodes[ordinal].attributes['aria-label'] === buttonName)
+}
+
+function documentLanguageRepair(
+  source: string,
+  mapping: SourceMapping,
+  issue: AccessibilityIssue,
+  target: SourceNode,
+  values: HumanValues,
+): RepairDecision {
+  if (issue.ruleId !== 'html-has-lang') return refuse('UNSUPPORTED_RULE', 'This repair only handles axe html-has-lang findings.')
+  if (target.tagName !== 'html') {
+    return refuse('UNSUPPORTED_TARGET', 'An explicit source-backed html element is required.')
+  }
+  if (hasTemplateSyntax(source, target)) {
+    return refuse('NONLITERAL_ATTRIBUTE', 'Template syntax in the html start tag cannot be patched safely.')
+  }
+  if (target.attributes.lang !== undefined || target.attributes['xml:lang'] !== undefined) {
+    return refuse('EXISTING_DOCUMENT_LANGUAGE', 'The document already has language markup that needs contextual review.')
+  }
+  if (values.languageTag === undefined || values.languageTag === '') {
+    return refuse('HUMAN_VALUE_REQUIRED', 'A human must identify the document language with a BCP 47 language tag.')
+  }
+  const languageTag = canonicalLanguageTag(values.languageTag)
+  if (!languageTag) {
+    return refuse('INVALID_HUMAN_VALUE', 'Document language must be a valid 1–35 character BCP 47 language tag.')
+  }
+
+  const offset = attributeInsertionOffset(source, target.startTagRange)
+  const patch: RepairPatch = {
+    start: offset,
+    end: offset,
+    expectedText: '',
+    replacement: ` lang="${languageTag}"`,
+  }
+  const ordinal = ordinalOf(target.nodeId)
+  return finalize(source, mapping, {
+    family: 'document-language',
+    classification: 'CONTEXTUAL',
+    patches: [patch],
+    rationale: 'Adds the human-confirmed BCP 47 language to the explicit source-backed html element.',
+    expectedValidation: 'A real axe rescan must no longer report html-has-lang for this document.',
+    semanticJudgmentRequired: true,
+    humanValues: { languageTag },
+    validationTarget: { ruleId: 'html-has-lang', tagName: 'html', ordinal },
+    restorationTarget: { ruleId: 'html-has-lang', tagName: 'html', ordinal },
+  }, (proposed) => ordinal !== undefined && proposed.nodes[ordinal]?.tagName === 'html' &&
+    proposed.nodes[ordinal].attributes.lang === languageTag)
+}
+
 export function createRepair(
   source: string,
   mapping: SourceMapping,
@@ -406,7 +522,9 @@ export function createRepair(
   if ('ok' in target) return target
   if (family === 'missing-form-label') return labelRepair(source, mapping, issue, target, values)
   if (family === 'positive-tabindex') return tabindexRepair(source, mapping, issue, target)
-  return imageRepair(source, mapping, issue, target, values)
+  if (family === 'image-alternative') return imageRepair(source, mapping, issue, target, values)
+  if (family === 'button-accessible-name') return buttonNameRepair(source, mapping, issue, target, values)
+  return documentLanguageRepair(source, mapping, issue, target, values)
 }
 
 export async function hashText(value: string): Promise<string> {

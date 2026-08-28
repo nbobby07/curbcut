@@ -53,6 +53,12 @@ describe('M4 WebMCP contract', () => {
       ['preview_remediation', { issueId: 'x', family: 'add_form_label', values: { labelText: '' } }],
       ['preview_remediation', { issueId: 'x', family: 'remove_positive_tabindex', values: { labelText: 'No' } }],
       ['preview_remediation', { issueId: 'x', family: 'set_image_alt', values: { altMode: 'meaningful' } }],
+      ['preview_remediation', { issueId: 'x', family: 'name_button', values: {} }],
+      ['preview_remediation', { issueId: 'x', family: 'name_button', values: { buttonName: ' Save' } }],
+      ['preview_remediation', { issueId: 'x', family: 'name_button', values: { buttonName: 'Save', languageTag: 'en' } }],
+      ['preview_remediation', { issueId: 'x', family: 'set_document_language', values: {} }],
+      ['preview_remediation', { issueId: 'x', family: 'set_document_language', values: { languageTag: 'en_US' } }],
+      ['preview_remediation', { issueId: 'x', family: 'toString', values: {} }],
       ['apply_remediation', {}],
       ['reject_remediation', { proposalId: 'x', reason: 'because' }],
       ['undo_remediation', { force: true }],
@@ -65,6 +71,11 @@ describe('M4 WebMCP contract', () => {
       expect(['INVALID_INPUT', 'INPUT_REQUIRED']).toContain((output.error as { code: string }).code)
       expect(JSON.stringify(output).length).toBeLessThanOrEqual(1_500)
     }
+    const preview = WEBMCP_TOOL_DEFINITIONS.find(({ name }) => name === 'preview_remediation')!
+    const inputSchema = preview.inputSchema as { properties: { family: { enum: string[] } } }
+    expect(inputSchema.properties.family).toMatchObject({
+      enum: ['add_form_label', 'remove_positive_tabindex', 'set_image_alt', 'name_button', 'set_document_language'],
+    })
   })
 
   it('returns common state/next-actions, handles cancellation, and never leaks canonical source', async () => {
@@ -84,6 +95,14 @@ describe('M4 WebMCP contract', () => {
     const activity = workspaceStore.getSnapshot().activity
     expect(activity).toHaveLength(100)
     expect(JSON.stringify(activity)).not.toContain(CHECKOUT_HTML.slice(0, 40))
+  })
+
+  it('marks scan-derived change counts stale and omits them after source changes', async () => {
+    workspaceStore.loadDemo()
+    const output = await parse(executeWorkspaceTool('get_change_summary', {}))
+    expect(output).toMatchObject({ ok: true, data: { countsStatus: 'STALE' } })
+    expect(output.data).not.toHaveProperty('openCriticalSerious')
+    expect(output.data).not.toHaveProperty('manualReviewsOutstanding')
   })
 
   it('builds exact canonical export artifacts with hashes and no mapping metadata', async () => {

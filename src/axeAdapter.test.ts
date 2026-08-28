@@ -25,6 +25,7 @@ describe('axe issue normalization', () => {
         tags: ['wcag2aa'],
         nodes: [{ impact: 'serious', target: ['p'], html: '<p>' }],
       }],
+      coverage: { truncated: false, totalRuleCount: 2, totalNodeCount: 3, returnedRuleCount: 2, returnedNodeCount: 3, maxRules: 40, maxNodes: 100 },
     }, mapping, 'scan-1')
 
     expect(issues).toHaveLength(3)
@@ -62,7 +63,8 @@ describe('axe issue normalization', () => {
       nodes: [{ impact: 'serious' as const, target: ['button'], html: '<button>', nodeId: button.nodeId }],
     })
 
-    expect(normalizeAxeResults({ violations: [makeRule('tabindex')], incomplete: [] }, mapping, 's')[0].classification).toBe('MECHANICAL')
-    expect(normalizeAxeResults({ violations: [makeRule('unknown-rule')], incomplete: [] }, mapping, 's')[0].classification).toBe('MANUAL_REVIEW')
+    const coverage = { truncated: false, totalRuleCount: 1, totalNodeCount: 1, returnedRuleCount: 1, returnedNodeCount: 1, maxRules: 40, maxNodes: 100 }
+    expect(normalizeAxeResults({ violations: [makeRule('tabindex')], incomplete: [], coverage }, mapping, 's')[0].classification).toBe('MECHANICAL')
+    expect(normalizeAxeResults({ violations: [makeRule('unknown-rule')], incomplete: [], coverage }, mapping, 's')[0].classification).toBe('MANUAL_REVIEW')
   })
 })

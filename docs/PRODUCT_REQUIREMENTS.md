@@ -1,6 +1,6 @@
 # Curbcut — Product Requirements
 
-Status: implementation-ready MVP plan  
+Status: M1–M7 implemented; current-source production freeze, final target-client verification, video, and submission remain pending
 Planning date: August 26, 2026  
 Hackathon deadline: September 3, 2026 at 1:00 PM PT
 
@@ -8,7 +8,7 @@ Hackathon deadline: September 3, 2026 at 1:00 PM PT
 
 Curbcut is a local-first, browser-native accessibility repair workbench for static HTML and CSS. A frontend developer and an external browser agent inspect and change the same rendered artifact through the same explicit workflow:
 
-`source → render → scan → inspect → preview → [approve if contextual] → apply → rescan → verify → undo/export`
+`source → render → scan → inspect → preview → wait for exact preview READY → [approve if contextual] → apply → rescan → verify → undo/export`
 
 The differentiator is the shared interaction boundary. The human sees source, rendering, evidence, diffs, and verification. The browser agent receives narrow WebMCP tools for those same workspace actions. The agent performs mechanical work; the human retains semantic and visual judgment.
 
@@ -25,7 +25,7 @@ The product extends, rather than replaces, the successful spike architecture:
 - Replace the spike's same-origin iframe with an opaque-origin sandbox and a validated `postMessage` bridge.
 - Register a stable tool set once. The spike observed a transient tool-list update during sequential registration, so the MVP will not dynamically add and remove tools as state changes.
 - Connect WebMCP to the real product architecture early: by the end of M2, `scan_accessibility`, `list_issues`, and `inspect_issue` must operate the real sandbox, axe results, React store, source map, source selection, and preview highlight. The complete ten-tool workflow remains M4 scope.
-- Maintain a persistent authenticated Vercel deployment from M1/M2 onward. Every browser-critical milestone is smoke tested on deployed HTTPS; M8 freezes and verifies that deployment rather than creating it for the first time.
+- Maintain a persistent authenticated Vercel deployment from M1/M2 onward. Earlier milestones were smoke tested on deployed HTTPS; M8 must freeze, redeploy, and verify the current source rather than treating the previously verified M7 build as final-release evidence.
 
 ## 2. Audience and job to be done
 
@@ -123,7 +123,7 @@ On narrower viewports, Source, Preview, and Evidence become three keyboard-acces
 - Creating a proposal does not mutate working source.
 - Right panel shows required semantic input, rationale, surgical edit, before/after diff, and expected validation.
 - Center switches to the Proposed rendering, clearly labeled “Not applied.” Working and Proposed remain directly switchable.
-- Every proposal is non-mutating and visibly reviewable. Mechanical Apply is enabled immediately; contextual Apply is enabled only after exact visible approval.
+- Every proposal is non-mutating and visibly reviewable. Apply remains unavailable while the exact proposed iframe is `RENDERING`. Once it is `READY`, mechanical Apply is enabled; contextual Apply additionally requires exact visible approval.
 
 ### Applied
 
@@ -220,7 +220,7 @@ Every normalized issue contains:
 - **CONTEXTUAL**: the patch shape is deterministic, but its value encodes meaning that a person must provide or confirm. Examples: label text, accessible button name, document language, and image alternative.
 - **MANUAL_REVIEW**: axe reports an incomplete/manual check, source mapping is insufficient, or a credible repair requires semantic, layout, cascade, interaction, or design-system analysis outside the MVP.
 
-Classification describes both the change and its authority boundary, not compliance certainty. A mechanical edit may apply after its exact proposal is visible; contextual work still requires a human semantic decision and approval.
+Classification describes both the change and its authority boundary, not compliance certainty. A mechanical edit may apply after its exact proposal is visible and its proposed iframe is `READY`; contextual work still requires a human semantic decision and approval.
 
 ## 8. Repair families
 
@@ -228,20 +228,20 @@ The repair engine creates ordered text edits against exact source ranges. It nev
 
 | Family | Axe evidence | Classification | Surgical transformation | Agent behavior and human authority | Rescan proof | Refuse when |
 |---|---|---|---|---|---|---|
-| Missing form label | `label`, failing form-control node | CONTEXTUAL | Insert a `<label for="…">…</label>` immediately before the input. Reuse an existing unique `id`; if absent, propose a collision-free ID plus label insertion as two edits. A safe adjacent visible-text candidate may prefill the proposal. | Agent may identify the family and offer the deterministic candidate. Human must confirm visible wording and approve; a candidate never becomes approval. | The affected control no longer appears under `label`; label/control association is also checked in the preview DOM. | Existing ambiguous labeling, duplicate IDs, non-source-backed node, templated attributes, custom control, or no safe/provided wording. |
+| Missing form label | `label`, failing form-control node | CONTEXTUAL | If one safe adjacent visible-text node exists, give it a collision-free ID when needed and add `aria-labelledby` to the control without duplicating visible text. Otherwise insert a `<label for="…">…</label>` from human-provided wording, adding a collision-free control ID when needed. | Agent may identify the family and offer the deterministic adjacent-text candidate. Human must confirm the meaning and approve; a candidate never becomes approval. | The affected control no longer appears under `label`; the exact label/control association is also checked in the preview DOM. | Existing ambiguous labeling, duplicate IDs, non-source-backed node, templated attributes, custom control, or no safe/provided wording. |
 | Missing accessible button name | `button-name` on a native `<button>` | CONTEXTUAL | Add a quoted `aria-label` attribute to the source start tag. | Agent may request a concise name based on visible context but cannot silently choose it. Human provides/confirms the name. | The node no longer appears under `button-name`; computed accessible name is non-empty. | Non-native/custom widget, existing `aria-labelledby`, complex descendant semantics, duplicate attribute, or purpose remains ambiguous. |
-| Missing document language | `html-has-lang` | CONTEXTUAL | Add `lang="…"` to the source-backed `<html>` start tag. Value must pass `Intl.Locale` construction and a small BCP 47 syntax check. | Agent may ask for the document language and form a patch; human confirms it. | `html-has-lang` clears and the iframe document element reports the chosen language. | Fragment without a source `<html>`, an invalid value, mixed-language question requiring per-node markup, or `html-lang-valid` correction beyond the simple case. |
+| Missing document language | `html-has-lang` | CONTEXTUAL | Add `lang="…"` to the source-backed `<html>` start tag. `languageTag` must pass a conservative BCP 47 syntax check and `Intl.getCanonicalLocales`. | Agent may ask for the document language and form a patch; human confirms it. | `html-has-lang` clears and the iframe document element reports the chosen language. | Fragment without a source `<html>`, an invalid value, mixed-language question requiring per-node markup, or `html-lang-valid` correction beyond the simple case. |
 | Positive tabindex | `tabindex` | MECHANICAL | Remove exactly the positive `tabindex` attribute and adjacent whitespace from the mapped start tag. | Agent may preview and apply the exact patch directly; no semantic approval is required. | The node clears `tabindex`; regression test confirms no unrelated attribute changed. | Nonliteral/template value, deliberate custom composite-widget ordering, multiple coupled nodes requiring interaction redesign, or no exact attribute range. |
 | Missing image alternative | `image-alt` | CONTEXTUAL | Human chooses either decorative (`alt=""`) or meaningful (`alt="provided text"`); add or replace only the `alt` attribute. | Agent must ask whether the image conveys information. Meaningful text is human-provided/confirmed. | The node clears `image-alt`; preview DOM contains the exact approved value. | Charts/diagrams, image maps, `<input type="image">`, complex SVG, uncertain purpose, duplicated textual alternatives, or no human decision. |
 | Text color contrast | `color-contrast` | MANUAL_REVIEW | **No automatic transformation in the MVP.** Show foreground/background evidence from axe, mapped source when available, and focus the rendered text/CSS editor. | Agent may flag and explain it, but must ask for design review. | User edits CSS manually and rescans; only axe can mark the original failure absent. | Always refuse automatic repair: cascade, transparency, states, design tokens, and brand constraints make a deterministic deadline-safe patch implausible. |
 
-Shipping priority is deliberately asymmetric:
+The implementation order was deliberately asymmetric; the current source now ships all five bounded families:
 
-- **Tier A — guaranteed:** missing form label, positive tabindex, and image alternative. These must be polished, fully tested, and demonstrated.
-- **Tier B — schedule-permitting:** button accessible name and document language. Implement these only after Tier A, the WebMCP workflow, security gates, evals, and primary UX remain on schedule.
+- **Core families:** missing form label, positive tabindex, and image alternative.
+- **Completed contextual extensions:** button accessible name and document language. Both retain human-confirmed values and exact visible approval.
 - **Manual evidence only:** color contrast. It has no automatic transformation.
 
-Product coherence and WebMCP eval quality take priority over claiming five repair families.
+Product coherence and WebMCP eval quality still take priority over adding any sixth repair family.
 
 ## 9. Remediation proposal model
 
@@ -275,7 +275,7 @@ or
 
 `PROPOSED → REJECTED`
 
-Every Apply uses the exact current proposal ID, diff hash, and source revision. Contextual application additionally requires visible UI approval. Any source edit invalidates the proposal.
+Every Apply uses the exact current proposal ID, diff hash, source revision, and successful proposed-render state. Contextual application additionally requires visible UI approval. Any source edit invalidates the proposal.
 
 Applying creates one exact before/after history record. Undo restores the complete before snapshot, because reconstructing reverse edits after later changes risks data loss.
 
@@ -288,7 +288,7 @@ Applying creates one exact before/after history record. Undo restores the comple
 - List and inspect issues.
 - Focus an issue in source and preview.
 - Generate one remediation preview using validated inputs.
-- Apply one exact current **MECHANICAL** proposal after its diff and rendered result are visible.
+- Apply one exact current **MECHANICAL** proposal after its diff is visible and its exact proposed rendering is `READY`.
 - Reject its own pending proposal.
 - Undo the latest eligible remediation only when the user's current request explicitly asks to undo; no extra UI confirmation is required because the action restores an exact snapshot and immediately becomes visible/stale-for-rescan.
 - Read change summaries.
@@ -347,7 +347,7 @@ Clicking a current-revision event selects the issue, source range, and preview n
 
 The demo is a polished, compact checkout page: order summary, product thumbnail, email field, shipping/payment controls, icon-only remove action, and Continue button. It uses static HTML/CSS only and no network assets.
 
-Intended seeded axe-core 4.13.0 findings:
+Frozen seeded axe-core 4.13.0 findings:
 
 | Rule | Nodes | Intended impact | Product treatment |
 |---|---:|---|---|
@@ -356,13 +356,13 @@ Intended seeded axe-core 4.13.0 findings:
 | `button-name` | 1 | critical | Contextual accessible-name proposal |
 | `image-alt` | 1 | critical | Contextual decorative/meaningful decision |
 | `color-contrast` | 1 | serious | Manual review; no automatic patch |
-| `heading-order` | 1 | moderate | Manual review |
+| `tabindex` | 1 | serious | Mechanical exact-attribute removal |
 
-Target: six distinct automated violations, five critical/serious affected nodes, multiple repairable families, and obvious semantic judgment.
+Frozen result: exactly six distinct violations and six critical/serious affected nodes—3 critical and 3 serious—with five repairable families and one explicit contrast manual review.
 
-These are intended results, not assumptions. The fixture is frozen only when real Chromium tests against the pinned axe version prove the exact rule IDs, impacts, and affected-node counts. If axe reports an incidental finding, fix the fixture; do not weaken the assertion to accept noise.
+These results are enforced by real Chromium tests against the pinned axe version, including exact rule IDs, impacts, and affected-node counts. If axe reports an incidental finding, fix the fixture; do not weaken the assertion to accept noise.
 
-Positive `tabindex` is supported by the engine but not seeded, keeping the fixture within the requested issue count and making the prominent demo issues meaningful rather than contrived.
+The fixture intentionally seeds positive `tabindex` so the demo includes one exact mechanical repair alongside the four contextual families.
 
 ## 14. Local-first behavior
 
@@ -403,7 +403,7 @@ Primary prompt:
 
 Storyboard:
 
-1. **0:00–0:15 — Working transformation.** Cold-open on the exact positive-`tabindex` diff. The browser agent applies that visible mechanical proposal without a redundant approval and source changes on screen.
+1. **0:00–0:15 — Working transformation.** Cold-open on the exact positive-`tabindex` diff. After the proposed iframe reports `READY`, the browser agent applies that visible mechanical proposal without redundant semantic approval and source changes on screen.
 2. **0:15–0:45 — Live evidence.** Reset, run the real baseline scan, inspect the same node, and show source focus, preview highlight, and proposal synchronization.
 3. **0:45–1:10 — Mechanical Apply and verify.** Agent applies the exact proposal and rescans. The `tabindex` finding disappears; source revision, verified change, and timeline update together.
 4. **1:10–1:50 — Semantic boundary.** Agent inspects `label` or `image-alt`. A safe label candidate may be offered, but the human confirms meaning and approves the exact contextual diff before Apply.
@@ -435,7 +435,7 @@ Point-loss risk: flaky registration, ambiguous schemas, a demo that uses only on
 
 ### Execution
 
-Why it can score highly: one coherent end-to-end workspace, parser-backed mapping, isolated preview, three polished Tier A patch families, exact undo, deterministic fixture, tests, and durable deployment. Tier B breadth is evidence only if complete.
+Why it can score highly: one coherent end-to-end workspace, parser-backed mapping, isolated preview, five fully bounded and tested patch families, exact undo, deterministic fixture, and calibrated authority. Durable current-source deployment evidence remains an M8 release task.
 
 Evidence: a new source revision, a verified rule disappearance, an undo that restores the exact source and finding, and export without metadata.
 
@@ -465,7 +465,7 @@ Point-loss risk: looking like an axe results viewer with two decorative WebMCP c
 - Built-in deterministic fixture and reset.
 - parse-backed source ranges and preview-only node IDs.
 - axe 4.13.0 scan, inspection, highlight, factual metrics, and manual-review surfacing.
-- Tier A label, positive-tabindex, and image-alt surgical proposals.
+- Five shipped surgical proposal families: label, positive tabindex, image alternative, button accessible name, and document language.
 - Color-contrast evidence with explicit manual repair only.
 - Classification-aware proposed/approved/applied/rejected lifecycle, visual proposed preview, exact last-change undo, rescan verification, and export.
 - The ten WebMCP tools and real browser-agent demo.
@@ -481,7 +481,7 @@ Point-loss risk: looking like an axe results viewer with two decorative WebMCP c
 - Advanced issue filtering and sorting.
 - Dynamic WebMCP tool exposure by state.
 - More than one demo fixture.
-- Tier B button-name and document-language remediations, but only after every Tier A, WebMCP, security, eval, and UX gate remains green.
+- Additional remediation families beyond the shipped five.
 
 ### CUT
 
@@ -530,7 +530,7 @@ Plan change: demo time prioritizes useful WebMCP autonomy, exact source/render s
 1. Current experimental WebMCP behavior differs between the final judging client and tested Chrome/in-app browser.
 2. Opaque iframe messaging and in-realm axe execution become flaky under deployment CSP or browser timing.
 3. Source mapping fails on browser/parser tree-construction edge cases, making a highlighted axe node non-repairable.
-4. Tier B repair breadth consumes schedule needed for WebMCP evals or UI coherence.
+4. Final five-family schema, documentation, deployment, or media drifts from the frozen source.
 5. Judges perceive the product as an axe wrapper because the shared live workspace and human authority boundary are not demonstrated quickly enough.
 
 Recommendation: **MODIFY, then proceed**—commit to the product, but cut automatic contrast repair, cross-edit node reconciliation, dynamic tool exposure, and editor/framework ambitions now. The resulting MVP is ambitious where the hackathon rewards it and conservative at security and semantic boundaries.
@@ -566,7 +566,7 @@ The MVP is done only when a fresh deployed session can:
 4. create a surgical proposal without changing working source;
 5. render the proposed result;
 6. expose whether the exact proposal is mechanical or requires contextual approval;
-7. apply a mechanical proposal directly or a contextual proposal only after approval;
+7. after its exact proposed rendering is `READY`, apply a mechanical proposal directly or a contextual proposal only after approval;
 8. rescan and verify the original node/rule no longer fails;
 9. undo and prove exact source and finding restoration;
 10. export clean source without mapping metadata;
