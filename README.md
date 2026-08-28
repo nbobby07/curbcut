@@ -19,6 +19,12 @@ editable source -> secure rendered preview -> in-frame axe scan -> mapped eviden
 
 The agent handles repetitive scanning, filtering, source lookup, proposal preparation, verification, summary, and export. The developer sees the affected source and rendered element, supplies semantic meaning when needed, reviews the proposed visual result and exact diff, and explicitly approves or rejects the change. There is no arbitrary JavaScript tool, DOM mutation tool, or whole-document rewrite tool.
 
+## Live workspace
+
+![Curbcut scanned workspace](./docs/curbcut-scanned-workspace.png)
+
+![Curbcut non-mutating remediation preview](./docs/curbcut-remediation-preview.png)
+
 ## Judge quick start
 
 1. Open the [live application](https://curbcut-one.vercel.app) in ChatGPT's in-app browser, or Chrome 149+ with WebMCP testing enabled.

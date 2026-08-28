@@ -5,7 +5,8 @@ Date: August 28, 2026 (PT)
 ## Result
 
 - **Deterministic eval and browser hardening: PASS**
-- **Target-client verification: pending the final production deployment smoke**
+- **ChatGPT in-app browser discovery, scan, list, inspect, and preview: PASS**
+- **Human-approved Apply/rescan/Undo rehearsal: pending the owner's visible approval**
 - **Optional automated OpenAI trajectory corpus: pending a valid `OPENAI_API_KEY`**
 - **M7 deterministic release evidence: COMPLETE**
 
@@ -79,9 +80,22 @@ model openai:gpt-5.4-mini-2026-03-17
 2 runs, max 6 steps, console + JSON reporters
 ```
 
-This optional model-backed run requires `OPENAI_API_KEY` and has not been used as release evidence. Earlier provider-specific runner exploration was discarded as implementation exploration; it is neither a Curbcut dependency nor submitted evidence.
+This optional model-backed run requires `OPENAI_API_KEY` and has not been used as release evidence. It is not a Curbcut runtime dependency or a submission gate.
 
-Current release evidence is the deterministic corpus validator, live-schema drift test, full browser suite, and production build. Final target-client evidence is recorded only after the frozen production deployment is exercised. When an optional OpenAI run is performed, report `passCount`, `failCount`, and `errorCount` from the generated JSON and preserve representative failure trajectories before changing schemas or prompts.
+Current release evidence is the deterministic corpus validator, live-schema drift test, full browser suite, production build, and the final HTTPS target-client smoke below. When an optional OpenAI run is performed, report `passCount`, `failCount`, and `errorCount` from the generated JSON and preserve representative failure trajectories before changing schemas or prompts.
+
+## Final HTTPS target-client smoke
+
+On August 28, 2026, the production deployment at <https://curbcut-one.vercel.app> was exercised in ChatGPT's in-app browser:
+
+- all ten page-defined WebMCP tools were discovered with the expected schemas and annotations;
+- `scan_accessibility` returned 6 rules / 6 affected nodes: 3 critical, 3 serious, 0 moderate, and 0 minor;
+- `list_issues` found the serious mechanical `tabindex` issue;
+- `inspect_issue` selected and highlighted the rendered button while returning source line 25, column 11, offsets 768–848;
+- `preview_remediation` created one non-mutating `remove_positive_tabindex` patch and stopped in `PROPOSED` with visible human approval required;
+- the browser console contained no errors.
+
+The safety boundary was preserved: Apply was not exercised without the owner's visible approval. The owner-approved Apply/rescan/Undo rehearsal remains the only pending target-client workflow step.
 
 ## Limits
 

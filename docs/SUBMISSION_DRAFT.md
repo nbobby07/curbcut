@@ -84,17 +84,17 @@ TODO before submission: insert measured WebMCP evaluation results only after the
 - [ ] Verify the video and audio from a signed-out browser.
 - [ ] Show real tool discovery/calls, not a simulated invocation.
 - [ ] Show scan evidence, synchronized source/preview focus, a non-mutating proposal, visible approval, Apply/rescan, semantic review, and summary/export or Undo.
-- [ ] Capture a current scanned-workspace screenshot.
-- [ ] Capture a current proposed-diff/render/approval screenshot.
+- [x] Capture a current scanned-workspace screenshot.
+- [x] Capture a current proposed-diff/render/approval screenshot.
 - [ ] Capture a current verified-result/timeline screenshot.
 - [ ] Use narration only or properly licensed audio; do not add third-party trademarks or copyrighted music.
 
 ## Final submission checklist
 
 - [ ] Join/registration status is confirmed in the submitting Devpost account.
-- [ ] Live URL works in a clean target-client session and remains available without payment or credentials.
-- [ ] GitHub repository is public; root license is detected; About description and homepage are set.
-- [ ] `npm test`, `npm run test:e2e`, and `npm run build` pass from the frozen commit.
+- [x] Live URL works in a clean target-client session and remains available without payment or credentials.
+- [x] GitHub repository is public; root license is detected; About description and homepage are set.
+- [x] `npm test`, `npm run test:e2e`, and `npm run build` pass from the frozen commit.
 - [ ] Final browser/client/build, prompt, limitations, and measured eval results agree across README, reports, video, and Devpost text.
 - [ ] Every public screenshot and the video depict the frozen deployment.
 - [ ] All URLs work from a signed-out browser.
