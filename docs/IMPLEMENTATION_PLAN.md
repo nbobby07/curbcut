@@ -1,6 +1,6 @@
 # Curbcut — Implementation Plan
 
-Status: M1–M3 passed; M4 implementation and deployed verification are in progress  
+Status: M1–M6 passed; M7 eval hardening is next
 Baseline: the successful Spike A and Spike B code in this repository  
 Target: persistent authenticated Vercel deployment established during M1/M2, with final production freeze by September 2, 2026
 
@@ -786,7 +786,7 @@ Acceptance:
 
 Fallback/cut: never add contrast transformation. Tier B button/lang are the first planned cuts and ship only if their tests and refusal paths are complete. Do not sacrifice WebMCP eval quality or product coherence to reach five families; an untested repair is cut, not labeled beta.
 
-### M4 — Full WebMCP workflow — August 30 — 10 hours
+### M4 — Full WebMCP workflow — COMPLETE
 
 Tasks:
 
@@ -803,7 +803,7 @@ Acceptance:
 
 Fallback/cut: do not dynamically expose tools. If output budget is tight, return fewer issue rows/snippets, not weaker validation. Do not cut the core inspect/preview/apply/rescan/undo chain.
 
-### M5 — Human review and timeline — August 31 — 5 hours
+### M5 — Human review and timeline — COMPLETE
 
 Tasks:
 
@@ -818,7 +818,7 @@ Acceptance:
 
 Fallback/cut: no persisted timeline, filters, free-form notes, or audit export. Keep the latest 100 in memory.
 
-### M6 — Restrained UI quality — August 31 — 5 hours
+### M6 — Restrained UI quality — COMPLETE
 
 Tasks:
 

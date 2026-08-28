@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import type { AccessibilityIssue } from './axeAdapter'
 import { Preview, type PreviewBridge } from './Preview'
 import { ProposedPreview } from './ProposedPreview'
@@ -15,6 +15,7 @@ export function App() {
   const [exportKind, setExportKind] = useState<'html' | 'css' | 'workspace'>('html')
   const previewRef = useRef<PreviewBridge>(null)
   const editorRef = useRef<HTMLTextAreaElement>(null)
+  const scanButtonRef = useRef<HTMLButtonElement>(null)
   const selectedIssue = state.issues.find(({ issueId }) => issueId === state.selectedIssueId)
   const pendingProposal = state.proposal && ['PROPOSED', 'APPROVED'].includes(state.proposal.status)
     ? state.proposal
@@ -40,6 +41,26 @@ export function App() {
     })
   }, [selectedIssue, sourceTab])
 
+  useEffect(() => {
+    if (state.verificationNotice?.outcome === 'PENDING') scanButtonRef.current?.focus()
+  }, [state.verificationNotice])
+
+  function moveSourceTab(event: KeyboardEvent<HTMLButtonElement>) {
+    if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return
+    event.preventDefault()
+    setSourceTab(sourceTab === 'html' ? 'css' : 'html')
+    const sibling = sourceTab === 'html' ? event.currentTarget.nextElementSibling : event.currentTarget.previousElementSibling
+    if (sibling instanceof HTMLButtonElement) sibling.focus()
+  }
+
+  function movePreviewTab(event: KeyboardEvent<HTMLButtonElement>) {
+    if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return
+    event.preventDefault()
+    workspaceStore.setPreviewMode(state.previewMode === 'WORKING' ? 'PROPOSED' : 'WORKING')
+    const sibling = state.previewMode === 'WORKING' ? event.currentTarget.nextElementSibling : event.currentTarget.previousElementSibling
+    if (sibling instanceof HTMLButtonElement) sibling.focus()
+  }
+
   return (
     <main className="app-shell">
       <header className="command-bar">
@@ -47,10 +68,13 @@ export function App() {
           <h1>Curbcut</h1>
           <p>Local HTML/CSS accessibility workspace</p>
         </div>
-        <div className="command-actions">
-          <span className="status-chip">Revision {state.sourceRevision}</span>
-          <span className="status-chip">Scan: {state.scanStatus}</span>
-          <button type="button" onClick={() => workspaceStore.loadDemo()}>Load demo</button>
+        <div className="command-actions" aria-label="Workspace commands">
+          <div className="command-status" aria-label="Workspace status">
+            <span className="status-chip">Revision {state.sourceRevision}</span>
+            <span className={`status-chip scan-${state.scanStatus.toLowerCase()}`}>Scan {state.scanStatus.toLowerCase()}</span>
+          </div>
+          <div className="command-group">
+            <button type="button" onClick={() => workspaceStore.loadDemo()}>Reset demo</button>
           <button
             type="button"
             disabled={!latestChange || Boolean(latestChange.undoneAt)}
@@ -59,6 +83,7 @@ export function App() {
             Undo last repair
           </button>
           <button
+            ref={scanButtonRef}
             type="button"
             className="primary-action"
             disabled={state.scanStatus === 'RUNNING' || state.previewStatus !== 'READY' || Boolean(pendingProposal)}
@@ -66,6 +91,8 @@ export function App() {
           >
             {state.scanStatus === 'RUNNING' ? 'Scanning…' : state.scan ? 'Rescan with axe' : 'Run axe scan'}
           </button>
+          </div>
+          <div className="command-group export-group">
           <label className="export-control">Export
             <select value={exportKind} onChange={(event) => setExportKind(event.target.value as typeof exportKind)}>
               <option value="html">HTML</option>
@@ -74,6 +101,7 @@ export function App() {
             </select>
           </label>
           <button type="button" onClick={() => void workspaceStore.exportSource(exportKind)}>Download</button>
+          </div>
         </div>
       </header>
 
@@ -89,11 +117,12 @@ export function App() {
               )}
             </div>
             <div className="tabs" role="tablist" aria-label="Source file">
-              <button role="tab" aria-selected={sourceTab === 'html'} onClick={() => setSourceTab('html')}>HTML</button>
-              <button role="tab" aria-selected={sourceTab === 'css'} onClick={() => setSourceTab('css')}>CSS</button>
+              <button id="html-tab" role="tab" aria-controls="source-editor" aria-selected={sourceTab === 'html'} tabIndex={sourceTab === 'html' ? 0 : -1} onKeyDown={moveSourceTab} onClick={() => setSourceTab('html')}>HTML</button>
+              <button id="css-tab" role="tab" aria-controls="source-editor" aria-selected={sourceTab === 'css'} tabIndex={sourceTab === 'css' ? 0 : -1} onKeyDown={moveSourceTab} onClick={() => setSourceTab('css')}>CSS</button>
             </div>
           </div>
           <textarea
+            id="source-editor"
             ref={editorRef}
             aria-label={sourceTab === 'html' ? 'Editable HTML source' : 'Editable CSS source'}
             spellCheck={false}
@@ -112,8 +141,8 @@ export function App() {
             </div>
             {pendingProposal ? (
               <div className="tabs" role="tablist" aria-label="Preview state">
-                <button role="tab" aria-selected={state.previewMode === 'WORKING'} onClick={() => workspaceStore.setPreviewMode('WORKING')}>Working</button>
-                <button role="tab" aria-selected={state.previewMode === 'PROPOSED'} onClick={() => workspaceStore.setPreviewMode('PROPOSED')}>Proposed</button>
+                <button role="tab" aria-selected={state.previewMode === 'WORKING'} tabIndex={state.previewMode === 'WORKING' ? 0 : -1} onKeyDown={movePreviewTab} onClick={() => workspaceStore.setPreviewMode('WORKING')}>Working</button>
+                <button role="tab" aria-selected={state.previewMode === 'PROPOSED'} tabIndex={state.previewMode === 'PROPOSED' ? 0 : -1} onKeyDown={movePreviewTab} onClick={() => workspaceStore.setPreviewMode('PROPOSED')}>Proposed</button>
               </div>
             ) : <span className={`state-dot state-${state.previewStatus.toLowerCase()}`}>{state.previewStatus}</span>}
           </div>
@@ -162,13 +191,17 @@ export function App() {
         </section>
       </section>
 
+      <ActivityTimeline />
       <footer className="activity-bar">
-        <span>WebMCP: {state.registeredTools.join(', ') || state.webMcpError || 'registering…'}</span>
+        <span title={state.registeredTools.join(', ')}>
+          WebMCP: {state.registeredTools.length ? `${state.registeredTools.length} tools ready` : state.webMcpError || 'registering…'}
+        </span>
         <span data-testid="last-invocation">
           {state.lastInvocation
             ? `${state.lastInvocation.tool} · ${state.lastInvocation.summary} · ${state.lastInvocation.timestamp}`
-            : 'No agent action yet'}
+            : 'Waiting for browser agent'}
         </span>
+        <span>Browser persistence · not a backup</span>
       </footer>
       <p className="sr-status" role="status" aria-live="polite">
         Preview {state.previewStatus}. Scan {state.scanStatus}. {state.verificationNotice?.message}
@@ -177,11 +210,57 @@ export function App() {
   )
 }
 
+function ActivityTimeline() {
+  const state = useWorkspaceState()
+  const events = [...state.activity].reverse()
+  return (
+    <section className="activity-timeline" aria-labelledby="activity-heading">
+      <div className="timeline-heading">
+        <div>
+          <h2 id="activity-heading">Agent action timeline</h2>
+          <p>{events.length ? `${events.length} local event${events.length === 1 ? '' : 's'} · newest first` : 'Browser-agent calls and human approvals appear here'}</p>
+        </div>
+        <span className={`connection-state ${state.registeredTools.length ? 'connected' : ''}`}>
+          {state.registeredTools.length ? 'WebMCP connected' : 'Manual mode'}
+        </span>
+      </div>
+      {events.length ? (
+        <ol data-testid="activity-timeline">
+          {events.map((event) => {
+            const issueAvailable = Boolean(event.issueId && state.issues.some(({ issueId }) => issueId === event.issueId))
+            return (
+              <li key={event.eventId}>
+                <button
+                  type="button"
+                  disabled={!issueAvailable}
+                  title={issueAvailable ? 'Focus the related issue' : 'No current issue to focus'}
+                  onClick={() => event.issueId && void workspaceStore.inspectIssue(event.issueId)}
+                >
+                  <span className={`actor actor-${event.actor}`}>{event.actor}</span>
+                  <strong>{event.action.replaceAll('_', ' ')}</strong>
+                  <span>{event.resultSummary}</span>
+                  <time dateTime={event.timestamp}>{formatTime(event.timestamp)}</time>
+                  <span>{event.approvalOccurred ? 'Approved by human' : `Revision ${event.sourceRevision}`}</span>
+                </button>
+              </li>
+            )
+          })}
+        </ol>
+      ) : <p className="timeline-empty">Try: “Find the serious accessibility issues in this checkout.”</p>}
+    </section>
+  )
+}
+
 function IssueList() {
   const state = useWorkspaceState()
   if (state.scanStatus === 'RUNNING') return <p className="empty-evidence">Running axe-core 4.13.0 inside the isolated preview…</p>
   if (state.scanStatus === 'STALE') return <p className="empty-evidence">Working source changed. Rescan with real axe before relying on issue results.</p>
-  if (!state.scan) return <p className="empty-evidence">Run a scan to see factual axe findings. No accessibility score is calculated.</p>
+  if (!state.scan) return (
+    <div className="empty-evidence">
+      <strong>Fixture ready to audit</strong>
+      <p>Run axe to populate factual findings, mapped source ranges, and rendered highlights. Curbcut does not invent an accessibility score.</p>
+    </div>
+  )
 
   return (
     <div className="issue-list" data-testid="issue-list">
@@ -200,7 +279,7 @@ function IssueList() {
         >
           <span className={`impact impact-${issue.impact ?? 'unknown'}`}>{issue.impact ?? 'unknown'}</span>
           <strong>{issue.ruleId}</strong>
-          <span>{issue.classification.replace('_', ' ')}</span>
+          <span>{classificationLabel(issue.classification)}</span>
           <span>{issue.sourceNode ? `Line ${issue.sourceNode.sourceRange.startLine}` : 'Unmapped'}</span>
         </button>
       ))}
@@ -214,13 +293,13 @@ function IssueDetail({ issue }: { issue: AccessibilityIssue }) {
       <button type="button" className="back-button" onClick={() => workspaceStore.clearSelection()}>
         ← All issues
       </button>
-      <p className="detail-kicker">{issue.resultKind} · {issue.impact ?? 'unknown'} impact</p>
+      <p className="detail-kicker">{issue.resultKind} · {issue.impact ?? 'unknown'} impact · {classificationLabel(issue.classification)}</p>
       <h3>{issue.ruleId}</h3>
       <p>{issue.help}</p>
       <p><a href={issue.helpUrl} target="_blank" rel="noreferrer">axe rule guidance</a></p>
       <dl>
         <dt>Classification</dt>
-        <dd>{issue.classification}</dd>
+        <dd>{classificationLabel(issue.classification)}</dd>
         <dt>Why</dt>
         <dd>{issue.classificationReason}</dd>
         <dt>Mapping</dt>
@@ -245,7 +324,12 @@ function RepairControl({ issue }: { issue: AccessibilityIssue }) {
   const [altMode, setAltMode] = useState<HumanValues['altMode']>()
   const [altText, setAltText] = useState('')
   if (!family) {
-    return <p className="scope-note">No deterministic M3 repair is offered. Review the evidence and edit source manually if appropriate.</p>
+    return (
+      <section className="manual-review" aria-labelledby="manual-review-heading">
+        <h4 id="manual-review-heading">Human review needed</h4>
+        <p>No deterministic repair is available for this issue in the MVP. Review the evidence, make an intentional source edit when appropriate, then rescan with axe.</p>
+      </section>
+    )
   }
   const repairFamily = family
 
@@ -295,22 +379,24 @@ function RepairControl({ issue }: { issue: AccessibilityIssue }) {
 }
 
 function ProposalPanel({ proposal }: { proposal: RemediationProposal }) {
+  const panelRef = useRef<HTMLElement>(null)
+  useEffect(() => panelRef.current?.focus(), [])
   return (
-    <article className="issue-detail proposal-panel" data-testid="proposal-panel">
-      <p className="detail-kicker">{proposal.status} · Not applied</p>
+    <article ref={panelRef} tabIndex={-1} className="issue-detail proposal-panel" data-testid="proposal-panel">
+      <p className="detail-kicker">{proposal.status} · Working source unchanged</p>
       <h3>{proposal.family}</h3>
       <dl>
         <dt>Classification</dt><dd>{proposal.classification}</dd>
         <dt>Rationale</dt><dd>{proposal.rationale}</dd>
         <dt>Validation</dt><dd>{proposal.expectedValidation}</dd>
-        <dt>Human values</dt><dd><code>{JSON.stringify(proposal.humanValues)}</code></dd>
+        <dt>Human decision</dt><dd><code>{JSON.stringify(proposal.humanValues)}</code></dd>
       </dl>
       <h4>Exact compact diff</h4>
       <div className="source-diff" aria-label="Proposed source diff">
         <pre><span aria-hidden="true">− </span>{proposal.diff.before || '(empty)'}</pre>
         <pre><span aria-hidden="true">+ </span>{proposal.diff.after || '(empty)'}</pre>
       </div>
-      <p className="scope-note">Working HTML/CSS is unchanged. To change a semantic answer, reject this proposal and create a new unapproved diff.</p>
+      <p className="review-notice"><strong>Your approval is required.</strong> The agent may propose this change, but it cannot approve semantic content or mutate working source. To change an answer, reject and create a new proposal.</p>
       {proposal.status === 'PROPOSED' ? (
         <button
           type="button"
@@ -355,4 +441,14 @@ function familyFor(issue: AccessibilityIssue): RepairFamily | null {
   if (issue.ruleId === 'tabindex' && issue.sourceNode) return 'positive-tabindex'
   if (issue.ruleId === 'image-alt' && issue.sourceNode?.tagName === 'img') return 'image-alternative'
   return null
+}
+
+function classificationLabel(classification: AccessibilityIssue['classification']) {
+  if (classification === 'MECHANICAL') return 'Mechanical repair'
+  if (classification === 'CONTEXTUAL') return 'Needs your decision'
+  return 'Manual review'
+}
+
+function formatTime(timestamp: string) {
+  return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' }).format(new Date(timestamp))
 }

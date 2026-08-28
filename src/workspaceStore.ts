@@ -121,6 +121,20 @@ export type ExportMetadata = {
   mappingMetadataPresent: false
 }
 
+const STORAGE_KEY = 'curbcut.workspace.v1'
+
+function readPersistedSource() {
+  if (typeof localStorage === 'undefined') return null
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as { html?: unknown; css?: unknown } | null
+    return saved && typeof saved.html === 'string' && typeof saved.css === 'string'
+      ? { html: saved.html, css: saved.css }
+      : null
+  } catch {
+    return null
+  }
+}
+
 export async function createExportArtifact(
   kind: ExportKind,
   html: string,
@@ -150,9 +164,10 @@ export async function createExportArtifact(
   }
 }
 
+const persistedSource = readPersistedSource()
 let state: WorkspaceState = {
-  htmlSource: CHECKOUT_HTML,
-  cssSource: CHECKOUT_CSS,
+  htmlSource: persistedSource?.html ?? CHECKOUT_HTML,
+  cssSource: persistedSource?.css ?? CHECKOUT_CSS,
   sourceRevision: 1,
   workspaceStatus: 'READY',
   previewStatus: 'IDLE',
@@ -176,10 +191,21 @@ let state: WorkspaceState = {
 
 let bridge: PreviewBridge | null = null
 let activeRender: { revision: number; promise: Promise<CommandResult<{ sourceRevision: number }>> } | null = null
+let persistenceTimer: ReturnType<typeof setTimeout> | null = null
 const listeners = new Set<() => void>()
 const emit = () => listeners.forEach((listener) => listener())
 const update = (patch: Partial<WorkspaceState>) => {
   state = { ...state, ...patch }
+  if (typeof localStorage !== 'undefined' && ('htmlSource' in patch || 'cssSource' in patch)) {
+    if (persistenceTimer) clearTimeout(persistenceTimer)
+    persistenceTimer = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, html: state.htmlSource, css: state.cssSource }))
+      } catch {
+        // Browser persistence is convenience storage; canonical in-memory source remains authoritative.
+      }
+    }, 120)
+  }
   emit()
 }
 

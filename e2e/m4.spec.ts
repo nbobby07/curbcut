@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { resolve } from 'node:path'
 
 type ToolResult = {
   ok: boolean
@@ -171,4 +172,42 @@ test('F — export downloads canonical source and returns metadata only', async 
   for await (const chunk of stream) chunks.push(Buffer.from(chunk))
   expect(Buffer.concat(chunks).toString('utf8')).toBe(source)
   expect(Buffer.concat(chunks).toString('utf8')).not.toContain('data-curbcut-node')
+})
+
+test('G — keyboard tabs, manual-review copy, timeline focus, and app chrome stay accessible', async ({ page }) => {
+  await page.goto('/')
+  const htmlTab = page.getByRole('tab', { name: 'HTML' })
+  await htmlTab.focus()
+  await htmlTab.press('ArrowRight')
+  await expect(page.getByRole('tab', { name: 'CSS' })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('tab', { name: 'CSS' })).toBeFocused()
+  await expect(page.getByLabel('Editable CSS source')).toBeVisible()
+
+  await tool(page, 'scan_accessibility', { reason: 'initial' })
+  const listed = await tool(page, 'list_issues', { impact: 'critical', classification: 'all', status: 'open', limit: 10 })
+  const buttonIssue = (listed.data!.issues as Array<{ issueId: string; ruleId: string }>).find(({ ruleId }) => ruleId === 'button-name')!
+  await tool(page, 'inspect_issue', { issueId: buttonIssue.issueId })
+  await expect(page.getByRole('heading', { name: 'Human review needed' })).toBeVisible()
+  await expect(page.getByText('No deterministic repair is available for this issue in the MVP.')).toBeVisible()
+  await page.getByRole('button', { name: /All issues/ }).click()
+  await page.getByTestId('activity-timeline').locator('button').first().click()
+  await expect(page.getByTestId('selected-issue')).toContainText('button-name')
+
+  await page.addScriptTag({ path: resolve('node_modules/axe-core/axe.min.js') })
+  const highImpact = await page.evaluate(async () => {
+    const results = await (window as typeof window & { axe: { run: (root: Document, options: object) => Promise<{ violations: Array<{ id: string; impact: string }> }> } }).axe.run(document, { iframes: false })
+    return results.violations.filter(({ impact }) => impact === 'critical' || impact === 'serious')
+  })
+  expect(highImpact).toEqual([])
+})
+
+test('H — reload restores canonical local source and clean WebMCP registration', async ({ page }) => {
+  await page.goto('/')
+  const editor = page.getByLabel('Editable HTML source')
+  const persisted = `${await editor.inputValue()}\n<!-- local draft -->`
+  await editor.fill(persisted)
+  await page.waitForTimeout(150)
+  await page.reload()
+  await expect(editor).toHaveValue(persisted)
+  await expect.poll(async () => page.evaluate(() => document.modelContext!.getTools().then((items) => items.length))).toBe(10)
 })

@@ -29,7 +29,7 @@ test('freezes the checkout fixture and completes label Apply/rescan/Undo', async
   await page.getByRole('button', { name: 'Preview repair' }).click()
 
   await expect(editor).toHaveValue(before)
-  await expect(page.getByTestId('proposal-panel')).toContainText('PROPOSED · Not applied')
+  await expect(page.getByTestId('proposal-panel')).toContainText('PROPOSED · Working source unchanged')
   await expect(page.getByTestId('proposed-preview-stage')).toBeVisible()
   await expect(page.locator('iframe[title="Proposed source preview — not applied"]')).toHaveAttribute('sandbox', 'allow-scripts')
   await expect(page.getByTestId('apply-proposal')).toBeDisabled()
