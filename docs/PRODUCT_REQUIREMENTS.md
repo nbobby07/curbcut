@@ -8,7 +8,7 @@ Hackathon deadline: September 3, 2026 at 1:00 PM PT
 
 Curbcut is a local-first, browser-native accessibility repair workbench for static HTML and CSS. A frontend developer and an external browser agent inspect and change the same rendered artifact through the same explicit workflow:
 
-`source → render → scan → inspect → preview → approve → apply → rescan → verify → undo/export`
+`source → render → scan → inspect → preview → [approve if contextual] → apply → rescan → verify → undo/export`
 
 The differentiator is the shared interaction boundary. The human sees source, rendering, evidence, diffs, and verification. The browser agent receives narrow WebMCP tools for those same workspace actions. The agent performs mechanical work; the human retains semantic and visual judgment.
 
@@ -44,7 +44,7 @@ The MVP must also be legible to a hackathon judge who has less than three minute
 - Demonstrate a complete repair loop on arbitrary pasted static HTML and CSS.
 - Make rendered evidence and source ranges stay synchronized.
 - Give a browser agent a deep, stateful WebMCP workflow rather than a novelty command.
-- Make every source mutation proposed, visible, approved, reversible, and verifiable.
+- Make every source mutation proposed, visible, authority-checked, reversible, and verifiable.
 - Show where automated evidence ends and human judgment begins.
 - Remain a static, browser-only deployment with source local to the browser.
 
@@ -82,7 +82,7 @@ The product has one route and one workspace. Desktop layout:
    - Shows either the issue list, a selected issue, or a remediation proposal. These are modes of one panel, not nested cards.
    - Issue list offers small filters for impact and classification.
    - Issue detail contains axe evidence, source mapping, classification, and the next valid action.
-   - Proposal detail contains rationale, input requiring judgment, a compact source diff, validation expectations, Approve, Reject, and Apply controls.
+   - Proposal detail contains rationale, input requiring judgment, a compact source diff, validation expectations, Reject, and Apply controls; Approve appears only for contextual work.
 5. **Bottom — Agent activity**
    - A collapsible, single-line-height timeline of recent WebMCP calls and human approvals.
    - It is not a chat, log-analysis product, or enterprise audit trail.
@@ -123,7 +123,7 @@ On narrower viewports, Source, Preview, and Evidence become three keyboard-acces
 - Creating a proposal does not mutate working source.
 - Right panel shows required semantic input, rationale, surgical edit, before/after diff, and expected validation.
 - Center switches to the Proposed rendering, clearly labeled “Not applied.” Working and Proposed remain directly switchable.
-- Approve records a human decision but still does not change source. Apply is enabled only after approval.
+- Every proposal is non-mutating and visibly reviewable. Mechanical Apply is enabled immediately; contextual Apply is enabled only after exact visible approval.
 
 ### Applied
 
@@ -220,7 +220,7 @@ Every normalized issue contains:
 - **CONTEXTUAL**: the patch shape is deterministic, but its value encodes meaning that a person must provide or confirm. Examples: label text, accessible button name, document language, and image alternative.
 - **MANUAL_REVIEW**: axe reports an incomplete/manual check, source mapping is insufficient, or a credible repair requires semantic, layout, cascade, interaction, or design-system analysis outside the MVP.
 
-Classification describes the change, not compliance certainty. Even a mechanical edit requires visible human approval before source mutation.
+Classification describes both the change and its authority boundary, not compliance certainty. A mechanical edit may apply after its exact proposal is visible; contextual work still requires a human semantic decision and approval.
 
 ## 8. Repair families
 
@@ -228,10 +228,10 @@ The repair engine creates ordered text edits against exact source ranges. It nev
 
 | Family | Axe evidence | Classification | Surgical transformation | Agent behavior and human authority | Rescan proof | Refuse when |
 |---|---|---|---|---|---|---|
-| Missing form label | `label`, failing form-control node | CONTEXTUAL | Insert a `<label for="…">…</label>` immediately before the input. Reuse an existing unique `id`; if absent, propose a collision-free ID plus label insertion as two edits. | Agent may identify the family and request/propose label text. Human must confirm visible wording and approve. | The affected control no longer appears under `label`; label/control association is also checked in the preview DOM. | Existing ambiguous labeling, duplicate IDs, non-source-backed node, templated attributes, custom control, or wording not provided. |
+| Missing form label | `label`, failing form-control node | CONTEXTUAL | Insert a `<label for="…">…</label>` immediately before the input. Reuse an existing unique `id`; if absent, propose a collision-free ID plus label insertion as two edits. A safe adjacent visible-text candidate may prefill the proposal. | Agent may identify the family and offer the deterministic candidate. Human must confirm visible wording and approve; a candidate never becomes approval. | The affected control no longer appears under `label`; label/control association is also checked in the preview DOM. | Existing ambiguous labeling, duplicate IDs, non-source-backed node, templated attributes, custom control, or no safe/provided wording. |
 | Missing accessible button name | `button-name` on a native `<button>` | CONTEXTUAL | Add a quoted `aria-label` attribute to the source start tag. | Agent may request a concise name based on visible context but cannot silently choose it. Human provides/confirms the name. | The node no longer appears under `button-name`; computed accessible name is non-empty. | Non-native/custom widget, existing `aria-labelledby`, complex descendant semantics, duplicate attribute, or purpose remains ambiguous. |
 | Missing document language | `html-has-lang` | CONTEXTUAL | Add `lang="…"` to the source-backed `<html>` start tag. Value must pass `Intl.Locale` construction and a small BCP 47 syntax check. | Agent may ask for the document language and form a patch; human confirms it. | `html-has-lang` clears and the iframe document element reports the chosen language. | Fragment without a source `<html>`, an invalid value, mixed-language question requiring per-node markup, or `html-lang-valid` correction beyond the simple case. |
-| Positive tabindex | `tabindex` | MECHANICAL | Remove exactly the positive `tabindex` attribute and adjacent whitespace from the mapped start tag. | Agent may recommend the patch automatically. Human still approves the source mutation. | The node clears `tabindex`; regression test confirms no unrelated attribute changed. | Nonliteral/template value, deliberate custom composite-widget ordering, multiple coupled nodes requiring interaction redesign, or no exact attribute range. |
+| Positive tabindex | `tabindex` | MECHANICAL | Remove exactly the positive `tabindex` attribute and adjacent whitespace from the mapped start tag. | Agent may preview and apply the exact patch directly; no semantic approval is required. | The node clears `tabindex`; regression test confirms no unrelated attribute changed. | Nonliteral/template value, deliberate custom composite-widget ordering, multiple coupled nodes requiring interaction redesign, or no exact attribute range. |
 | Missing image alternative | `image-alt` | CONTEXTUAL | Human chooses either decorative (`alt=""`) or meaningful (`alt="provided text"`); add or replace only the `alt` attribute. | Agent must ask whether the image conveys information. Meaningful text is human-provided/confirmed. | The node clears `image-alt`; preview DOM contains the exact approved value. | Charts/diagrams, image maps, `<input type="image">`, complex SVG, uncertain purpose, duplicated textual alternatives, or no human decision. |
 | Text color contrast | `color-contrast` | MANUAL_REVIEW | **No automatic transformation in the MVP.** Show foreground/background evidence from axe, mapped source when available, and focus the rendered text/CSS editor. | Agent may flag and explain it, but must ask for design review. | User edits CSS manually and rescans; only axe can mark the original failure absent. | Always refuse automatic repair: cascade, transparency, states, design tokens, and brand constraints make a deterministic deadline-safe patch implausible. |
 
@@ -259,7 +259,7 @@ A proposal is immutable and contains:
 - `semanticJudgmentRequired` and the human-provided values used;
 - approval actor and timestamp, if approved.
 
-Lifecycle:
+Contextual lifecycle:
 
 `PROPOSED → APPROVED → APPLIED`
 
@@ -267,7 +267,15 @@ or
 
 `PROPOSED → REJECTED`
 
-Approval and application are deliberately separate. A WebMCP agent may create a proposal. It may call Apply only after the visible UI records human approval for the exact proposal ID and source revision. Any source edit invalidates the proposal.
+Mechanical lifecycle:
+
+`PROPOSED → APPLIED`
+
+or
+
+`PROPOSED → REJECTED`
+
+Every Apply uses the exact current proposal ID, diff hash, and source revision. Contextual application additionally requires visible UI approval. Any source edit invalidates the proposal.
 
 Applying creates one exact before/after history record. Undo restores the complete before snapshot, because reconstructing reverse edits after later changes risks data loss.
 
@@ -280,6 +288,7 @@ Applying creates one exact before/after history record. Undo restores the comple
 - List and inspect issues.
 - Focus an issue in source and preview.
 - Generate one remediation preview using validated inputs.
+- Apply one exact current **MECHANICAL** proposal after its diff and rendered result are visible.
 - Reject its own pending proposal.
 - Undo the latest eligible remediation only when the user's current request explicitly asks to undo; no extra UI confirmation is required because the action restores an exact snapshot and immediately becomes visible/stale-for-rescan.
 - Read change summaries.
@@ -287,7 +296,7 @@ Applying creates one exact before/after history record. Undo restores the comple
 
 ### Agent may not act without a visible human decision
 
-- Apply any source change, including a mechanical one.
+- Apply a **CONTEXTUAL** source change without exact visible human approval.
 - Choose alternative text, a button name, visible label text, or document language.
 - Decide that an image is decorative.
 - Apply a visual contrast change.
@@ -295,7 +304,7 @@ Applying creates one exact before/after history record. Undo restores the comple
 - Initiate an undo speculatively when the user did not request it.
 - Claim compliance or dismiss manual review.
 
-The agent can recommend a candidate phrase, but the human must enter or confirm it in the proposal UI. Approval is tied to the exact diff; revising any value clears approval.
+The agent can recommend or safely extract a candidate phrase, but the human must confirm it in the proposal UI. Contextual approval is tied to the exact diff; revising any value clears approval.
 
 ## 11. WebMCP product surface
 
@@ -394,11 +403,11 @@ Primary prompt:
 
 Storyboard:
 
-1. **0:00–0:15 — Working transformation.** Open the preloaded fixture. The page performs a real baseline scan. The browser agent discovers tools, reads the current workspace, inspects the critical email-label issue, and creates a proposal. Source, preview target, and diff synchronize. This timing is measured in rehearsal; if tool latency exceeds 15 seconds, preload the completed baseline scan but still rerun it later on camera.
-2. **0:15–0:45 — Human approval.** The proposal asks for visible label wording. Human confirms “Email address,” compares Working and Proposed, and approves the exact diff.
-3. **0:45–1:10 — Apply and verify.** Agent applies the approved proposal and rescans. The `label` finding disappears; source revision, verified change, and timeline update together.
-4. **1:10–1:50 — Semantic boundary.** Agent inspects `image-alt`. It asks whether the product thumbnail is informative or decorative rather than inventing alt text. Human chooses meaningful and enters/approves the alternative. The agent applies and verifies.
-5. **1:50–2:25 — Safe mechanical change.** Agent previews positive actions it can safely recommend or handles the button-name issue with human confirmation. Contrast remains visibly marked manual review.
+1. **0:00–0:15 — Working transformation.** Cold-open on the exact positive-`tabindex` diff. The browser agent applies that visible mechanical proposal without a redundant approval and source changes on screen.
+2. **0:15–0:45 — Live evidence.** Reset, run the real baseline scan, inspect the same node, and show source focus, preview highlight, and proposal synchronization.
+3. **0:45–1:10 — Mechanical Apply and verify.** Agent applies the exact proposal and rescans. The `tabindex` finding disappears; source revision, verified change, and timeline update together.
+4. **1:10–1:50 — Semantic boundary.** Agent inspects `label` or `image-alt`. A safe label candidate may be offered, but the human confirms meaning and approves the exact contextual diff before Apply.
+5. **1:50–2:25 — Manual boundary.** Contrast remains visibly marked manual review; the agent does not invent a design change.
 6. **2:25–2:50 — Reversibility and output.** Show change summary, undo one change and rescan to prove restoration, then reapply if time permits and export current source.
 7. **2:50–3:00 — Proof.** Point to the real WebMCP timeline, fewer factual axe findings, remaining human review, and local-only status.
 
@@ -408,9 +417,9 @@ The demo must never imply that the remaining findings are safe to ignore or that
 
 - **axe DevTools** provides mature browser, editor, test, and organizational accessibility workflows. Curbcut is narrower: a local editable artifact, source-range surgical diffs, and an external browser agent operating the same visible approval loop. See [Deque's Axe DevTools overview](https://docs.deque.com/devtools-for-web/en/).
 - **axe MCP Server** brings `analyze` and AI-assisted `remediate` capabilities to IDE and coding-agent workflows. Curbcut does not try to replace it. Curbcut explores a different boundary: WebMCP tools exposed by the workbench page itself, where the human, rendered artifact, source, evidence, and browser agent share one live state machine. See [Deque's official axe MCP Server](https://github.com/dequelabs/axe-mcp-server-public).
-- **Generic coding-agent fixes** primarily operate in repository files and development tooling. Curbcut makes the rendered proposed result and human approval first-class before a source mutation.
+- **Generic coding-agent fixes** primarily operate in repository files and development tooling. Curbcut makes the rendered proposed result and calibrated mechanical/contextual authority first-class before a source mutation.
 - **Accessibility overlays** alter runtime behavior on an existing site. Curbcut edits developer-owned source, shows the diff, and exports it; it is not installed on production pages.
-- **Automated compliance scanners** detect and report. Curbcut adds a deliberately constrained repair/approval/verification loop and explicitly preserves manual review.
+- **Automated compliance scanners** detect and report. Curbcut adds a deliberately constrained preview/authority/verification loop and explicitly preserves manual review.
 
 The claim is not that these categories lack repair features. The distinct experiment is browser-native shared remediation through WebMCP.
 
@@ -418,9 +427,9 @@ The claim is not that these categories lack repair features. The distinct experi
 
 ### WebMCP Leverage
 
-Why it can score highly: ten narrow tools span discovery, evidence, proposal, approval-gated mutation, verification, reversal, summary, and export. Tool calls operate the exact React state visible to the user, use current annotations, and are tested as multi-step journeys.
+Why it can score highly: ten narrow tools span discovery, evidence, proposal, classification-aware mutation, verification, reversal, summary, and export. Tool calls operate the exact React state visible to the user, use current annotations, and are tested as multi-step journeys.
 
-Evidence: live HTTPS tool discovery; action timeline; synchronized source/preview/evidence changes; human approval blocking Apply; browser eval results.
+Evidence: live HTTPS tool discovery; action timeline; synchronized source/preview/evidence changes; direct mechanical Apply; contextual approval blocking Apply; browser eval results.
 
 Point-loss risk: flaky registration, ambiguous schemas, a demo that uses only one tool, or approval happening off-camera.
 
@@ -458,7 +467,7 @@ Point-loss risk: looking like an axe results viewer with two decorative WebMCP c
 - axe 4.13.0 scan, inspection, highlight, factual metrics, and manual-review surfacing.
 - Tier A label, positive-tabindex, and image-alt surgical proposals.
 - Color-contrast evidence with explicit manual repair only.
-- Proposed/approved/applied/rejected lifecycle, visual proposed preview, exact last-change undo, rescan verification, and export.
+- Classification-aware proposed/approved/applied/rejected lifecycle, visual proposed preview, exact last-change undo, rescan verification, and export.
 - The ten WebMCP tools and real browser-agent demo.
 - Unit, security, regression, WebMCP, and Playwright journey tests.
 - Accessible, durable HTTPS deployment and completed submission evidence.
@@ -489,7 +498,7 @@ Point-loss risk: looking like an axe results viewer with two decorative WebMCP c
 ### Accessibility engineer
 
 Attack: deterministic patches can still create wrong semantics; a clean axe result can mislead.  
-Plan change: all mutations require visible approval, four families explicitly require human values, `incomplete` becomes manual review, and the UI forbids compliance language.
+Plan change: all mutations require an exact visible proposal; contextual families require human values and approval, `incomplete` becomes manual review, and the UI forbids compliance language.
 
 ### Browser standards engineer
 
@@ -514,7 +523,7 @@ Plan change: user CSS enters only as style text in the trusted frame controller,
 ### Competing entrant
 
 Attack: an accessibility workbench is not new; a polished competitor could look more complete.  
-Plan change: demo time prioritizes the unmistakable WebMCP/human shared loop, exact source/render synchronization, approval gating, semantic refusal, undo, and verification—not breadth or branding.
+Plan change: demo time prioritizes useful WebMCP autonomy, exact source/render synchronization, contextual approval gating, semantic refusal, undo, and verification—not breadth or branding.
 
 ### Five largest top-10 risks after mitigation
 
@@ -556,8 +565,8 @@ The MVP is done only when a fresh deployed session can:
 3. select a finding and synchronize evidence, preview highlight, and exact source range;
 4. create a surgical proposal without changing working source;
 5. render the proposed result;
-6. require human approval for the exact proposal;
-7. apply through UI or WebMCP only after approval;
+6. expose whether the exact proposal is mechanical or requires contextual approval;
+7. apply a mechanical proposal directly or a contextual proposal only after approval;
 8. rescan and verify the original node/rule no longer fails;
 9. undo and prove exact source and finding restoration;
 10. export clean source without mapping metadata;

@@ -2,7 +2,7 @@
 
 [Live application](https://curbcut-one.vercel.app) · [Source code](https://github.com/nbobby07/curbcut) · [MIT license](./LICENSE)
 
-Curbcut is a local-first, browser-native accessibility repair workbench for editable static HTML and CSS. A frontend developer and an external browser agent inspect and repair the same live artifact through WebMCP while the developer keeps control of semantic decisions and every source mutation.
+Curbcut is a local-first, browser-native accessibility repair workbench for editable static HTML and CSS. A frontend developer and an external browser agent inspect and repair the same live artifact through WebMCP: the agent may apply exact mechanical patches after showing them, while the developer retains semantic and visual judgment.
 
 Curbcut does **not** claim automated WCAG compliance. axe-core reports a useful subset of accessibility problems; unresolved findings and manual testing still require accessibility expertise.
 
@@ -13,11 +13,11 @@ Curbcut is not a chatbot wrapped around an accessibility scanner. Its WebMCP too
 ```text
 editable source -> secure rendered preview -> in-frame axe scan -> mapped evidence
        ^                                                         |
-       |             exact diff + human approval                 v
+       |       exact visible diff + calibrated authority        v
        +----------- surgical patch <- remediation preview <- browser agent
 ```
 
-The agent handles repetitive scanning, filtering, source lookup, proposal preparation, verification, summary, and export. The developer sees the affected source and rendered element, supplies semantic meaning when needed, reviews the proposed visual result and exact diff, and explicitly approves or rejects the change. There is no arbitrary JavaScript tool, DOM mutation tool, or whole-document rewrite tool.
+The agent handles repetitive scanning, filtering, source lookup, proposal preparation, exact mechanical application, verification, summary, and export. Every proposal shows the affected source, rendered element, visual result, and exact diff before mutation. Deterministic mechanical work can continue without a redundant approval click; contextual labels and image alternatives still stop for a human decision and visible approval. There is no arbitrary JavaScript tool, DOM mutation tool, or whole-document rewrite tool.
 
 ## Live workspace
 
@@ -34,9 +34,9 @@ The agent handles repetitive scanning, filtering, source lookup, proposal prepar
    > Fix the critical and serious accessibility issues in this checkout without changing the overall visual design. Preview each change before applying it, and ask me about anything that requires semantic judgment.
 
 4. Watch the agent scan and inspect the page. The selected issue should focus the exact HTML range and highlight the same rendered element.
-5. When a proposal appears, review both previews and the source diff, then choose **Approve this exact change** in Curbcut. Approval cannot be supplied by a tool call.
-6. Tell the agent: **I've approved the visible proposal. Apply it, rescan, and summarize what changed.**
-7. Confirm that the intended finding disappears, the agent timeline records the calls and human approval, and Undo restores the exact prior source.
+5. Watch a mechanical positive-`tabindex` proposal appear, remain visible, apply directly, and disappear after the agent rescans.
+6. When a label or image proposal needs meaning, review both previews and the source diff, then choose **Approve this exact change** in Curbcut. A tool call cannot manufacture semantic approval.
+7. Confirm that the timeline distinguishes direct mechanical Apply from human-approved contextual Apply, and that Undo restores the exact prior source.
 
 If WebMCP is unavailable, the same workflow remains usable manually; the status bar reports that no browser-agent tools are connected.
 
@@ -48,8 +48,8 @@ If WebMCP is unavailable, the same workflow remains usable manually; the status 
 | `scan_accessibility` | Render current source and run axe inside the isolated preview. |
 | `list_issues` | Return filtered, bounded issue summaries. |
 | `inspect_issue` | Select an issue, focus its mapped source range, and highlight its preview node. |
-| `preview_remediation` | Create one unapproved surgical proposal without mutating canonical source. |
-| `apply_remediation` | Apply only the exact proposal already approved in the visible UI. |
+| `preview_remediation` | Create one visible, non-mutating surgical proposal and report whether approval is required. |
+| `apply_remediation` | Apply an exact mechanical proposal directly, or an exact contextual proposal after visible human approval. |
 | `reject_remediation` | Reject the current proposal without changing source. |
 | `undo_remediation` | Restore the exact source snapshot before the latest eligible repair. |
 | `get_change_summary` | Summarize applied, verified, rejected, undone, and unresolved work. |
@@ -61,7 +61,7 @@ Imported source and accessibility snippets are marked as untrusted where returne
 
 - The application is a static React 19, TypeScript, and Vite frontend with no account, database, or application backend.
 - parse5 8.0.1 assigns revision-bound internal IDs and exact source ranges. Mapping attributes exist only in generated preview markup and never contaminate canonical or exported source.
-- Raw-offset patches preserve unrelated source bytes; every proposal is non-mutating until the developer approves the exact diff.
+- Raw-offset patches preserve unrelated source bytes; every proposal is visibly previewed and non-mutating. Mechanical patches may then apply directly; contextual patches require approval bound to the exact diff.
 - DOMPurify applies an allowlist before render. Scripts, inline handlers, executable embeds, navigation, form submission, and external network access are blocked.
 - The preview uses `sandbox="allow-scripts"` without `allow-same-origin`, giving it an opaque origin. A nonce-based CSP permits only Curbcut's bundled controller, bundled axe-core 4.13.0, and user CSS.
 - axe runs inside the preview realm. A revision-bound, request/response `postMessage` bridge validates messages between the iframe and the React application.
@@ -69,7 +69,7 @@ Imported source and accessibility snippets are marked as untrusted where returne
 
 ## Supported MVP repairs
 
-- Missing form label: proposes a visible `<label>` using human-chosen text.
+- Missing form label: proposes a visible `<label>`. It may reuse a safe adjacent visible-text candidate, but the wording remains contextual and approval-gated.
 - Positive `tabindex`: removes only the exact positive attribute.
 - Missing image alternative: requires the developer to decide whether the image is meaningful or decorative and, when meaningful, provide the text.
 
@@ -94,7 +94,7 @@ npm run test:e2e
 npm run build
 ```
 
-The current M7 gate validates 24 WebMCP trajectory cases across eight intents, with 52 passing Vitest checks, 14 passing Playwright browser checks, and a successful production build. Browser tests cover isolation, CSP, source mapping, real axe scans, approval enforcement, Apply/rescan, Undo/rescan, export, reload, all ten tool registrations, and exact agreement between live tool schemas and the eval snapshot. See the [M7 report](./docs/M7_REPORT.md) and [August 27 M4–M6 verification](./docs/M4_REPORT.md). Model-backed evaluation results are reported only after they are actually run.
+The current M7 gate validates 27 WebMCP trajectory cases across nine intents, with 55 passing unit checks and 15 passing Playwright browser checks. Browser coverage includes isolation, CSP, source mapping, real axe scans, direct mechanical Apply, contextual approval enforcement, Apply/rescan, Undo/rescan, export, reload, all ten tool registrations, and exact agreement between live tool schemas and the eval snapshot. See the [M7 report](./docs/M7_REPORT.md) and [August 27 M4–M6 verification](./docs/M4_REPORT.md). Model-backed results are reported only after they are actually run.
 
 ## Current limitations
 

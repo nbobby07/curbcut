@@ -9,6 +9,7 @@ const expectedIntents = new Set([
   'preview_only',
   'human_judgment',
   'apply_after_approval',
+  'mechanical_apply',
   'wrong_order_recovery',
   'undo',
   'export_summary',
@@ -31,6 +32,13 @@ const postLabelScanMetrics = Object.freeze({
   moderate: 0,
   minor: 0,
   manualReviewsOutstanding: 4,
+})
+const postMechanicalScanMetrics = Object.freeze({
+  critical: 3,
+  serious: 2,
+  moderate: 0,
+  minor: 0,
+  manualReviewsOutstanding: 5,
 })
 const postLabelSummaryMetrics = Object.freeze({
   openCriticalSerious: 5,
@@ -64,6 +72,7 @@ for (const test of cases) {
   if (test.expectedCall.length > 6) fail(`${test.name} exceeds the six-step runner budget.`)
 
   let approvedStateSeen = false
+  let mechanicalProposalSeen = false
   for (const call of test.expectedCall) {
     if (!call || typeof call !== 'object' || typeof call.functionName !== 'string' || !names.has(call.functionName)) {
       fail(`${test.name} contains an invalid expected tool call.`)
@@ -82,12 +91,15 @@ for (const test of cases) {
     }
     if (call.mockOutput.data?.proposalStatus === 'APPROVED') approvedStateSeen = true
     if (call.functionName === 'scan_accessibility') {
-      const isPostLabelScan = typeof call.mockOutput.data?.verifiedChangeId === 'string'
+      const isVerifiedScan = typeof call.mockOutput.data?.verifiedChangeId === 'string'
+      const expectedMetrics = !isVerifiedScan
+        ? baselineScanMetrics
+        : test.intent === 'mechanical_apply' ? postMechanicalScanMetrics : postLabelScanMetrics
       assertMetrics(
         test.name,
-        isPostLabelScan ? 'post-label scan' : 'baseline/undo scan',
+        !isVerifiedScan ? 'baseline/undo scan' : test.intent === 'mechanical_apply' ? 'post-mechanical scan' : 'post-label scan',
         call.mockOutput.data,
-        isPostLabelScan ? postLabelScanMetrics : baselineScanMetrics,
+        expectedMetrics,
       )
     }
     if (call.functionName === 'get_change_summary') {
@@ -101,13 +113,20 @@ for (const test of cases) {
         fail(`${test.name} six-finding list must include the frozen serious mechanical tabindex finding.`)
       }
     }
-    if (call.functionName === 'apply_remediation' && (test.intent !== 'apply_after_approval' || !approvedStateSeen)) {
-      fail(`${test.name} may apply only after a mocked visible APPROVED proposal.`)
+    if (call.functionName === 'apply_remediation' &&
+      !((test.intent === 'apply_after_approval' && approvedStateSeen) ||
+        (test.intent === 'mechanical_apply' && mechanicalProposalSeen))) {
+      fail(`${test.name} may apply only after visible approval for contextual work or a visible mechanical proposal.`)
     }
-    if (call.functionName === 'preview_remediation' &&
-      (call.mockOutput.data?.approvalRequired !== true || call.mockOutput.data?.approvalState !== 'PROPOSED' ||
-        call.mockOutput.allowedNextActions.includes('apply_remediation'))) {
-      fail(`${test.name} preview must remain unapproved and may not enable Apply.`)
+    if (call.functionName === 'preview_remediation') {
+      const mechanical = call.mockOutput.data?.classification === 'MECHANICAL'
+      const applyEnabled = call.mockOutput.allowedNextActions.includes('apply_remediation')
+      if (call.mockOutput.data?.approvalState !== 'PROPOSED' ||
+        (mechanical && (call.mockOutput.data?.approvalRequired !== false || !applyEnabled)) ||
+        (!mechanical && (call.mockOutput.data?.approvalRequired !== true || applyEnabled))) {
+        fail(`${test.name} preview must enable exact mechanical Apply and gate contextual Apply on visible approval.`)
+      }
+      if (mechanical) mechanicalProposalSeen = true
     }
   }
 
@@ -130,9 +149,9 @@ for (const test of cases) {
   }
 }
 
-if (!Array.isArray(cases) || cases.length !== 24 || intents.size !== expectedIntents.size ||
+if (!Array.isArray(cases) || cases.length !== 27 || intents.size !== expectedIntents.size ||
   [...expectedIntents].some((intent) => intents.get(intent) !== 3)) {
-  fail('Eval corpus must contain exactly three paraphrases for each of the eight required intents.')
+  fail('Eval corpus must contain exactly three paraphrases for each of the nine required intents.')
 }
 
 console.log(`Eval corpus valid: ${cases.length} cases, ${intents.size} intents, ${tools.length} tools.`)

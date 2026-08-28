@@ -90,7 +90,7 @@ const failure = (code: ProposalErrorCode, message: string): ProposalResult<never
 })
 
 function patchBinding(proposal: Pick<RemediationProposal,
-  'issueId' | 'scanId' | 'sourceRevision' | 'family' | 'affectedNodeId' | 'patches' | 'proposedHtml' | 'proposedCss' | 'humanValues' | 'validationTarget' | 'restorationTarget'>) {
+  'issueId' | 'scanId' | 'sourceRevision' | 'family' | 'affectedNodeId' | 'patches' | 'proposedHtml' | 'proposedCss' | 'classification' | 'semanticJudgmentRequired' | 'humanValues' | 'validationTarget' | 'restorationTarget'>) {
   return JSON.stringify({
     issueId: proposal.issueId,
     scanId: proposal.scanId,
@@ -100,11 +100,16 @@ function patchBinding(proposal: Pick<RemediationProposal,
     patches: proposal.patches,
     proposedHtml: proposal.proposedHtml,
     proposedCss: proposal.proposedCss,
+    classification: proposal.classification,
+    semanticJudgmentRequired: proposal.semanticJudgmentRequired,
     humanValues: proposal.humanValues,
     validationTarget: proposal.validationTarget,
     restorationTarget: proposal.restorationTarget,
   })
 }
+
+export const requiresHumanApproval = (proposal: Pick<RemediationProposal, 'classification' | 'semanticJudgmentRequired'>) =>
+  proposal.classification !== 'MECHANICAL' || proposal.semanticJudgmentRequired
 
 export async function createProposal(
   html: string,
@@ -180,13 +185,17 @@ export async function applyApprovedProposal(
   proposal: RemediationProposal,
   current: { html: string; css: string; sourceRevision: number },
 ): Promise<ProposalResult<{ proposal: RemediationProposal; change: ChangeRecord }>> {
-  if (proposal.status !== 'APPROVED' || !proposal.approval) {
+  const approvalRequired = requiresHumanApproval(proposal)
+  if (approvalRequired && (proposal.status !== 'APPROVED' || !proposal.approval)) {
     return failure('APPROVAL_REQUIRED', 'Review and approve this exact diff before applying it.')
+  }
+  if (!approvalRequired && proposal.status !== 'PROPOSED' && proposal.status !== 'APPROVED') {
+    return failure('NOT_APPLICABLE', 'Only the current visible mechanical proposal can be applied.')
   }
   if (proposal.sourceRevision !== current.sourceRevision) {
     return failure('STALE_PROPOSAL', 'The source revision changed after this proposal was created.')
   }
-  if (proposal.approval.proposalId !== proposal.proposalId || proposal.approval.diffHash !== proposal.diffHash) {
+  if (proposal.approval && (proposal.approval.proposalId !== proposal.proposalId || proposal.approval.diffHash !== proposal.diffHash)) {
     return failure('DIFF_MISMATCH', 'Approval does not match this exact proposal and diff.')
   }
   const [htmlHash, cssHash, diffHash] = await Promise.all([

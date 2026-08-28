@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import type { AccessibilityIssue } from './axeAdapter'
 import { Preview, type PreviewBridge } from './Preview'
 import { ProposedPreview } from './ProposedPreview'
-import type { RemediationProposal } from './proposal'
+import { requiresHumanApproval, type RemediationProposal } from './proposal'
 import type { HumanValues, RepairFamily } from './repairs'
 import { useWorkspaceWebMcpTools } from './webmcp'
 import { useWorkspaceState, workspaceStore } from './workspaceStore'
@@ -324,10 +324,11 @@ function RepairControl({ issue }: { issue: AccessibilityIssue }) {
   const [altMode, setAltMode] = useState<HumanValues['altMode']>()
   const [altText, setAltText] = useState('')
   if (!family) {
+    const contextual = issue.classification === 'CONTEXTUAL'
     return (
       <section className="manual-review" aria-labelledby="manual-review-heading">
-        <h4 id="manual-review-heading">Human review needed</h4>
-        <p>No deterministic repair is available for this issue in the MVP. Review the evidence, make an intentional source edit when appropriate, then rescan with axe.</p>
+        <h4 id="manual-review-heading">{contextual ? 'Context needed' : 'Evidence only'}</h4>
+        <p>Curbcut mapped this issue to source, but the MVP has no bounded repair for it. Review the evidence, make an intentional source edit when appropriate, then rescan with axe.</p>
       </section>
     )
   }
@@ -345,11 +346,14 @@ function RepairControl({ issue }: { issue: AccessibilityIssue }) {
 
   return (
     <form className="repair-control" onSubmit={submit}>
-      <h4>Deterministic repair</h4>
+      <h4>{family === 'positive-tabindex' ? 'Ready-made code fix' : 'Contextual code fix'}</h4>
       {family === 'missing-form-label' && (
-        <label>Visible label text
-          <input value={labelText} minLength={1} maxLength={120} required onChange={(event) => setLabelText(event.target.value)} />
-        </label>
+        <>
+          <label>Label text override (optional)
+            <input value={labelText} minLength={1} maxLength={120} onChange={(event) => setLabelText(event.target.value)} />
+          </label>
+          <p>Curbcut can reuse safe adjacent visible text as the candidate. You approve whether that wording is correct.</p>
+        </>
       )}
       {family === 'image-alternative' && (
         <fieldset>
@@ -364,15 +368,14 @@ function RepairControl({ issue }: { issue: AccessibilityIssue }) {
           <p>The system cannot decide image purpose or invent meaningful text. Decorative uses an empty alt attribute.</p>
         </fieldset>
       )}
-      {family === 'positive-tabindex' && <p>Proposal removes only the exact positive tabindex attribute. Human approval is still required.</p>}
+      {family === 'positive-tabindex' && <p>Removes only the exact positive tabindex attribute. No content or design choice is required.</p>}
       <button
         type="submit"
         className="primary-action"
         data-testid="preview-repair"
-        disabled={(family === 'missing-form-label' && !labelText) ||
-          (family === 'image-alternative' && (!altMode || (altMode === 'meaningful' && !altText)))}
+        disabled={family === 'image-alternative' && (!altMode || (altMode === 'meaningful' && !altText))}
       >
-        Preview repair
+        Preview code change
       </button>
     </form>
   )
@@ -380,33 +383,40 @@ function RepairControl({ issue }: { issue: AccessibilityIssue }) {
 
 function ProposalPanel({ proposal }: { proposal: RemediationProposal }) {
   const panelRef = useRef<HTMLElement>(null)
+  const approvalRequired = requiresHumanApproval(proposal)
+  const decision = proposal.humanValues.labelText
+    ? `Label: ${proposal.humanValues.labelText}`
+    : proposal.humanValues.altMode === 'decorative'
+      ? 'Image purpose: decorative'
+      : proposal.humanValues.altText
+        ? `Alternative text: ${proposal.humanValues.altText}`
+        : null
   useEffect(() => panelRef.current?.focus(), [])
   return (
     <article ref={panelRef} tabIndex={-1} className="issue-detail proposal-panel" data-testid="proposal-panel">
-      <p className="detail-kicker">{proposal.status} · Working source unchanged</p>
+      <p className="detail-kicker">{approvalRequired ? `${proposal.status} · Working source unchanged` : 'MECHANICAL · NOT APPLIED'}</p>
       <h3>{proposal.family}</h3>
       <dl>
         <dt>Classification</dt><dd>{proposal.classification}</dd>
         <dt>Rationale</dt><dd>{proposal.rationale}</dd>
         <dt>Validation</dt><dd>{proposal.expectedValidation}</dd>
-        <dt>Human decision</dt><dd><code>{JSON.stringify(proposal.humanValues)}</code></dd>
+        {decision && <><dt>Proposed meaning</dt><dd>{decision}</dd></>}
       </dl>
       <h4>Exact compact diff</h4>
       <div className="source-diff" aria-label="Proposed source diff">
-        <pre><span aria-hidden="true">− </span>{proposal.diff.before || '(empty)'}</pre>
-        <pre><span aria-hidden="true">+ </span>{proposal.diff.after || '(empty)'}</pre>
+        <pre aria-label="Before source"><span aria-hidden="true">− </span>{proposal.diff.before || '(empty)'}</pre>
+        <pre aria-label="After source"><span aria-hidden="true">+ </span>{proposal.diff.after || '(empty)'}</pre>
       </div>
-      <p className="review-notice"><strong>Your approval is required.</strong> The agent may propose this change, but it cannot approve semantic content or mutate working source. To change an answer, reject and create a new proposal.</p>
-      {proposal.status === 'PROPOSED' ? (
-        <button
-          type="button"
-          className="approve-action"
-          data-testid="approve-proposal"
-          onClick={() => workspaceStore.approveProposal(proposal.proposalId, proposal.diffHash)}
-        >
+      <p className="review-notice">{approvalRequired
+        ? <><strong>Your approval is required.</strong> Curbcut wrote the code, but only you can confirm its meaning. Reject and create a new proposal to change the answer.</>
+        : <><strong>No semantic approval needed.</strong> This exact syntax-only diff is visible before the agent or you applies it, and exact Undo remains available.</>}</p>
+      {approvalRequired && proposal.status === 'PROPOSED' && (
+        <button type="button" className="approve-action" data-testid="approve-proposal"
+          onClick={() => workspaceStore.approveProposal(proposal.proposalId, proposal.diffHash)}>
           Approve this exact change
         </button>
-      ) : (
+      )}
+      {approvalRequired && proposal.status === 'APPROVED' && (
         <p className="approval-status" data-testid="approval-status">Approved by human for diff {proposal.diffHash.slice(0, 12)}…</p>
       )}
       <div className="proposal-actions">
@@ -415,10 +425,10 @@ function ProposalPanel({ proposal }: { proposal: RemediationProposal }) {
           type="button"
           className="primary-action"
           data-testid="apply-proposal"
-          disabled={proposal.status !== 'APPROVED'}
+          disabled={approvalRequired ? proposal.status !== 'APPROVED' : proposal.status !== 'PROPOSED' && proposal.status !== 'APPROVED'}
           onClick={() => void workspaceStore.applyProposal(proposal.proposalId)}
         >
-          Apply approved change
+          {approvalRequired ? 'Apply approved change' : 'Apply mechanical change'}
         </button>
       </div>
     </article>

@@ -48,6 +48,17 @@ describe('missing form label repair', () => {
     })
   })
 
+  it('reuses safe adjacent visible text as an approval-gated label candidate', () => {
+    const source = '<div class="field">\n  <span>Email address</span>\n  <input id="email">\n</div>'
+    const result = repair(source, 'label', 'input', 'missing-form-label')
+
+    expect(result).toMatchObject({
+      ok: true,
+      repair: { semanticJudgmentRequired: true, humanValues: { labelText: 'Email address' } },
+    })
+    expect(result.ok && result.repair.proposedHtml).toContain('<label for="email">Email address</label>\n  <input id="email">')
+  })
+
   it('generates a collision-free ID with two guarded patches', () => {
     const source = '<input id="curbcut-input-1"><input type="email">'
     const result = repair(source, 'label', 'input', 'missing-form-label', { labelText: 'Work email' }, 1)

@@ -41,7 +41,7 @@
     },
     {
       "name": "preview_remediation",
-      "description": "Create one visible, unapproved Tier A surgical proposal. Candidate semantic values never count as human approval and source is not committed.",
+      "description": "Create one visible, non-mutating Tier A surgical proposal. Mechanical proposals may be applied next; contextual proposals require human approval.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -50,7 +50,7 @@
           "values": {
             "type": "object",
             "properties": {
-              "labelText": { "type": "string", "minLength": 1, "maxLength": 120, "description": "Human-chosen visible form label." },
+              "labelText": { "type": "string", "minLength": 1, "maxLength": 120, "description": "Optional label override. When omitted, Curbcut may reuse safe adjacent visible text as a candidate." },
               "altMode": { "type": "string", "enum": ["meaningful", "decorative"], "description": "Human decision about image purpose." },
               "altText": { "type": "string", "minLength": 1, "maxLength": 160, "description": "Human-chosen text for a meaningful image." }
             },
@@ -63,7 +63,7 @@
     },
     {
       "name": "apply_remediation",
-      "description": "Apply only the exact proposal already approved by a human in the visible Curbcut UI. This tool cannot create or infer approval.",
+      "description": "Apply the exact visible mechanical proposal, or a contextual proposal approved by a human in the Curbcut UI. Never invent semantic approval.",
       "inputSchema": {
         "type": "object",
         "properties": { "proposalId": { "type": "string", "minLength": 1, "maxLength": 180 } },

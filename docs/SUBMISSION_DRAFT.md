@@ -26,23 +26,23 @@ Curbcut turns that handoff into one visible, reversible workspace.
 
 ### What Curbcut does
 
-Curbcut is a local-first workbench for editable static HTML and CSS. It keeps source, a securely rendered preview, factual axe-core findings, mapped source evidence, a proposed code diff, a proposed visual result, human approval, verification results, exact Undo, export, and an agent-action timeline in one browser tab.
+Curbcut is a local-first workbench for editable static HTML and CSS. It keeps source, a securely rendered preview, factual axe-core findings, mapped source evidence, a proposed code diff, a proposed visual result, calibrated human/agent authority, verification results, exact Undo, export, and an agent-action timeline in one browser tab.
 
-The built-in checkout fixture contains deterministic accessibility failures. A developer can also edit the source directly. axe runs against the real isolated preview rather than a stored result. Selecting an issue focuses its exact source range and highlights the corresponding rendered element. A remediation first enters a proposed state: canonical source does not change until the developer reviews the diff and explicitly approves it. Apply makes the surgical edit, a real rescan verifies whether the intended axe finding disappeared, and Undo restores the exact prior source.
+The built-in checkout fixture contains deterministic accessibility failures. A developer can also edit the source directly. axe runs against the real isolated preview rather than a stored result. Selecting an issue focuses its exact source range and highlights the corresponding rendered element. Every remediation first enters a visible, non-mutating proposed state. An exact mechanical patch can then apply directly; a contextual patch remains blocked until the developer supplies meaning and approves the exact diff. A real rescan verifies whether the intended axe finding disappeared, and Undo restores the exact prior source.
 
-The current deterministic repair families are missing form labels, positive `tabindex`, and missing image alternatives. Label text and image meaning remain human decisions. Other findings, including contrast, remain visible evidence/manual-review work rather than being silently “fixed.”
+The current deterministic repair families are missing form labels, positive `tabindex`, and missing image alternatives. A label proposal may automatically reuse a safe adjacent visible-text candidate, but its wording remains contextual and approval-gated. Image purpose and alternative text also remain human decisions. Other findings, including contrast, remain visible evidence/manual-review work rather than being silently “fixed.”
 
 ### Why WebMCP is the right interface
 
 The core interaction is not “send code to an AI and accept a rewrite.” Curbcut exposes ten narrow WebMCP tools that correspond to real product actions: read workspace state, scan, list, inspect, preview, apply, reject, undo, summarize, and export. These tools call the same React store and secure preview bridge used by the visible controls.
 
-That shared boundary materially improves the experience. The browser agent can perform repetitive multi-step work against the exact artifact the developer is looking at, while every call produces a visible UI side effect and a bounded structured result. Issue IDs, source revisions, proposal IDs, and allowed next actions keep the workflow stateful instead of relying on prose. Imported snippets are marked untrusted, source is never exposed through an arbitrary execution tool, and tool calls cannot manufacture human approval.
+That shared boundary materially improves the experience. The browser agent can perform repetitive multi-step work against the exact artifact the developer is looking at, while every call produces a visible UI side effect and a bounded structured result. Issue IDs, source revisions, proposal IDs, classifications, and allowed next actions keep the workflow stateful instead of relying on prose. Imported snippets are marked untrusted, source is never exposed through an arbitrary execution tool, and tool calls cannot manufacture semantic approval.
 
 ### What the human and agent can do together
 
-The agent can run and filter scans, inspect evidence, synchronize source and preview focus, prepare a small deterministic proposal, rescan after a change, undo when asked, and summarize/export the result. The developer can see all the evidence the agent used, supply semantic meaning, compare working and proposed renders, inspect the exact diff, and approve or reject the change.
+The agent can run and filter scans, inspect evidence, synchronize source and preview focus, prepare a small deterministic proposal, apply an exact mechanical proposal, rescan, undo when asked, and summarize/export the result. The developer can see all the evidence the agent used, supply semantic meaning, compare working and proposed renders, inspect the exact diff, and approve or reject contextual changes.
 
-This makes a workflow that is awkward across a scanner, editor, preview, and general coding agent happen in one live browser workspace. The agent handles mechanical coordination; the human retains authority over meaning and mutation.
+This makes a workflow that is awkward across a scanner, editor, preview, and general coding agent happen in one live browser workspace. The agent handles mechanical work; the human retains authority where a repair invents meaning or changes design.
 
 ### How it was built
 
@@ -52,7 +52,7 @@ parse5 8.0.1 parses canonical HTML with source locations and assigns revision-bo
 
 Untrusted HTML is sanitized with DOMPurify and rendered into an iframe with `sandbox="allow-scripts"` but no same-origin permission. A nonce-based CSP blocks network access, navigation, forms, embeds, and untrusted scripts. axe-core 4.13.0 executes inside that opaque preview realm. A secret-channel, request-ID, source-revision `postMessage` protocol carries validated render, scan, and highlight commands back to the React store.
 
-The top document registers exactly ten imperative WebMCP tools. Inputs are runtime-validated, responses are bounded, read-only and untrusted-content annotations are applied, stale revisions are rejected, cancellation is handled, and Apply requires an exact approval token created only by the visible UI.
+The top document registers exactly ten imperative WebMCP tools. Inputs are runtime-validated, responses are bounded, read-only and untrusted-content annotations are applied, stale revisions are rejected, and cancellation is handled. Apply accepts only the current exact proposal: mechanical proposals can proceed directly after preview, while contextual proposals require an approval token created only by the visible UI.
 
 ### Responsible scope
 
@@ -60,7 +60,7 @@ Curbcut does not claim automated WCAG compliance. axe-core covers only part of a
 
 ### Evidence
 
-The current M7 release gate validates 24 WebMCP trajectory cases across eight intents and contains 52 passing unit checks, 14 passing Playwright browser checks, and a successful production build. Browser coverage includes the opaque-origin boundary, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, semantic input gates, exact approval enforcement, Apply/rescan, Undo/rescan, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between the live tool schemas and the eval snapshot.
+The current M7 release gate validates 27 WebMCP trajectory cases across nine intents, with 55 passing unit checks and 15 passing Playwright browser checks. Coverage includes both direct mechanical Apply and contextual approval, the opaque-origin boundary, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, semantic input gates, conditional authority enforcement, Apply/rescan, Undo/rescan, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between the live tool schemas and the eval snapshot.
 
 TODO before submission: insert measured WebMCP evaluation results only after the final corpus has run on the named client/model/build. Do not replace this sentence with an estimate.
 
@@ -73,8 +73,8 @@ TODO before submission: insert measured WebMCP evaluation results only after the
    > Fix the critical and serious accessibility issues in this checkout without changing the overall visual design. Preview each change before applying it, and ask me about anything that requires semantic judgment.
 
 4. Confirm that scan/list/inspect calls populate the visible issue list, focus an exact source range, highlight the same rendered node, and appear in the local timeline.
-5. Supply requested semantic text only if you agree with it. Review the working/proposed renders and exact diff, then choose **Approve this exact change**.
-6. Say: **I've approved the visible proposal. Apply it, rescan, and summarize what changed.**
+5. Confirm the mechanical `tabindex` proposal is visible, applies without a redundant approval click, and clears after rescan.
+6. For a label or image proposal, supply semantic text only if you agree with it. Review the working/proposed renders and exact diff, then choose **Approve this exact change**.
 7. Confirm the intended finding disappears. Ask: **Undo the last repair and rescan.** Confirm exact source and the original finding return.
 8. Ask: **Summarize the current changes and export the HTML.** Confirm a local canonical-source download with no Curbcut mapping attribute.
 
@@ -83,7 +83,7 @@ TODO before submission: insert measured WebMCP evaluation results only after the
 - [ ] Upload a narrated video shorter than three minutes to YouTube with public visibility.
 - [ ] Verify the video and audio from a signed-out browser.
 - [ ] Show real tool discovery/calls, not a simulated invocation.
-- [ ] Show scan evidence, synchronized source/preview focus, a non-mutating proposal, visible approval, Apply/rescan, semantic review, and summary/export or Undo.
+- [ ] Show scan evidence, synchronized source/preview focus, direct mechanical Apply, contextual visible approval, rescan, semantic review, and summary/export or Undo.
 - [x] Capture a current scanned-workspace screenshot.
 - [x] Capture a current proposed-diff/render/approval screenshot.
 - [ ] Capture a current verified-result/timeline screenshot.

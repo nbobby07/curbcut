@@ -348,6 +348,117 @@
     ]
   },
   {
+    "name": "Mechanical Apply — safe tabindex repair",
+    "intent": "mechanical_apply",
+    "messages": [{ "role": "user", "type": "message", "content": "Fix the checkout's safe mechanical accessibility issue. Show the exact proposal, apply it without asking me for semantic input, and verify it with axe." }],
+    "expectedCall": [
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "initial" },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "sourceRevision": 1, "ruleCount": 6, "affectedNodeCount": 6, "critical": 3, "serious": 3, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5 }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "list_issues",
+        "arguments": { "impact": "all", "classification": "MECHANICAL", "status": "open", "limit": 10 },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "targetSummary": ".continue", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "help": "Elements should not have tabindex greater than zero", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/tabindex", "wcagTags": ["best-practice"], "classification": "MECHANICAL", "classificationReason": "The source-backed attribute can be removed without inventing meaning.", "target": ".continue", "sourceLocation": { "line": 25, "column": 11, "startOffset": 768, "endOffset": 848 }, "repairFamily": "remove_positive_tabindex", "requiredInputs": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "preview_remediation",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex" },
+        "mockOutput": { "ok": true, "data": { "proposalId": "66666666-6666-4666-8666-666666666666", "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex", "classification": "MECHANICAL", "semanticJudgmentRequired": false, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report tabindex for this element.", "approvalRequired": false, "approvalState": "PROPOSED" }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
+      },
+      {
+        "functionName": "apply_remediation",
+        "arguments": { "proposalId": "66666666-6666-4666-8666-666666666666" },
+        "mockOutput": { "ok": true, "data": { "changeId": "77777777-7777-4777-8777-777777777777", "proposalId": "66666666-6666-4666-8666-666666666666", "sourceRevision": 2, "scanStatus": "STALE", "next": "scan_accessibility" }, "state": { "sourceRevision": 2, "scanStatus": "STALE", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "undo_remediation"] }
+      },
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "after_change" },
+        "mockOutput": { "ok": true, "data": { "scanId": "88888888-8888-4888-8888-888888888888", "sourceRevision": 2, "ruleCount": 5, "affectedNodeCount": 5, "critical": 3, "serious": 2, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5, "verifiedChangeId": "77777777-7777-4777-8777-777777777777" }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
+      }
+    ]
+  },
+  {
+    "name": "Mechanical Apply — preview then commit",
+    "intent": "mechanical_apply",
+    "messages": [{ "role": "user", "type": "message", "content": "Find a deterministic repair that needs no wording or design decision, display its code diff, apply that exact proposal, and rescan." }],
+    "expectedCall": [
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "initial" },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "sourceRevision": 1, "ruleCount": 6, "affectedNodeCount": 6, "critical": 3, "serious": 3, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5 }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "list_issues",
+        "arguments": { "impact": "all", "classification": "MECHANICAL", "status": "open", "limit": 10 },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "targetSummary": ".continue", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "help": "Elements should not have tabindex greater than zero", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/tabindex", "wcagTags": ["best-practice"], "classification": "MECHANICAL", "classificationReason": "The source-backed attribute can be removed without inventing meaning.", "target": ".continue", "sourceLocation": { "line": 25, "column": 11, "startOffset": 768, "endOffset": 848 }, "repairFamily": "remove_positive_tabindex", "requiredInputs": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "preview_remediation",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex" },
+        "mockOutput": { "ok": true, "data": { "proposalId": "66666666-6666-4666-8666-666666666666", "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex", "classification": "MECHANICAL", "semanticJudgmentRequired": false, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report tabindex for this element.", "approvalRequired": false, "approvalState": "PROPOSED" }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
+      },
+      {
+        "functionName": "apply_remediation",
+        "arguments": { "proposalId": "66666666-6666-4666-8666-666666666666" },
+        "mockOutput": { "ok": true, "data": { "changeId": "77777777-7777-4777-8777-777777777777", "proposalId": "66666666-6666-4666-8666-666666666666", "sourceRevision": 2, "scanStatus": "STALE", "next": "scan_accessibility" }, "state": { "sourceRevision": 2, "scanStatus": "STALE", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "undo_remediation"] }
+      },
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "after_change" },
+        "mockOutput": { "ok": true, "data": { "scanId": "88888888-8888-4888-8888-888888888888", "sourceRevision": 2, "ruleCount": 5, "affectedNodeCount": 5, "critical": 3, "serious": 2, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5, "verifiedChangeId": "77777777-7777-4777-8777-777777777777" }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
+      }
+    ]
+  },
+  {
+    "name": "Mechanical Apply — no semantic pause",
+    "intent": "mechanical_apply",
+    "messages": [{ "role": "user", "type": "message", "content": "Repair what is purely mechanical in this checkout. Keep the proposal visible, apply only that surgical change, and confirm the original finding disappears." }],
+    "expectedCall": [
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "initial" },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "sourceRevision": 1, "ruleCount": 6, "affectedNodeCount": 6, "critical": 3, "serious": 3, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5 }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "list_issues",
+        "arguments": { "impact": "all", "classification": "MECHANICAL", "status": "open", "limit": 10 },
+        "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "targetSummary": ".continue", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "help": "Elements should not have tabindex greater than zero", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/tabindex", "wcagTags": ["best-practice"], "classification": "MECHANICAL", "classificationReason": "The source-backed attribute can be removed without inventing meaning.", "target": ".continue", "sourceLocation": { "line": 25, "column": 11, "startOffset": 768, "endOffset": 848 }, "repairFamily": "remove_positive_tabindex", "requiredInputs": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "preview_remediation",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex" },
+        "mockOutput": { "ok": true, "data": { "proposalId": "66666666-6666-4666-8666-666666666666", "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "family": "remove_positive_tabindex", "classification": "MECHANICAL", "semanticJudgmentRequired": false, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report tabindex for this element.", "approvalRequired": false, "approvalState": "PROPOSED" }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
+      },
+      {
+        "functionName": "apply_remediation",
+        "arguments": { "proposalId": "66666666-6666-4666-8666-666666666666" },
+        "mockOutput": { "ok": true, "data": { "changeId": "77777777-7777-4777-8777-777777777777", "proposalId": "66666666-6666-4666-8666-666666666666", "sourceRevision": 2, "scanStatus": "STALE", "next": "scan_accessibility" }, "state": { "sourceRevision": 2, "scanStatus": "STALE", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "undo_remediation"] }
+      },
+      {
+        "functionName": "scan_accessibility",
+        "arguments": { "reason": "after_change" },
+        "mockOutput": { "ok": true, "data": { "scanId": "88888888-8888-4888-8888-888888888888", "sourceRevision": 2, "ruleCount": 5, "affectedNodeCount": 5, "critical": 3, "serious": 2, "moderate": 0, "minor": 0, "manualReviewsOutstanding": 5, "verifiedChangeId": "77777777-7777-4777-8777-777777777777" }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
+      }
+    ]
+  },
+  {
     "name": "Wrong order recovery — missing proposal",
     "intent": "wrong_order_recovery",
     "messages": [

@@ -156,6 +156,18 @@ function literalId(node: SourceNode): string | null {
   return id && /^[^\s"'<>`=]+$/u.test(id) ? id : null
 }
 
+function adjacentLabelCandidate(source: string, mapping: SourceMapping, target: SourceNode): string | null {
+  const candidate = mapping.nodes
+    .filter((node) => ['span', 'strong', 'b', 'p', 'small'].includes(node.tagName) && node.endTagRange &&
+      node.sourceRange.endOffset <= target.startTagRange.startOffset &&
+      /^\s*$/u.test(source.slice(node.sourceRange.endOffset, target.startTagRange.startOffset)))
+    .at(-1)
+  if (!candidate?.endTagRange) return null
+  const raw = source.slice(candidate.startTagRange.endOffset, candidate.endTagRange.startOffset)
+  if (/[<>&]/u.test(raw)) return null
+  return visibleText(raw.trim(), 120)
+}
+
 function labelRepair(
   source: string,
   mapping: SourceMapping,
@@ -167,9 +179,10 @@ function labelRepair(
   if (!['input', 'select', 'textarea'].includes(target.tagName) || target.attributes.type === 'hidden') {
     return refuse('UNSUPPORTED_TARGET', 'Only native, visible input, select, and textarea controls are supported.')
   }
-  const labelText = visibleText(values.labelText, 120)
-  if (!values.labelText) return refuse('HUMAN_VALUE_REQUIRED', 'Visible label text must be provided by a human.')
-  if (!labelText) return refuse('INVALID_HUMAN_VALUE', 'Label text must be 1–120 visible characters without control characters or edge whitespace.')
+  const suppliedLabel = values.labelText !== undefined && values.labelText !== ''
+  const labelText = suppliedLabel ? visibleText(values.labelText, 120) : adjacentLabelCandidate(source, mapping, target)
+  if (suppliedLabel && !labelText) return refuse('INVALID_HUMAN_VALUE', 'Label text must be 1–120 visible characters without control characters or edge whitespace.')
+  if (!labelText) return refuse('HUMAN_VALUE_REQUIRED', 'Provide label text because no safe adjacent visible-text candidate was found.')
   if (target.attributes['aria-label'] || target.attributes['aria-labelledby']) {
     return refuse('EXISTING_COMPLEX_LABEL', 'The control already uses ARIA labeling that needs contextual review.')
   }
@@ -220,7 +233,9 @@ function labelRepair(
     family: 'missing-form-label',
     classification: 'CONTEXTUAL',
     patches,
-    rationale: 'Adds one visible label explicitly associated with the mapped form control.',
+    rationale: suppliedLabel
+      ? 'Adds the chosen visible label explicitly associated with the mapped form control.'
+      : 'Reuses safe adjacent visible text as a candidate label explicitly associated with the mapped form control.',
     expectedValidation: 'A real axe rescan must no longer report label for this control.',
     semanticJudgmentRequired: true,
     humanValues: { labelText },

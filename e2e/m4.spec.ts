@@ -89,6 +89,28 @@ test('C — preview is non-mutating and apply cannot bypass visible exact approv
   await expect(editor).toHaveValue(before.replace('            <input id="email"', '            <label for="email">Email address</label>\n            <input id="email"'))
 })
 
+test('mechanical proposal is visible, agent-applicable, rescannable, and undoable without semantic approval', async ({ page }) => {
+  await page.goto('/')
+  await tool(page, 'scan_accessibility', { reason: 'initial' })
+  const listed = await tool(page, 'list_issues', { impact: 'serious', classification: 'MECHANICAL', status: 'open', limit: 10 })
+  const issueId = String((listed.data!.issues as Array<{ issueId: string }>)[0].issueId)
+  const editor = page.getByLabel('Editable HTML source')
+  const before = await editor.inputValue()
+  const preview = await tool(page, 'preview_remediation', { issueId, family: 'remove_positive_tabindex' })
+  expect(preview).toMatchObject({ ok: true, data: { approvalRequired: false, agentMayApply: true, semanticJudgmentRequired: false } })
+  expect(preview.allowedNextActions).toContain('apply_remediation')
+  expect(await editor.inputValue()).toBe(before)
+  await expect(page.getByTestId('approve-proposal')).toHaveCount(0)
+
+  const proposalId = String(preview.data!.proposalId)
+  expect(await tool(page, 'apply_remediation', { proposalId })).toMatchObject({ ok: true, data: { scanStatus: 'STALE' } })
+  await expect(editor).toHaveValue(before.replace(' tabindex="2"', ''))
+  await tool(page, 'scan_accessibility', { reason: 'after_change' })
+  await expect(page.locator('.issue-row strong').filter({ hasText: /^tabindex$/ })).toHaveCount(0)
+  expect(await tool(page, 'undo_remediation', {})).toMatchObject({ ok: true })
+  await expect(editor).toHaveValue(before)
+})
+
 test('image semantic values remain candidate-only until a new visible approval', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('button', { name: 'Rescan with axe' })).toBeEnabled()
@@ -190,8 +212,8 @@ test('G — keyboard tabs, manual-review copy, timeline focus, and app chrome st
   const listed = await tool(page, 'list_issues', { impact: 'critical', classification: 'all', status: 'open', limit: 10 })
   const buttonIssue = (listed.data!.issues as Array<{ issueId: string; ruleId: string }>).find(({ ruleId }) => ruleId === 'button-name')!
   await tool(page, 'inspect_issue', { issueId: buttonIssue.issueId })
-  await expect(page.getByRole('heading', { name: 'Human review needed' })).toBeVisible()
-  await expect(page.getByText('No deterministic repair is available for this issue in the MVP.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Context needed' })).toBeVisible()
+  await expect(page.getByText('Curbcut mapped this issue to source, but the MVP has no bounded repair for it.')).toBeVisible()
   await page.getByRole('button', { name: /All issues/ }).click()
   await page.getByTestId('activity-timeline').locator('button').first().click()
   await expect(page.getByTestId('selected-issue')).toContainText('button-name')

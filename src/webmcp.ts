@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import type { AccessibilityIssue, Classification, Impact } from './axeAdapter'
+import { requiresHumanApproval } from './proposal'
 import type { HumanValues, RepairFamily } from './repairs'
 import { workspaceStore, type CommandErrorCode, type CommandResult, type WorkspaceState } from './workspaceStore'
 
@@ -37,7 +38,9 @@ export function allowedNextActions(state = workspaceStore.getSnapshot()): WebMcp
   const pending = state.proposal && (state.proposal.status === 'PROPOSED' || state.proposal.status === 'APPROVED')
   if (pending) {
     actions.push('reject_remediation')
-    if (state.proposal?.status === 'APPROVED') actions.push('apply_remediation')
+    if (state.proposal?.status === 'APPROVED' || (state.proposal?.status === 'PROPOSED' && !requiresHumanApproval(state.proposal))) {
+      actions.push('apply_remediation')
+    }
   } else if (state.workspaceStatus === 'READY' && state.scanStatus !== 'RUNNING') {
     actions.push('scan_accessibility')
     if (state.scanStatus === 'CURRENT' && state.scan?.sourceRevision === state.sourceRevision) {
@@ -129,7 +132,7 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
       sourceLocation: issue.sourceNode ? { line: issue.sourceNode.sourceRange.startLine, column: issue.sourceNode.sourceRange.startColumn,
         startOffset: issue.sourceNode.sourceRange.startOffset, endOffset: issue.sourceNode.sourceRange.endOffset } : null,
       ...(publicFamily(issue) ? { repairFamily: publicFamily(issue), requiredInputs: publicFamily(issue) === 'add_form_label'
-        ? ['labelText'] : publicFamily(issue) === 'set_image_alt' ? ['altMode', 'altText when meaningful'] : [] } : {}),
+        ? ['labelText only when no safe adjacent visible-text candidate exists'] : publicFamily(issue) === 'set_image_alt' ? ['altMode', 'altText when meaningful'] : [] } : {}),
     }))
   },
   async preview_remediation(args, signal) {
@@ -147,7 +150,8 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
     return success({ proposalId: proposal.proposalId, issueId: proposal.issueId, family, classification: proposal.classification,
       semanticJudgmentRequired: proposal.semanticJudgmentRequired, editCount: proposal.patches.length,
       diffSummary: `${proposal.patches.length} surgical source edit${proposal.patches.length === 1 ? '' : 's'}; exact diff is visible in Curbcut.`,
-      validationTarget: proposal.expectedValidation.slice(0, 160), approvalRequired: true, approvalState: proposal.status })
+      validationTarget: proposal.expectedValidation.slice(0, 160), approvalRequired: requiresHumanApproval(proposal),
+      agentMayApply: !requiresHumanApproval(proposal), approvalState: proposal.status })
   },
   async apply_remediation(args, signal) {
     const result = await workspaceStore.applyProposal(String(args.proposalId), signal)
@@ -217,7 +221,7 @@ function validate(name: WebMcpToolName, value: unknown): CommandResult<Record<st
       (args.values !== undefined && (!isRecord(args.values) || !hasOnly(args.values, ['labelText', 'altMode', 'altText'])))) return invalid('The issue, Tier A family, or values object is invalid.')
     const family = args.family as PublicFamily
     const values = (args.values ?? {}) as Record<string, unknown>
-    if (family === 'add_form_label' && !validString(values.labelText, 120)) return invalid('A human-chosen labelText is required to preview this visible label.', 'INPUT_REQUIRED')
+    if (family === 'add_form_label' && values.labelText !== undefined && !validString(values.labelText, 120)) return invalid('labelText must be 1–120 characters when provided.')
     if (family === 'set_image_alt' && values.altMode !== 'meaningful' && values.altMode !== 'decorative') return invalid('A human must choose meaningful or decorative image purpose.', 'INPUT_REQUIRED')
     if (family === 'set_image_alt' && values.altMode === 'meaningful' && !validString(values.altText, 160)) return invalid('Human-chosen altText is required for a meaningful image.', 'INPUT_REQUIRED')
     if ((family === 'add_form_label' && (values.altMode !== undefined || values.altText !== undefined)) ||
@@ -271,7 +275,7 @@ export async function executeWorkspaceTool(name: WebMcpToolName, input: unknown,
 }
 
 const valuesSchema = { type: 'object', properties: {
-  labelText: { type: 'string', minLength: 1, maxLength: 120, description: 'Human-chosen visible form label.' },
+  labelText: { type: 'string', minLength: 1, maxLength: 120, description: 'Optional label override. When omitted, Curbcut may reuse safe adjacent visible text as a candidate.' },
   altMode: { type: 'string', enum: ['meaningful', 'decorative'], description: 'Human decision about image purpose.' },
   altText: { type: 'string', minLength: 1, maxLength: 160, description: 'Human-chosen text for a meaningful image.' },
 }, additionalProperties: false } as const
@@ -281,8 +285,8 @@ export const WEBMCP_TOOL_DEFINITIONS: readonly Omit<WebMCP.ModelContextTool, 'ex
   { name: 'scan_accessibility', title: 'Scan accessibility', description: 'Render current source in the secure preview, run in-frame axe, and replace visible issue results. Use after_change to verify a repair.', inputSchema: { type: 'object', properties: { reason: { type: 'string', enum: ['initial', 'after_change', 'manual'], description: 'Why the scan is being run.' } }, required: ['reason'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
   { name: 'list_issues', title: 'List issues', description: 'List bounded current axe issue or verified-repair summaries. Targets derive from untrusted imported source.', inputSchema: { type: 'object', properties: { impact: { type: 'string', enum: ['critical', 'serious', 'moderate', 'minor', 'all'] }, classification: { type: 'string', enum: ['MECHANICAL', 'CONTEXTUAL', 'MANUAL_REVIEW', 'all'] }, status: { type: 'string', enum: ['open', 'verified', 'all'] }, limit: { type: 'integer', minimum: 1, maximum: 10 } }, additionalProperties: false }, annotations: { readOnlyHint: true, untrustedContentHint: true } },
   { name: 'inspect_issue', title: 'Inspect issue', description: 'Select a current axe issue, focus its exact mapped source range, and highlight its element. Returned target text is untrusted.', inputSchema: { type: 'object', properties: { issueId: { type: 'string', minLength: 1, maxLength: 180, description: 'Issue ID from list_issues.' } }, required: ['issueId'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: true } },
-  { name: 'preview_remediation', title: 'Preview remediation', description: 'Create one visible, unapproved Tier A surgical proposal. Candidate semantic values never count as human approval and source is not committed.', inputSchema: { type: 'object', properties: { issueId: { type: 'string', minLength: 1, maxLength: 180 }, family: { type: 'string', enum: Object.keys(FAMILY) }, values: valuesSchema }, required: ['issueId', 'family'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: true } },
-  { name: 'apply_remediation', title: 'Apply remediation', description: 'Apply only the exact proposal already approved by a human in the visible Curbcut UI. This tool cannot create or infer approval.', inputSchema: { type: 'object', properties: { proposalId: { type: 'string', minLength: 1, maxLength: 180 } }, required: ['proposalId'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
+  { name: 'preview_remediation', title: 'Preview remediation', description: 'Create one visible, non-mutating Tier A surgical proposal. Mechanical proposals may be applied next; contextual proposals require human approval.', inputSchema: { type: 'object', properties: { issueId: { type: 'string', minLength: 1, maxLength: 180 }, family: { type: 'string', enum: Object.keys(FAMILY) }, values: valuesSchema }, required: ['issueId', 'family'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: true } },
+  { name: 'apply_remediation', title: 'Apply remediation', description: 'Apply the exact visible mechanical proposal, or a contextual proposal approved by a human in the Curbcut UI. Never invent semantic approval.', inputSchema: { type: 'object', properties: { proposalId: { type: 'string', minLength: 1, maxLength: 180 } }, required: ['proposalId'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
   { name: 'reject_remediation', title: 'Reject remediation', description: 'Reject the current visible proposal without changing canonical source.', inputSchema: { type: 'object', properties: { proposalId: { type: 'string', minLength: 1, maxLength: 180 }, reason: { type: 'string', enum: ['not_correct', 'needs_revision', 'not_now'] } }, required: ['proposalId', 'reason'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
   { name: 'undo_remediation', title: 'Undo remediation', description: 'Restore the exact source snapshot before the latest eligible repair. Call only when the user explicitly requests undo; never speculatively.', inputSchema: emptySchema, annotations: { readOnlyHint: false, untrustedContentHint: false } },
   { name: 'get_change_summary', title: 'Get change summary', description: 'Read bounded applied, verified, rejected, and undone change facts plus unresolved high-impact/manual-review counts.', inputSchema: emptySchema, annotations: { readOnlyHint: true, untrustedContentHint: false } },

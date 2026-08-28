@@ -50,7 +50,7 @@ describe('M4 WebMCP contract', () => {
       ['scan_accessibility', { reason: 'rescan' }],
       ['list_issues', { limit: 11 }],
       ['inspect_issue', { issueId: 4 }],
-      ['preview_remediation', { issueId: 'x', family: 'add_form_label', values: {} }],
+      ['preview_remediation', { issueId: 'x', family: 'add_form_label', values: { labelText: '' } }],
       ['preview_remediation', { issueId: 'x', family: 'remove_positive_tabindex', values: { labelText: 'No' } }],
       ['preview_remediation', { issueId: 'x', family: 'set_image_alt', values: { altMode: 'meaningful' } }],
       ['apply_remediation', {}],

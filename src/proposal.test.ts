@@ -21,6 +21,18 @@ function labelCase(source = '<form>\r\n  <input id="email">\r\n</form>') {
   return { source, mapping, issue }
 }
 
+function tabindexCase(source = '<button tabindex="2">Pay</button>') {
+  const mapping = createSourceMapping(source, 5)
+  const node = mapping.nodes.find(({ tagName }) => tagName === 'button')!
+  const issue: AccessibilityIssue = {
+    issueId: 'scan:tabindex:button', scanId: 'scan', sourceRevision: 5, resultKind: 'violation',
+    ruleId: 'tabindex', impact: 'serious', help: 'tabindex', helpUrl: 'https://example.test', tags: [],
+    target: ['button'], htmlSnippet: '<button tabindex="2">', nodeId: node.nodeId, sourceNode: node,
+    classification: 'MECHANICAL', classificationReason: 'test',
+  }
+  return { source, mapping, issue }
+}
+
 describe('proposal lifecycle', () => {
   it('creates a proposal without mutating canonical HTML/CSS', async () => {
     const { source, mapping, issue } = labelCase()
@@ -46,6 +58,25 @@ describe('proposal lifecycle', () => {
     expect(approveProposal(created.data, created.data.proposalId, 'wrong-hash')).toMatchObject({
       ok: false, error: { code: 'DIFF_MISMATCH' },
     })
+  })
+
+  it('applies a visible syntax-only proposal without semantic approval', async () => {
+    const { source, mapping, issue } = tabindexCase()
+    const created = await createProposal(source, '', mapping, issue, 'positive-tabindex', {})
+    if (!created.ok) throw new Error(created.error.message)
+
+    await expect(applyApprovedProposal(created.data, { html: source, css: '', sourceRevision: 5 }))
+      .resolves.toMatchObject({ ok: true, data: { proposal: { status: 'APPLIED' }, change: { afterHtml: '<button>Pay</button>' } } })
+  })
+
+  it('binds authority classification into the guarded diff hash', async () => {
+    const { source, mapping, issue } = labelCase()
+    const created = await createProposal(source, '', mapping, issue, 'missing-form-label', { labelText: 'Email' })
+    if (!created.ok) throw new Error(created.error.message)
+    const tampered = { ...created.data, classification: 'MECHANICAL' as const, semanticJudgmentRequired: false }
+
+    await expect(applyApprovedProposal(tampered, { html: source, css: '', sourceRevision: 5 }))
+      .resolves.toMatchObject({ ok: false, error: { code: 'DIFF_MISMATCH' } })
   })
 
   it('applies an approved exact patch and creates an exact undo snapshot', async () => {

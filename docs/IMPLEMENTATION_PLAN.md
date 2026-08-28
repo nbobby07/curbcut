@@ -285,6 +285,7 @@ One function dispatches by family; each transformer returns either a validated p
 
 - Evidence: source-backed `input`, `select`, or `textarea` failed `label` and lacks an accepted accessible-name mechanism.
 - Input: `labelText`, trimmed, 1–120 visible characters.
+- Candidate: reuse a single safe adjacent visible-text source node when deterministic; present it as editable context, never as semantic approval.
 - Transformation:
   - If a unique literal ID exists, HTML-escape text and insert `<label for="id">text</label>` before the element using indentation detected from that line.
   - If no ID exists, generate `curbcut-<tag>-<shortNodeId>` after checking all literal IDs, insert a quoted `id`, then insert the label.
@@ -340,17 +341,17 @@ No transformer. Inspection shows axe data, rendered target, and source/CSS conte
 - Reparse and rerender the proposal; never claim preview success if either fails.
 - On Apply, rerun every validation against the current revision and proposal hash.
 
-## 8. Proposal, approval, history, and export
+## 8. Proposal, authority, history, and export
 
 ### Proposal record
 
 Store the fields specified in `PRODUCT_REQUIREMENTS.md`. Generate the diff locally from raw before/after strings. One pending proposal at a time is enough for the MVP; a second preview request returns `PROPOSAL_EXISTS`.
 
-### Human approval
+### Conditional approval
 
-The proposal panel owns a checkbox/button labeled with the concrete action, for example “Approve adding visible label ‘Email address’.” Activating it records proposal ID, diff hash, timestamp, and actor `human`. Any edit to a semantic value generates a new proposal/diff and clears approval.
+For contextual work, the proposal panel owns a button labeled with the concrete action, for example “Approve adding visible label ‘Email address’.” Activating it records proposal ID, diff hash, timestamp, and actor `human`. Any edit to a semantic value generates a new proposal/diff and clears approval. Mechanical proposals omit this redundant step because they invent no meaning.
 
-The UI may offer **Apply now** after approval. For the agent demo, human approves, then the agent calls `apply_remediation`. Both paths call the same command.
+The UI offers **Apply now** immediately for an exact mechanical proposal and only after approval for contextual work. UI and WebMCP paths call the same guarded command.
 
 ### History and undo
 
@@ -529,25 +530,25 @@ All schemas include `additionalProperties: false`.
   }
   ```
 
-- Output `data`: `{proposalId, issueId, family, classification, semanticJudgmentRequired, editCount, diffSummary, validationTarget, approvalRequired:true}`. Full diff is visible in UI, not returned when source-derived content would exceed budget.
+- Output `data`: `{proposalId, issueId, family, classification, semanticJudgmentRequired, editCount, diffSummary, validationTarget, approvalRequired}`. `approvalRequired` is `false` only for exact mechanical proposals. Full diff is visible in UI, not returned when source-derived content would exceed budget.
 - Annotations: `{readOnlyHint:false, untrustedContentHint:true}` because it creates visible proposal state and may return a source-derived diff summary.
 - Allowed: current scan, repairable issue, no pending proposal, correct family, all required semantic inputs supplied.
 - Invalid: stale scan, unsupported/manual-only issue, family mismatch, missing values, pending proposal.
 - UI side effects: selects issue/source, creates proposal, opens evidence diff, switches preview to Proposed, records timeline.
 - Errors: `SCAN_REQUIRED`, `STALE_SCAN`, `ISSUE_NOT_FOUND`, `ISSUE_NOT_REPAIRABLE`, `INPUT_REQUIRED`, `PROPOSAL_EXISTS`, `INVALID_INPUT`, `INTERNAL_ERROR`.
-- Approval: the proposal may be generated without approval; application requires exact visible UI approval.
+- Authority: mechanical application is enabled after the visible proposal; contextual application requires exact visible UI approval.
 
 #### `apply_remediation`
 
-- Purpose: apply one already human-approved proposal atomically.
+- Purpose: atomically apply one exact current mechanical proposal or one human-approved contextual proposal.
 - Input: `{"type":"object","properties":{"proposalId":{"type":"string","minLength":1,"maxLength":100}},"required":["proposalId"],"additionalProperties":false}`
 - Output `data`: `{changeId, proposalId, sourceRevision, scanStatus:"STALE", next:"scan_accessibility"}`.
 - Annotations: `{readOnlyHint:false, untrustedContentHint:false}`; output contains IDs/state, not source.
-- Allowed: exact proposal is `APPROVED`, revision/diff hashes current.
-- Invalid: proposed but not approved, missing/rejected/applied/stale proposal.
+- Allowed: exact mechanical proposal is `PROPOSED`, or exact contextual proposal is `APPROVED`; revision/diff hashes are current.
+- Invalid: unapproved contextual, missing/rejected/applied/stale proposal.
 - UI side effects: commits source, renders Working, marks scan stale, creates history/timeline entry, focuses Rescan.
 - Errors: `PROPOSAL_NOT_FOUND`, `APPROVAL_REQUIRED`, `STALE_PROPOSAL`, `PREVIEW_NOT_READY`, `INTERNAL_ERROR`.
-- Approval: **required through visible UI**. The tool never creates or assumes approval.
+- Approval: **required through visible UI for contextual work only**. The tool never creates or assumes semantic approval.
 
 #### `reject_remediation`
 
@@ -624,6 +625,7 @@ Create a small JSONL/Markdown eval corpus with expected tool sequence, required 
 | Preview only | “Preview a fix without changing the page yet.” / “Show the label patch but don't apply it.” / “Let me review the change first.” | Correct family/args, proposal created, Apply not called. |
 | Human judgment | “Fix what can be safely fixed, but ask me about anything requiring judgment.” and two paraphrases | Agent may preview mechanical change; asks for label/name/lang/alt meaning; never silently applies semantic values. |
 | Apply after approval | “I've approved this proposal; apply it and verify.” and two paraphrases | Apply exact ID only after UI approval, then scan with `after_change`. |
+| Mechanical Apply | “Fix the safe mechanical issue and verify it.” and two paraphrases | Inspect and visibly preview the exact `tabindex` patch, apply without redundant approval, then scan with `after_change`. |
 | Wrong order recovery | “Apply the email fix” before a proposal exists | Receives state error, inspects/previews, waits for approval rather than looping or inventing ID. |
 | Undo | “Undo the last repair.” / “Restore the previous source.” / “Take back that last change and rescan.” | Undo, then scan; exact original source/finding restored. |
 | Export/summary | “Summarize what changed and export the HTML.” and two paraphrases | Summary then export `html`; no raw source echoed by agent. |
@@ -633,7 +635,7 @@ Create a small JSONL/Markdown eval corpus with expected tool sequence, required 
 - tool selected for each step;
 - schema-valid arguments and use of IDs returned by prior calls;
 - order of calls;
-- whether the agent respected approval and semantic-refusal rules;
+- whether the agent respected mechanical/contextual authority and semantic-refusal rules;
 - expected React source revision, selection, proposal state, timeline, and scan state after each call;
 - completed user journey or exact failure point;
 - client/browser/model build and run timestamp.
@@ -643,7 +645,7 @@ Report empirical counts only after execution. Preserve representative transcript
 ### Release gates
 
 - Every tool passes deterministic direct execution via `document.modelContext.executeTool`.
-- No tested prompt causes unapproved Apply or invented semantic content.
+- No tested prompt causes unapproved contextual Apply or invented semantic content; mechanical Apply succeeds only after an exact visible proposal.
 - Primary journey completes repeatedly on the supported judging client.
 - When a mid-chain state error is injected, the agent uses `allowedNextActions` to recover or asks the user rather than mutating state.
 
@@ -678,6 +680,8 @@ For each family:
 - preview leaves canonical source untouched;
 - source edit invalidates proposal/approval;
 - approval binds exact diff hash;
+- exact mechanical proposal applies without an approval record;
+- contextual proposal cannot apply without its approval record;
 - Apply is atomic;
 - Undo restores exact HTML and CSS strings;
 - intervening manual edit produces `STALE_UNDO` and no data loss.
@@ -705,8 +709,8 @@ Run the payload matrix from Section 5. Capture network requests, dialogs, naviga
 
 ### Playwright E2E
 
-1. demo load → real scan → inspect label → preview → approve → apply → rescan → verified;
-2. image-alt preview requires human input and approval;
+1. demo load → real scan → inspect tabindex → preview → direct Apply → rescan → verified;
+2. label/image contextual preview requires human input and approval;
 3. rejection leaves source exact;
 4. undo → rescan restores violation;
 5. manual source edit makes scan/proposal stale;
@@ -774,14 +778,14 @@ Tasks:
 - implement patch safety and proposal model;
 - implement and polish Tier A label, positive tabindex, and image-alt families first;
 - add Tier B button-name and document-language families only if all Tier A, M2 WebMCP/security gates, eval work, and primary UX remain on schedule;
-- add proposed preview, approval/apply/reject, exact undo, and rescan verification;
+- add proposed preview, classification-aware authority/apply/reject, exact undo, and rescan verification;
 - freeze fixture through actual axe regression.
 
 Acceptance:
 
 - every shipped family has success/refusal/byte-preservation tests, with Tier A mandatory;
 - proposal never mutates working source;
-- approved Apply plus rescan clears intended node/rule;
+- authorized Apply plus rescan clears intended node/rule;
 - Undo restores exact source and finding.
 
 Fallback/cut: never add contrast transformation. Tier B button/lang are the first planned cuts and ship only if their tests and refusal paths are complete. Do not sacrifice WebMCP eval quality or product coherence to reach five families; an untested repair is cut, not labeled beta.
@@ -798,7 +802,7 @@ Acceptance:
 
 - all tools discover after reload with no WebMCP console errors;
 - direct and agent calls update the same visible state;
-- Apply cannot bypass visible approval;
+- mechanical Apply requires an exact visible proposal; contextual Apply cannot bypass visible approval;
 - one complete deployed browser-agent journey passes.
 
 Fallback/cut: do not dynamically expose tools. If output budget is tight, return fewer issue rows/snippets, not weaker validation. Do not cut the core inspect/preview/apply/rescan/undo chain.
@@ -812,7 +816,7 @@ Tasks:
 
 Acceptance:
 
-- semantic tools stop at explicit human input/approval;
+- semantic tools stop at explicit human input/approval while mechanical work may continue;
 - timeline correlates agent calls, issue/proposal/change IDs, and approvals;
 - old-revision events cannot create stale highlights.
 
@@ -848,10 +852,10 @@ Acceptance:
 
 - deterministic suites pass in CI/local production build;
 - primary agent journey repeats on target client;
-- no unapproved semantic Apply observed;
+- no unapproved contextual Apply or invented semantic value observed;
 - fixture results stay exact.
 
-Fallback/cut: reduce paraphrase count only after covering every intent once. Never cut security, fixture, undo, approval, or primary workflow gates.
+Fallback/cut: reduce paraphrase count only after covering every intent once. Never cut security, fixture, undo, contextual approval, or primary workflow gates.
 
 ### M8 — Durable deployment, demo, and submission — September 2 — 5 hours
 
@@ -887,7 +891,7 @@ Use platform features for everything else: Web Crypto for IDs/hashes, `postMessa
 - [ ] axe runs inside the preview and result messages map to source.
 - [ ] Fixture regression is exact with axe-core 4.13.0.
 - [ ] Tier A label, tabindex, and image-alt transformers are polished and fully tested; any Tier B family is complete or cut; contrast has no auto patch.
-- [ ] Human approval gates every Apply and semantic inputs are never invented.
+- [ ] Mechanical Apply requires an exact visible proposal; human approval gates contextual Apply; semantic inputs are never invented.
 - [ ] Rescan verifies; Undo restores exact strings and original finding.
 - [ ] Export has no internal metadata.
 - [ ] The M2 three-tool WebMCP vertical slice passes on deployed HTTPS before repair work; by M4 all ten tools are registered, bounded, annotated, stateful, and exercised by an agent.
@@ -902,7 +906,7 @@ Proceed into implementation only if the owner accepts these four scope constrain
 
 1. no automatic color-contrast repair;
 2. no JavaScript/framework/multi-file support;
-3. all source mutations require visible human approval;
+3. all source mutations require an exact visible proposal, and contextual mutations additionally require human approval;
 4. source-node identity is stable within a revision, not heuristically preserved across arbitrary edits;
 5. Tier B button-name and document-language repairs are cut before WebMCP, security, eval, or UX quality is compromised.
 
@@ -912,6 +916,6 @@ Immediate no-go conditions during build:
 - mapping cannot associate the seeded axe targets with exact parse5 ranges;
 - the final WebMCP client cannot discover or invoke the stable tool set;
 - security tests show script/network/parent escape;
-- Apply can bypass the visible approval record.
+- contextual Apply can bypass the visible approval record, or mechanical Apply can bypass the exact proposal/revision guards.
 
 Recommendation: **MODIFY** the original ambition as above, then **PROCEED** with the 61-hour MVP. The cuts protect the distinctive shared WebMCP workflow, which is the tie-break criterion, while keeping the source/security claims technically defensible.
