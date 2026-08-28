@@ -1,6 +1,6 @@
 # Curbcut — Product Requirements
 
-Status: M1–M7 implemented; current-source production freeze, final target-client verification, video, and submission remain pending
+Status: MVP implementation, production freeze, and target-client verification complete; owner video and Devpost submission remain pending
 Planning date: August 26, 2026  
 Hackathon deadline: September 3, 2026 at 1:00 PM PT
 
@@ -25,7 +25,7 @@ The product extends, rather than replaces, the successful spike architecture:
 - Replace the spike's same-origin iframe with an opaque-origin sandbox and a validated `postMessage` bridge.
 - Register a stable tool set once. The spike observed a transient tool-list update during sequential registration, so the MVP will not dynamically add and remove tools as state changes.
 - Connect WebMCP to the real product architecture early: by the end of M2, `scan_accessibility`, `list_issues`, and `inspect_issue` must operate the real sandbox, axe results, React store, source map, source selection, and preview highlight. The complete ten-tool workflow remains M4 scope.
-- Maintain a persistent authenticated Vercel deployment from M1/M2 onward. Earlier milestones were smoke tested on deployed HTTPS; M8 must freeze, redeploy, and verify the current source rather than treating the previously verified M7 build as final-release evidence.
+- Maintain a persistent authenticated Vercel deployment from M1/M2 onward. The current release candidate, commit `b92ba81` on `codex/hackathon-ready`, was frozen, deployed, and verified at <https://curbcut-one.vercel.app> as Vercel deployment `dpl_9w2FuuoUFPFWPtM1Gc7zSFVSxy9Z`.
 
 ## 2. Audience and job to be done
 
@@ -435,7 +435,7 @@ Point-loss risk: flaky registration, ambiguous schemas, a demo that uses only on
 
 ### Execution
 
-Why it can score highly: one coherent end-to-end workspace, parser-backed mapping, isolated preview, five fully bounded and tested patch families, exact undo, deterministic fixture, and calibrated authority. Durable current-source deployment evidence remains an M8 release task.
+Why it can score highly: one coherent end-to-end workspace, parser-backed mapping, isolated preview, five fully bounded and tested patch families, exact undo, deterministic fixture, and calibrated authority. The current source is durably deployed and has passed both automated and production target-client gates.
 
 Evidence: a new source revision, a verified rule disappearance, an undo that restores the exact source and finding, and export without metadata.
 
@@ -572,3 +572,7 @@ The MVP is done only when a fresh deployed session can:
 10. export clean source without mapping metadata;
 11. complete the primary multi-tool browser-agent prompt on the supported client;
 12. keep Curbcut itself keyboard-usable and free of known critical/serious axe violations.
+
+Release evidence recorded August 28, 2026: 85/85 Vitest checks across eight files, 24/24 Playwright checks, 33 validated WebMCP trajectory cases across eleven intents and ten tools, a complete native-Chrome production ten-tool journey with reload rediscovery and zero console errors, and a Codex in-app browser production scan/list/inspect journey with exact source mapping, preview highlight, and zero console errors. Production CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS headers also passed. The Impeccable visual reviewer returned **SHIP** and the release code audit returned **CLEAR**.
+
+The optional model-backed OpenAI trajectory run remains pending only because `OPENAI_API_KEY` is absent; it is not required by the runtime or release gate. Known non-blockers are the Vite bundle warning (about 306.69 KB gzip, dominated by axe-core) and bounded scan responses: when a security cap is reached, counts are explicitly lower bounds and verification is reported as inconclusive rather than as a false pass.

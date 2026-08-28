@@ -1,6 +1,6 @@
 # Curbcut — Devpost submission draft
 
-Status: draft for final verification. The current five-family source is not yet frozen or redeployed; replace pending evidence only after the exact production artifact, client run, or public asset exists.
+Status: production release candidate verified; owner video upload and Devpost submission remain pending.
 
 ## Submission fields
 
@@ -8,7 +8,7 @@ Status: draft for final verification. The current five-family source is not yet 
 
 **Tagline:** A browser-native accessibility repair workbench where a developer and browser agent safely repair the same live HTML/CSS artifact.
 
-**Live application:** <https://curbcut-one.vercel.app> — last verified M7 deployment; current-source production redeploy and final smoke pending.
+**Live application:** <https://curbcut-one.vercel.app> — commit `b92ba81` on `codex/hackathon-ready`, Vercel deployment `dpl_9w2FuuoUFPFWPtM1Gc7zSFVSxy9Z`.
 
 **Public repository:** <https://github.com/nbobby07/curbcut>
 
@@ -60,13 +60,27 @@ Curbcut does not claim automated WCAG compliance. axe-core covers only part of a
 
 ### Evidence
 
-The current source gate validates 33 WebMCP trajectory cases across eleven intents and all ten tools, with 84 passing Vitest checks. The current Playwright suite contains 24 browser checks and still needs its final full run. Coverage includes all five repair families, proposal-readiness and concurrent-mutation guards, the real offscreen mobile iframe/requestAnimationFrame scan regression and zero horizontal overflow, direct mechanical Apply and contextual approval, the opaque-origin boundary, configured production headers, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, Apply/rescan, Undo/rescan, local import, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between registered tool schemas and the eval snapshot. The complete suite, production build, and target-client journey must be rerun from the frozen commit before these become final submission evidence.
+The frozen source gate passes 85/85 Vitest checks across eight files, 24/24 Playwright checks, and a validated WebMCP corpus of 33 trajectory cases across eleven intents and all ten tools. Coverage includes all five repair families, proposal-readiness and concurrent-mutation guards, the real offscreen mobile iframe/requestAnimationFrame scan regression and zero horizontal overflow, direct mechanical Apply and contextual approval, the opaque-origin boundary, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, Apply/rescan, Undo/rescan, local import, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between registered tool schemas and the eval snapshot.
 
-TODO before submission: insert measured WebMCP evaluation results only after the final corpus has run on the named client/model/build. Do not replace this sentence with an estimate.
+Native Chrome through Chrome DevTools MCP 1.8 passed the production ten-tool workflow, including reload rediscovery, with zero console errors. The Codex in-app browser independently passed production `get_workspace`, scan, list, and inspect calls with mapped source selection, preview highlight, timeline activity, and zero console errors on August 28, 2026. Production response headers passed for CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS. Impeccable review returned **SHIP** and the release code audit returned **CLEAR**.
+
+The optional OpenAI model-backed trajectory run remains pending only because `OPENAI_API_KEY` is absent; do not substitute an estimate. The deterministic corpus and live browser journeys are the current measured evidence. Known non-blockers are the roughly 306.69 KB gzip Vite chunk warning (axe-core dominates) and scan-cap lower-bound semantics: capped results say `≥` and cannot falsely mark Apply or Undo verified.
+
+## Production screenshots
+
+![Scanned production workspace](./curbcut-scanned-workspace.png)
+
+![Mechanical remediation preview](./curbcut-mechanical-preview.png)
+
+![Verified mechanical repair](./curbcut-verified-mechanical.png)
+
+![Contextual remediation awaiting approval](./curbcut-remediation-preview.png)
+
+![Responsive medium-width workspace](./curbcut-medium-workspace.png)
 
 ## Judge testing instructions
 
-1. Open <https://curbcut-one.vercel.app> in ChatGPT's in-app browser or a WebMCP-enabled Chrome build. Chrome 151 is the recorded standalone test client; replace this sentence with the exact final judging client/build after the frozen-release smoke.
+1. Open <https://curbcut-one.vercel.app> in ChatGPT's in-app browser or a WebMCP-enabled Chrome build. The release candidate was verified in the Codex in-app browser on August 28, 2026 and in native Chrome through Chrome DevTools MCP 1.8.
 2. Choose **Reset demo** if needed.
 3. Send this prompt to the browser agent:
 
@@ -84,19 +98,19 @@ TODO before submission: insert measured WebMCP evaluation results only after the
 - [ ] Verify the video and audio from a signed-out browser.
 - [ ] Show real tool discovery/calls, not a simulated invocation.
 - [ ] Show scan evidence, synchronized source/preview focus, direct mechanical Apply, contextual visible approval, rescan, semantic review, and summary/export or Undo.
-- [ ] Recapture the scanned workspace from the frozen production deployment.
-- [ ] Recapture the mechanical diff and `RENDERING → READY → Apply` state from the frozen production deployment.
-- [ ] Recapture the contextual proposed diff/render/approval state from the frozen production deployment.
-- [ ] Recapture a distinct verified-result/timeline image from the frozen production deployment; do not reuse the scanned-workspace file.
+- [x] Recapture the scanned workspace from the frozen production deployment.
+- [x] Recapture the mechanical diff and `RENDERING → READY → Apply` state from the frozen production deployment.
+- [x] Recapture the contextual proposed diff/render/approval state from the frozen production deployment.
+- [x] Recapture a distinct verified-result/timeline image from the frozen production deployment.
 - [ ] Use narration only or properly licensed audio; do not add third-party trademarks or copyrighted music.
 
 ## Final submission checklist
 
 - [ ] Join/registration status is confirmed in the submitting Devpost account.
-- [ ] Frozen current-source build is live in a clean target-client session and remains available without payment or credentials.
+- [x] Frozen current-source build is live in a clean target-client session and remains available without payment or credentials.
 - [x] GitHub repository is public; root license is detected; About description and homepage are set.
-- [ ] `npm test`, all 24 Playwright checks, and `npm run build` pass from the frozen commit.
-- [ ] Final browser/client/build, prompt, limitations, and measured eval results agree across README, reports, video, and Devpost text.
-- [ ] Every public screenshot and the video depict the frozen deployment.
+- [x] `npm test` (85/85), all 24 Playwright checks, and `npm run build` pass for the release candidate.
+- [ ] Final client, prompt, limitations, and measured evidence agree across README, reports, video, and Devpost text after the video is recorded.
+- [ ] Every public screenshot and the final video depict the frozen deployment; screenshots pass, video remains pending.
 - [ ] All URLs work from a signed-out browser.
 - [ ] Submit before September 3, 2026 at 1:00 PM PT; use deadline morning only as recovery buffer.

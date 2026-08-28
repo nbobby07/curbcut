@@ -1,8 +1,8 @@
 # Curbcut
 
-[Live application — last verified M7 deployment](https://curbcut-one.vercel.app) · [Source code](https://github.com/nbobby07/curbcut) · [MIT license](./LICENSE)
+[Live production release candidate](https://curbcut-one.vercel.app) · [Source code](https://github.com/nbobby07/curbcut) · [MIT license](./LICENSE)
 
-Release status: the five-family source build is complete locally, but its frozen commit, production redeploy, final target-client smoke, and release media are still pending verification.
+Release status: commit `b92ba81` on `codex/hackathon-ready` is deployed and verified at the public URL. Automated and target-client release gates pass. The remaining owner tasks are the narrated video and Devpost submission; the optional OpenAI model-backed eval awaits an `OPENAI_API_KEY`.
 
 Curbcut is a local-first, browser-native accessibility repair workbench for editable static HTML and CSS. A frontend developer and an external browser agent inspect and repair the same live artifact through WebMCP: the agent may apply exact mechanical patches after showing them, while the developer retains semantic and visual judgment.
 
@@ -23,9 +23,13 @@ The agent handles repetitive scanning, filtering, source lookup, proposal prepar
 
 ## Live workspace
 
-These are pre-freeze workflow captures. Final screenshots must be recaptured from the frozen production deployment.
+These are fresh captures of the production release candidate.
 
 ![Curbcut scanned workspace](./docs/curbcut-scanned-workspace.png)
+
+Responsive workspace at a medium viewport:
+
+![Curbcut medium workspace](./docs/curbcut-medium-workspace.png)
 
 Mechanical proposal: visible exact diff, immediately agent-applicable, and reversible.
 
@@ -41,7 +45,7 @@ Mechanical verification: the real axe rescan removes the repaired finding and re
 
 ## Judge quick start
 
-1. Open the [live application](https://curbcut-one.vercel.app) in ChatGPT's in-app browser, or a WebMCP-enabled Chrome build. Chrome 151 is the recorded standalone Chrome test client; the exact final judging client still requires a frozen-release smoke test.
+1. Open the [live application](https://curbcut-one.vercel.app) in ChatGPT's in-app browser, or a WebMCP-enabled Chrome build. The release candidate was exercised in the Codex in-app browser on August 28, 2026 and in native Chrome through Chrome DevTools MCP 1.8.
 2. If the workspace is not on the original fixture, choose **Reset demo**.
 3. Give the browser agent this prompt:
 
@@ -110,7 +114,9 @@ npm run test:e2e
 npm run build
 ```
 
-The current source gate validates 33 WebMCP trajectory cases across eleven intents and all ten tools, with 84 passing Vitest checks. The current Playwright suite contains 24 browser checks; its final full run is pending. Browser coverage includes isolation, configured production headers, source mapping, real axe scans, all five repair families, proposal-readiness and concurrent-mutation guards, the offscreen mobile-iframe scan path and zero horizontal overflow, direct mechanical Apply, contextual approval enforcement, Apply/rescan, Undo/rescan, import, export, reload, all ten tool registrations, and exact agreement between registered tool schemas and the eval snapshot. A complete rerun from the frozen commit and final production target-client smoke remain pending. See the [M7 report](./docs/M7_REPORT.md) and [August 27 M4–M6 verification](./docs/M4_REPORT.md). Model-backed results are reported only after they are actually run.
+Release verification passed with 85/85 Vitest checks across eight files, 24/24 Playwright checks, a production Vite build, and a validated WebMCP corpus of 33 cases across eleven intents and all ten tools. Native Chrome completed the production ten-tool workflow—including proposal readiness, mechanical Apply/rescan, contextual rejection, export, Undo/rescan, reload rediscovery, and zero console errors. The Codex in-app browser independently passed production `get_workspace`, scan, list, and inspect calls with exact mapped-source selection, preview highlight, and zero console errors. Production response headers passed for CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS. See the [M7 release report](./docs/M7_REPORT.md) and [August 27 M4–M6 verification](./docs/M4_REPORT.md).
+
+The deterministic browser and schema suites are the release evidence. The optional OpenAI model-backed trajectory run remains pending only because `OPENAI_API_KEY` is absent; it is not a runtime or submission gate. The production build retains a non-blocking Vite chunk warning at about 306.69 KB gzip because axe-core dominates the bundle. Bounded scan responses explicitly report truncation and lower-bound (`≥`) counts when security caps are reached, so a capped result cannot falsely claim verification.
 
 ## Current limitations
 

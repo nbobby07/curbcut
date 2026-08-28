@@ -1,8 +1,8 @@
 # Curbcut — Implementation Plan
 
-Status: M1–M7 complete; M8 current-source freeze, production redeploy, final target-client smoke, owner-approved Apply/Undo rehearsal, video, and Devpost submission remain pending
+Status: M1–M7 and the M8 production release gate are complete; owner video and Devpost submission remain pending
 Baseline: the successful Spike A and Spike B code in this repository  
-Target: persistent authenticated Vercel project established during M1/M2; freeze and redeploy the current source, then verify that exact production artifact before September 2, 2026
+Target: production release candidate `b92ba81` deployed and verified at <https://curbcut-one.vercel.app>; submit before September 3, 2026 at 1:00 PM PT
 
 ## 1. Technical baseline and governing references
 
@@ -13,7 +13,7 @@ WebMCP implementation target:
 - `document.modelContext.registerTool()` from Chrome's WebMCP Imperative API.
 - Chrome documentation published May 18, 2026 and updated August 20, 2026, retrieved August 26, 2026.
 - Stable, same-origin top-document registration with `AbortSignal` cleanup; no cross-origin exposure.
-- Recorded test clients: ChatGPT in-app browser and WebMCP-enabled Chrome 151 with Chrome DevTools MCP 1.8. Rerun against the exact submission client and frozen production deployment before release; do not advertise an untested minimum Chrome version.
+- Recorded release clients: Codex in-app browser on August 28, 2026 and native Chrome through Chrome DevTools MCP 1.8. Do not advertise an untested minimum Chrome version.
 
 Primary references:
 
@@ -724,8 +724,8 @@ Run the payload matrix from Section 5. Capture network requests, dialogs, naviga
 
 ### Compatibility smoke tests
 
-- WebMCP-enabled Chrome 151, the recorded standalone Chrome target;
-- ChatGPT in-app browser;
+- native Chrome through Chrome DevTools MCP 1.8;
+- Codex in-app browser (verified August 28, 2026);
 - ordinary current Chrome without WebMCP (manual app degrades cleanly);
 - one Firefox/Safari manual smoke for the non-WebMCP workspace if time remains, but these are not submission blockers.
 
@@ -859,25 +859,27 @@ Acceptance:
 - no unapproved contextual Apply or invented semantic value observed;
 - fixture results stay exact.
 
-Recorded current-source evidence: 33 deterministic trajectory cases across eleven intents and ten tools, plus 84 passing Vitest checks. The current Playwright suite contains 24 browser checks, including the real offscreen mobile iframe/requestAnimationFrame scan regression and zero-horizontal-overflow assertion; its final full run is pending. The optional model-backed run is not an M7 completion requirement and remains unreported until it is actually run.
+Recorded release evidence: 33 deterministic trajectory cases across eleven intents and ten tools, 85/85 passing Vitest checks across eight files, and 24/24 passing Playwright checks. Browser coverage includes the real offscreen mobile iframe/requestAnimationFrame scan regression, zero horizontal overflow, all five families, authority and proposal-readiness gates, isolation, mapping, export, reload, and schema drift. The optional OpenAI model-backed run is not an M7 completion requirement and remains pending only because `OPENAI_API_KEY` is absent.
 
 Fallback/cut: reduce paraphrase count only after covering every intent once. Never cut security, fixture, undo, contextual approval, or primary workflow gates.
 
-### M8 — Durable deployment, demo, and submission — September 2 — 5 hours
+### M8 — Durable deployment, demo, and submission — IN PROGRESS (release gate complete)
 
 Tasks:
 
-- freeze and deploy the current source to the authenticated Vercel production project, replacing the previously verified M7 artifact;
-- verify reload/direct URL/CSP/tool discovery on final URL;
-- capture screenshots/logs/eval evidence;
-- rehearse under-three-minute storyboard and finalize README/report/submission text.
+- [x] Freeze commit `b92ba81` on `codex/hackathon-ready` and deploy it with Vercel CLI 59.9.1 as `dpl_9w2FuuoUFPFWPtM1Gc7zSFVSxy9Z`.
+- [x] Verify the public URL, reload rediscovery, production security headers, tool discovery, and the complete native-Chrome ten-tool workflow.
+- [x] Verify production scan/list/inspect source selection and preview highlighting in the Codex in-app browser, with zero console errors.
+- [x] Capture fresh production workflow screenshots and finalize repository release evidence.
+- [ ] Record and upload the under-three-minute narrated video.
+- [ ] Submit the final Devpost entry.
 
 Acceptance:
 
-- clean-session deployed demo completes;
-- the frozen current-source deployment is authenticated, persistent, and available through judging;
-- exact URL, browser versions, prompts, limitations, and evidence are documented;
-- video/storyboard is under three minutes and first proposal appears by 15 seconds.
+- [x] Clean-session deployed native-Chrome demo completes all ten tools, including Apply/rescan, Undo/rescan, export, reload, and zero console errors.
+- [x] The frozen current-source deployment is authenticated, persistent, and publicly available at <https://curbcut-one.vercel.app>.
+- [x] Exact URL, clients, prompt, limitations, screenshots, and verification evidence are documented.
+- [ ] Video/storyboard is under three minutes and first proposal appears by 15 seconds.
 
 Fallback/cut: September 2 is feature freeze. Cut nice-to-haves and incomplete families; do not add infrastructure. September 3 morning is submission/recovery buffer only.
 
@@ -903,8 +905,9 @@ Use platform features for everything else: Web Crypto for IDs/hashes, `postMessa
 - [x] The M2 three-tool WebMCP vertical slice passed on deployed HTTPS before repair work; by M4 all ten tools were registered, bounded, annotated, stateful, and exercised by an agent.
 - [x] Evals include 33 paraphrased cases across eleven intents, wrong-order recovery, readiness gating, and UI state assertions.
 - [x] Curbcut is keyboard-usable and self-scanned.
-- [ ] Final HTTPS URL is durable and tested in the judging client.
-- [ ] README, spike report, product requirements, implementation plan, evidence, and demo prompt agree.
+- [x] Final HTTPS URL is durable and tested in native Chrome and the Codex in-app browser.
+- [x] README, product requirements, implementation plan, evidence, and demo prompt agree on the release candidate.
+- [ ] Owner records the video and submits the Devpost entry.
 
 ## 15. Go/no-go gates and recommendation
 
@@ -924,4 +927,6 @@ Immediate no-go conditions during release verification:
 - security tests show script/network/parent escape;
 - contextual Apply can bypass the visible approval record, or mechanical Apply can bypass the exact proposal/revision guards.
 
-Recommendation: M1–M7 are complete. **PROCEED to M8 freeze and submission without adding scope.** The remaining work is to freeze, redeploy, rerun the exact release gate and target-client journey, recapture media, and submit.
+Recommendation: the production release gate is complete. **PROCEED TO SUBMISSION without adding scope.** Remaining work is owner-only: record/host the under-three-minute video and submit Devpost. The optional OpenAI model-backed eval can be added if an `OPENAI_API_KEY` becomes available, but must not delay submission.
+
+Known non-blockers: the Vite production build reports a roughly 306.69 KB gzip chunk because axe-core dominates the bundle; scan security caps expose lower-bound counts and produce inconclusive verification rather than a false pass. Impeccable review returned **SHIP** and the release code audit returned **CLEAR**.

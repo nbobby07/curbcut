@@ -5,10 +5,12 @@ Date: August 28, 2026 (PT)
 ## Result
 
 - **Deterministic eval corpus and conditional-authority validation: PASS**
-- **Previous M7 deployment ChatGPT in-app browser smoke: PASS; historical evidence only**
-- **Current five-family source freeze, redeploy, and final target-client smoke: PENDING**
+- **Current five-family source freeze and production deployment: PASS**
+- **Native Chrome full ten-tool production workflow: PASS**
+- **Codex in-app browser production source-mapping workflow: PASS**
+- **Production security response headers: PASS**
 - **Optional automated OpenAI trajectory corpus: pending a valid `OPENAI_API_KEY`**
-- **M7 deterministic source evidence: COMPLETE**
+- **Release code audit: CLEAR; Impeccable visual review: SHIP**
 
 ## Corpus and safety gates
 
@@ -61,7 +63,7 @@ npx playwright test --list
 24 tests in 5 files
 ```
 
-The current suite includes a regression for the real offscreen mobile iframe/requestAnimationFrame scan failure and zero horizontal overflow. The complete 24-test suite must be run successfully—and rerun from the frozen commit—before those browser checks are presented as final release evidence.
+The current suite includes a regression for the real offscreen mobile iframe/requestAnimationFrame scan failure and zero horizontal overflow. The frozen release candidate passed all 24 browser checks.
 
 ## Deterministic verification
 
@@ -69,13 +71,16 @@ The current suite includes a regression for the real offscreen mobile iframe/req
 npm test
 Eval corpus valid: 33 cases, 11 intents, 10 tools.
 Test Files  8 passed (8)
-Tests       84 passed (84)
+Tests       85 passed (85)
+
+npm run test:e2e
+24 passed
 
 npm run build
 production build passed
 ```
 
-The build retains the known non-failing large-chunk warning for the locally bundled axe/controller code. Preserve the exact frozen-build log rather than carrying forward an older module count or byte size.
+The build retains a known non-failing large-chunk warning: the JavaScript bundle is about 306.69 KB gzip, dominated by the locally bundled axe-core runtime.
 
 ## Optional automated OpenAI corpus
 
@@ -90,26 +95,33 @@ model openai:gpt-5.4-mini-2026-03-17
 
 This optional model-backed run requires `OPENAI_API_KEY` and has not been used as release evidence. It is not a Curbcut runtime dependency or a submission gate.
 
-Current source evidence is the deterministic corpus validator, live-schema drift test, local browser coverage, and production build. Final release evidence still requires the complete suite from the frozen commit plus the current-source HTTPS target-client smoke. When an optional OpenAI run is performed, report `passCount`, `failCount`, and `errorCount` from the generated JSON and preserve representative failure trajectories before changing schemas or prompts.
+The deterministic corpus validator, live-schema drift test, full Playwright suite, production build, and target-client smokes are the release evidence. When an optional OpenAI run is performed, report `passCount`, `failCount`, and `errorCount` from the generated JSON and preserve representative failure trajectories before changing schemas or prompts.
 
-## Historical HTTPS target-client smoke — superseded for release
+## Frozen production release evidence
 
-On August 28, 2026, deployment `dpl_7Dhvy7s2y9B67iUNudo3QH9QP91D` at <https://curbcut-one.vercel.app> was exercised in ChatGPT's in-app browser. This remains valid evidence for that earlier M7 artifact, but it predates the two added repair families and the `RENDERING → READY → Apply` guard and is not evidence for the current source:
+Commit `b92ba81` on branch `codex/hackathon-ready` was built and deployed with Vercel CLI 59.9.1 as deployment `dpl_9w2FuuoUFPFWPtM1Gc7zSFVSxy9Z`, publicly aliased to <https://curbcut-one.vercel.app>.
 
-- all ten page-defined WebMCP tools were discovered with the expected schemas and annotations;
-- `list_issues` found the serious mechanical `tabindex` issue and `inspect_issue` mapped it to line 25, column 11, offsets 768–848;
-- `preview_remediation` returned `approvalRequired:false`, `agentMayApply:true`, and exposed `apply_remediation` as the next action while leaving source unchanged; the current implementation intentionally replaces that immediate next action with a `get_workspace` readiness poll;
-- the agent applied the exact mechanical proposal without a redundant approval, then a real axe rescan verified the `tabindex` finding was gone: 5 rules / 5 affected nodes, 3 critical and 2 serious;
-- `get_change_summary` reported one applied and verified `positive-tabindex` change;
-- the label proposal reused adjacent visible text (`Email address`) with two surgical edits (`id` plus `aria-labelledby`) and no duplicate visible label, returned `approvalRequired:true` and `agentMayApply:false`, and did not expose Apply before visible human approval;
-- the browser console contained no errors.
+Native Chrome through Chrome DevTools MCP 1.8 passed the complete production workflow:
 
-The target browser separately refused a speculative Undo because the user had not requested it. This is expected client safety behavior, not a Curbcut error. Explicit-user Undo has browser-test coverage; the final owner-approved narrated Apply/Undo rehearsal remains pending.
+- discovered all ten page-defined WebMCP tools;
+- called `get_workspace`, scan, list, and inspect against the live sandbox, store, mapping, source selection, and preview highlight;
+- created and rejected a contextual proposal without changing canonical source;
+- inspected and previewed the mechanical positive-`tabindex` repair, polled the exact proposal from `RENDERING` to `READY`, applied it, and verified it with a real rescan;
+- summarized and exported canonical source;
+- undid the change and rescanned to restore the original finding;
+- reloaded and rediscovered all ten tools;
+- completed with zero console errors.
 
-Before submission, replace this section's release conclusion with evidence from the frozen current-source deployment: commit SHA, deployment ID, client/browser build, exact prompt, all-ten-tool schema discovery, `RENDERING → READY → Apply`, mechanical verification, contextual approval refusal, explicit Undo/rescan, production response headers, reload, and console result.
+The Codex in-app browser independently exercised the same production deployment on August 28, 2026. `get_workspace`, `scan_accessibility`, `list_issues`, and `inspect_issue` passed; inspection selected the exact mapped source range, highlighted the corresponding preview node, populated the shared activity timeline, and produced zero console errors. The existing browser-local workspace already contained one persisted repair, so it correctly reported five current findings; fresh isolated production contexts were used for deterministic six-finding screenshots and regression evidence rather than overwriting local user data.
+
+The public alias returned HTTP 200 and passed the configured response-header gate: CSP, `Permissions-Policy: tools=(self)`, `Origin-Agent-Cluster: ?1`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, and HSTS. Fresh production captures are stored in `docs/curbcut-scanned-workspace.png`, `docs/curbcut-mechanical-preview.png`, `docs/curbcut-verified-mechanical.png`, `docs/curbcut-remediation-preview.png`, and `docs/curbcut-medium-workspace.png`.
+
+The release also passed an independent code audit (**CLEAR**) and Impeccable visual review (**SHIP**).
 
 ## Limits
 
 - Deterministic trajectory cases test schema selection, arguments, ordering, extra calls, and recovery using mock outputs. They do not execute the page or prove UI state.
 - Playwright separately covers the real sandbox, store, all five repair families, proposal readiness, concurrent mutation guards, conditional authority, Apply/rescan, Undo/rescan, import/export, reload, and schema registration boundaries.
 - The runner scores tool trajectories, not whether the final natural-language question is well phrased. Human-judgment cases therefore enforce the stronger machine-checkable boundary: inspection is allowed, while preview and Apply are not expected.
+- Scan security caps expose `countsStatus` and coverage metadata. If a result is truncated, issue counts are rendered as lower bounds and Apply/Undo verification is inconclusive rather than falsely successful.
+- The optional OpenAI model-backed eval remains pending only because `OPENAI_API_KEY` is absent; no alternate-provider credential is required by Curbcut.
