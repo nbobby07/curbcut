@@ -49,6 +49,7 @@ describe('M4 WebMCP contract', () => {
       ['get_workspace', { extra: true }],
       ['scan_accessibility', { reason: 'rescan' }],
       ['list_issues', { limit: 11 }],
+      ['list_issues', { impact: 'catastrophic' }],
       ['inspect_issue', { issueId: 4 }],
       ['preview_remediation', { issueId: 'x', family: 'add_form_label', values: { labelText: '' } }],
       ['preview_remediation', { issueId: 'x', family: 'remove_positive_tabindex', values: { labelText: 'No' } }],
@@ -76,6 +77,9 @@ describe('M4 WebMCP contract', () => {
     expect(inputSchema.properties.family).toMatchObject({
       enum: ['add_form_label', 'remove_positive_tabindex', 'set_image_alt', 'name_button', 'set_document_language'],
     })
+    const list = WEBMCP_TOOL_DEFINITIONS.find(({ name }) => name === 'list_issues')!
+    expect((list.inputSchema as { properties: { impact: { enum: string[] } } }).properties.impact.enum)
+      .toEqual(['critical', 'serious', 'moderate', 'minor', 'high', 'all'])
   })
 
   it('returns common state/next-actions, handles cancellation, and never leaks canonical source', async () => {

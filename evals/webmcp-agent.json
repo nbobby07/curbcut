@@ -17,7 +17,7 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "all", "status": "open", "limit": 10 },
+        "arguments": { "impact": "high", "status": "open" },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 6, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:color-contrast:0:cc-1-8", "ruleId": "color-contrast", "impact": "serious", "classification": "MANUAL_REVIEW", "status": "open", "sourceLine": 11 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 2 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       }
     ]
@@ -40,7 +40,7 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "all", "status": "open", "limit": 10 },
+        "arguments": { "impact": "high", "status": "open" },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 6, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:color-contrast:0:cc-1-8", "ruleId": "color-contrast", "impact": "serious", "classification": "MANUAL_REVIEW", "status": "open", "sourceLine": 11 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 2 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       }
     ]
@@ -63,7 +63,7 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "all", "status": "open", "limit": 10 },
+        "arguments": { "impact": "high", "status": "open" },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 6, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:color-contrast:0:cc-1-8", "ruleId": "color-contrast", "impact": "serious", "classification": "MANUAL_REVIEW", "status": "open", "sourceLine": 11 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 2 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       }
     ]
@@ -80,7 +80,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "#email", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -102,7 +101,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "#email", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -124,7 +122,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "#email", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -146,7 +143,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "#email", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -173,7 +169,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "#email", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -200,7 +195,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "#email", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -227,7 +221,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": ".product-image", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -249,7 +242,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": ".product-image", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -271,7 +263,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:image-alt:0:cc-1-23", "ruleId": "image-alt", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": ".product-image", "sourceLine": 34 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 16 }, { "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -290,6 +281,11 @@
         "functionName": "get_workspace",
         "arguments": {},
         "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 1, "scanId": "11111111-1111-4111-8111-111111111111", "proposalId": "22222222-2222-4222-8222-222222222222", "proposalStatus": "APPROVED", "canUndo": false, "webMcpAvailable": true }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "APPROVED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
+      },
+      {
+        "functionName": "get_change_summary",
+        "optional": true,
+        "mockOutput": { "ok": true, "data": { "sourceRevision": 1, "appliedCount": 0, "verifiedCount": 0, "undoneCount": 0, "countsStatus": "CURRENT", "scanCoverageStatus": "COMPLETE", "openCriticalSerious": 6, "manualReviewsOutstanding": 5, "changes": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "APPROVED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
       },
       {
         "functionName": "apply_remediation",
@@ -314,6 +310,11 @@
         "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 1, "scanId": "11111111-1111-4111-8111-111111111111", "proposalId": "22222222-2222-4222-8222-222222222222", "proposalStatus": "APPROVED", "canUndo": false, "webMcpAvailable": true }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "APPROVED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
       },
       {
+        "functionName": "get_change_summary",
+        "optional": true,
+        "mockOutput": { "ok": true, "data": { "sourceRevision": 1, "appliedCount": 0, "verifiedCount": 0, "undoneCount": 0, "countsStatus": "CURRENT", "scanCoverageStatus": "COMPLETE", "openCriticalSerious": 6, "manualReviewsOutstanding": 5, "changes": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "APPROVED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
+      },
+      {
         "functionName": "apply_remediation",
         "arguments": { "proposalId": "22222222-2222-4222-8222-222222222222" },
         "mockOutput": { "ok": true, "data": { "changeId": "33333333-3333-4333-8333-333333333333", "proposalId": "22222222-2222-4222-8222-222222222222", "sourceRevision": 2, "scanStatus": "STALE", "next": "scan_accessibility" }, "state": { "sourceRevision": 2, "scanStatus": "STALE", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "undo_remediation"] }
@@ -336,6 +337,11 @@
         "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 1, "scanId": "11111111-1111-4111-8111-111111111111", "proposalId": "22222222-2222-4222-8222-222222222222", "proposalStatus": "APPROVED", "canUndo": false, "webMcpAvailable": true }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "APPROVED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
       },
       {
+        "functionName": "get_change_summary",
+        "optional": true,
+        "mockOutput": { "ok": true, "data": { "sourceRevision": 1, "appliedCount": 0, "verifiedCount": 0, "undoneCount": 0, "countsStatus": "CURRENT", "scanCoverageStatus": "COMPLETE", "openCriticalSerious": 6, "manualReviewsOutstanding": 5, "changes": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "APPROVED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation", "apply_remediation"] }
+      },
+      {
         "functionName": "apply_remediation",
         "arguments": { "proposalId": "22222222-2222-4222-8222-222222222222" },
         "mockOutput": { "ok": true, "data": { "changeId": "33333333-3333-4333-8333-333333333333", "proposalId": "22222222-2222-4222-8222-222222222222", "sourceRevision": 2, "scanStatus": "STALE", "next": "scan_accessibility" }, "state": { "sourceRevision": 2, "scanStatus": "STALE", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "undo_remediation"] }
@@ -350,8 +356,13 @@
   {
     "name": "Mechanical Apply — safe tabindex repair",
     "intent": "mechanical_apply",
-    "messages": [{ "role": "user", "type": "message", "content": "Fix the checkout's safe mechanical accessibility issue. Show the exact proposal, apply it without asking me for semantic input, and verify it with axe." }],
+    "messages": [{ "role": "user", "type": "message", "content": "Check the workspace, then fix the checkout's safe mechanical accessibility issue. Inspect and show the exact proposal, apply it without semantic input, and verify it with axe." }],
     "expectedCall": [
+      {
+        "functionName": "get_workspace",
+        "arguments": {},
+        "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "NEVER", "sourceRevision": 1, "proposalStatus": "NONE", "canUndo": false, "webMcpAvailable": true }, "state": { "sourceRevision": 1, "scanStatus": "NEVER", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility"] }
+      },
       {
         "functionName": "scan_accessibility",
         "arguments": { "reason": "initial" },
@@ -359,8 +370,12 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "all", "classification": "MECHANICAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "targetSummary": ".continue", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "help": "Elements should not have tabindex greater than zero", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/tabindex?application=axeAPI", "wcagTags": [], "classification": "MECHANICAL", "classificationReason": "A deterministic syntax-only repair may be available for this exact source-backed target.", "target": ".continue", "sourceLocation": { "line": 25, "column": 11, "startOffset": 768, "endOffset": 848 }, "repairFamily": "remove_positive_tabindex", "requiredInputs": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
         "functionName": "preview_remediation",
@@ -387,7 +402,7 @@
   {
     "name": "Mechanical Apply — preview then commit",
     "intent": "mechanical_apply",
-    "messages": [{ "role": "user", "type": "message", "content": "Find a deterministic repair that needs no wording or design decision, display its code diff, apply that exact proposal, and rescan." }],
+    "messages": [{ "role": "user", "type": "message", "content": "Start with an accessibility scan. Find a deterministic repair that needs no wording or design decision, inspect it, display its code diff, apply that exact proposal, and rescan." }],
     "expectedCall": [
       {
         "functionName": "scan_accessibility",
@@ -396,8 +411,12 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "all", "classification": "MECHANICAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "targetSummary": ".continue", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "help": "Elements should not have tabindex greater than zero", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/tabindex?application=axeAPI", "wcagTags": [], "classification": "MECHANICAL", "classificationReason": "A deterministic syntax-only repair may be available for this exact source-backed target.", "target": ".continue", "sourceLocation": { "line": 25, "column": 11, "startOffset": 768, "endOffset": 848 }, "repairFamily": "remove_positive_tabindex", "requiredInputs": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
         "functionName": "preview_remediation",
@@ -424,7 +443,7 @@
   {
     "name": "Mechanical Apply — no semantic pause",
     "intent": "mechanical_apply",
-    "messages": [{ "role": "user", "type": "message", "content": "Repair what is purely mechanical in this checkout. Keep the proposal visible, apply only that surgical change, and confirm the original finding disappears." }],
+    "messages": [{ "role": "user", "type": "message", "content": "Start with an accessibility scan and repair what is purely mechanical in this checkout. Inspect it, keep the proposal visible, apply only that surgical change, and confirm the original finding disappears." }],
     "expectedCall": [
       {
         "functionName": "scan_accessibility",
@@ -433,8 +452,12 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "all", "classification": "MECHANICAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "classification": "MECHANICAL", "status": "open", "targetSummary": ".continue", "sourceLine": 25 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      },
+      {
+        "functionName": "inspect_issue",
+        "arguments": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17" },
+        "mockOutput": { "ok": true, "data": { "issueId": "11111111-1111-4111-8111-111111111111:violation:tabindex:0:cc-1-17", "ruleId": "tabindex", "impact": "serious", "help": "Elements should not have tabindex greater than zero", "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/tabindex?application=axeAPI", "wcagTags": [], "classification": "MECHANICAL", "classificationReason": "A deterministic syntax-only repair may be available for this exact source-backed target.", "target": ".continue", "sourceLocation": { "line": 25, "column": 11, "startOffset": 768, "endOffset": 848 }, "repairFamily": "remove_positive_tabindex", "requiredInputs": [] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
         "functionName": "preview_remediation",
@@ -475,7 +498,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "#email", "sourceLine": 16 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -507,7 +529,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "#email", "sourceLine": 16 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -539,7 +560,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:label:0:cc-1-12", "ruleId": "label", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "#email", "sourceLine": 16 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -562,6 +582,7 @@
       {
         "functionName": "get_workspace",
         "arguments": {},
+        "optional": true,
         "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 2, "scanId": "44444444-4444-4444-8444-444444444444", "proposalStatus": "APPLIED", "latestChangeId": "33333333-3333-4333-8333-333333333333", "canUndo": true, "webMcpAvailable": true }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
       },
       {
@@ -584,6 +605,7 @@
       {
         "functionName": "get_workspace",
         "arguments": {},
+        "optional": true,
         "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 2, "scanId": "44444444-4444-4444-8444-444444444444", "proposalStatus": "APPLIED", "latestChangeId": "33333333-3333-4333-8333-333333333333", "canUndo": true, "webMcpAvailable": true }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
       },
       {
@@ -606,6 +628,7 @@
       {
         "functionName": "get_workspace",
         "arguments": {},
+        "optional": true,
         "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 2, "scanId": "44444444-4444-4444-8444-444444444444", "proposalStatus": "APPLIED", "latestChangeId": "33333333-3333-4333-8333-333333333333", "canUndo": true, "webMcpAvailable": true }, "state": { "sourceRevision": 2, "scanStatus": "CURRENT", "proposalStatus": "APPLIED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation", "undo_remediation"] }
       },
       {
@@ -683,7 +706,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": ".icon-button", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -710,7 +732,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": ".icon-button", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -737,7 +758,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 3, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:button-name:0:cc-1-21", "ruleId": "button-name", "impact": "critical", "classification": "CONTEXTUAL", "status": "open", "targetSummary": ".icon-button", "sourceLine": 32 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -764,7 +784,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "html", "sourceLine": 2 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -791,7 +810,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "html", "sourceLine": 2 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {
@@ -818,7 +836,6 @@
       },
       {
         "functionName": "list_issues",
-        "arguments": { "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "limit": 10 },
         "mockOutput": { "ok": true, "data": { "scanId": "11111111-1111-4111-8111-111111111111", "totalMatching": 1, "issues": [{ "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "ruleId": "html-has-lang", "impact": "serious", "classification": "CONTEXTUAL", "status": "open", "targetSummary": "html", "sourceLine": 2 }] }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "NONE" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
       },
       {

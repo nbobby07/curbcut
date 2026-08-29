@@ -51,6 +51,10 @@ const postLabelSummaryMetrics = Object.freeze({
   openCriticalSerious: 5,
   manualReviewsOutstanding: 4,
 })
+const preApplySummaryMetrics = Object.freeze({
+  openCriticalSerious: 6,
+  manualReviewsOutstanding: 5,
+})
 
 const assertMetrics = (caseName, outputName, actual, expected) => {
   for (const [metric, frozenValue] of Object.entries(expected)) {
@@ -85,7 +89,7 @@ for (const test of cases) {
   if (lastMessage?.role !== 'user' || lastMessage.type !== 'message' || typeof lastMessage.content !== 'string' || !lastMessage.content.trim()) {
     fail(`${test.name} must end with one non-empty user prompt.`)
   }
-  if (test.expectedCall.length > 6) fail(`${test.name} exceeds the six-step runner budget.`)
+  if (test.expectedCall.length > 8) fail(`${test.name} exceeds the eight-step runner budget.`)
 
   let approvedStateSeen = false
   let mechanicalProposalSeen = false
@@ -96,6 +100,9 @@ for (const test of cases) {
     }
     if (call.arguments !== undefined && (!call.arguments || typeof call.arguments !== 'object' || Array.isArray(call.arguments))) {
       fail(`${test.name} has invalid arguments for ${call.functionName}.`)
+    }
+    if (call.optional !== undefined && (typeof call.optional !== 'boolean' || call.optional && !['get_workspace', 'get_change_summary'].includes(call.functionName))) {
+      fail(`${test.name} may mark only bounded state reads optional.`)
     }
     if (!call.mockOutput || typeof call.mockOutput !== 'object' || Array.isArray(call.mockOutput)) {
       fail(`${test.name} must provide a realistic object mockOutput for ${call.functionName}.`)
@@ -122,7 +129,8 @@ for (const test of cases) {
       )
     }
     if (call.functionName === 'get_change_summary') {
-      assertMetrics(test.name, 'post-label change summary', call.mockOutput.data, postLabelSummaryMetrics)
+      const summaryMetrics = test.intent === 'apply_after_approval' ? preApplySummaryMetrics : postLabelSummaryMetrics
+      assertMetrics(test.name, 'current change summary', call.mockOutput.data, summaryMetrics)
       if (call.mockOutput.data?.countsStatus !== 'CURRENT') fail(`${test.name} current change summary must identify its scan counts as CURRENT.`)
     }
     if (call.functionName === 'list_issues' && call.mockOutput.data?.totalMatching === 6) {
@@ -164,14 +172,29 @@ for (const test of cases) {
     (test.expectedCall.some(({ functionName }) => functionName === 'apply_remediation') || !seededApplies.length)) {
     fail(`${test.name} must recover from one injected Apply refusal and stop before Apply.`)
   }
+  if (test.intent === 'find_high_impact') {
+    const list = test.expectedCall.find(({ functionName }) => functionName === 'list_issues')
+    if (list?.arguments?.impact !== 'high' || list.arguments.status !== 'open') {
+      fail(`${test.name} must exercise the strict high-impact aggregate filter.`)
+    }
+  }
   if (test.intent === 'mechanical_apply' &&
-    test.expectedCall.map(({ functionName }) => functionName).join('>') !==
-      'scan_accessibility>list_issues>preview_remediation>get_workspace>apply_remediation>scan_accessibility') {
-    fail(`${test.name} must poll get_workspace for a READY visible preview before mechanical Apply.`)
+    ![
+      'get_workspace>scan_accessibility>list_issues>inspect_issue>preview_remediation>get_workspace>apply_remediation>scan_accessibility',
+      'scan_accessibility>list_issues>inspect_issue>preview_remediation>get_workspace>apply_remediation>scan_accessibility',
+    ].includes(test.expectedCall.map(({ functionName }) => functionName).join('>'))) {
+    fail(`${test.name} must inspect the issue and poll get_workspace for a READY visible preview before mechanical Apply.`)
   }
   if (test.intent === 'human_judgment' &&
     test.expectedCall.some(({ functionName }) => ['preview_remediation', 'apply_remediation'].includes(functionName))) {
     fail(`${test.name} must stop for human judgment before preview or Apply.`)
+  }
+  if (test.intent === 'undo') {
+    const [workspace, undo, rescan] = test.expectedCall
+    if (workspace?.functionName !== 'get_workspace' || workspace.optional !== true ||
+      undo?.functionName !== 'undo_remediation' || rescan?.functionName !== 'scan_accessibility') {
+      fail(`${test.name} must allow direct Undo and require the verification rescan.`)
+    }
   }
   if (test.intent === 'preview_button_name' || test.intent === 'preview_document_language') {
     const expectedFamily = test.intent === 'preview_button_name' ? 'name_button' : 'set_document_language'

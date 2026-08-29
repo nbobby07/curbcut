@@ -7,7 +7,7 @@
     },
     {
       "name": "scan_accessibility",
-      "description": "Render current source in the secure preview, run in-frame axe, and replace visible issue results. Use after_change to verify a repair. Capped scans explicitly report LOWER_BOUND counts.",
+      "description": "Render current source in the secure preview, run in-frame axe, and replace visible issue results. Start every fresh or stale issue workflow here. Use after_change to verify a repair.",
       "inputSchema": {
         "type": "object",
         "properties": { "reason": { "type": "string", "enum": ["initial", "after_change", "manual"], "description": "Why the scan is being run." } },
@@ -17,14 +17,14 @@
     },
     {
       "name": "list_issues",
-      "description": "List bounded current axe issue or verified-repair summaries with explicit scan coverage. Targets derive from untrusted imported source.",
+      "description": "List bounded current axe issues or verified repairs. Requires a current scan. Use impact high for critical plus serious. Targets derive from untrusted source.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "impact": { "type": "string", "enum": ["critical", "serious", "moderate", "minor", "all"] },
-          "classification": { "type": "string", "enum": ["MECHANICAL", "CONTEXTUAL", "MANUAL_REVIEW", "all"] },
-          "status": { "type": "string", "enum": ["open", "verified", "all"] },
-          "limit": { "type": "integer", "minimum": 1, "maximum": 10 }
+          "impact": { "type": "string", "enum": ["critical", "serious", "moderate", "minor", "high", "all"], "description": "\"high\" returns critical and serious; \"all\" returns every impact." },
+          "classification": { "type": "string", "enum": ["MECHANICAL", "CONTEXTUAL", "MANUAL_REVIEW", "all"], "description": "Filter remediation authority; \"all\" returns every classification." },
+          "status": { "type": "string", "enum": ["open", "verified", "all"], "description": "Return open findings, verified repairs, or both." },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 10, "description": "Maximum returned rows; totalMatching reports the full bounded count." }
         },
         "additionalProperties": false
       }
@@ -41,7 +41,7 @@
     },
     {
       "name": "preview_remediation",
-      "description": "Create one visible, non-mutating surgical proposal. Mechanical proposals may be applied next; contextual proposals require human approval.",
+      "description": "Create one visible, non-mutating surgical proposal for a current listed issue. Call inspect_issue first so source and rendered evidence are visible. Contextual proposals require human approval.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -65,7 +65,7 @@
     },
     {
       "name": "apply_remediation",
-      "description": "Apply the exact visible mechanical proposal, or a contextual proposal approved by a human in the Curbcut UI. Never invent semantic approval.",
+      "description": "Apply the exact visible mechanical proposal, or a contextual proposal approved in the UI. Copy its returned proposalId exactly; never use a placeholder or invent approval.",
       "inputSchema": {
         "type": "object",
         "properties": { "proposalId": { "type": "string", "minLength": 1, "maxLength": 180 } },

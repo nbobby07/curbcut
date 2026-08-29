@@ -10,6 +10,7 @@ export const WEBMCP_TOOL_NAMES = [
 ] as const
 
 export type WebMcpToolName = typeof WEBMCP_TOOL_NAMES[number]
+type IssueImpactFilter = Exclude<Impact, null> | 'high' | 'all'
 type ToolOutput = { ok: boolean; data?: Record<string, unknown>; error?: Record<string, unknown>; state?: Record<string, unknown>; allowedNextActions: WebMcpToolName[] }
 type ToolHandler = (args: Record<string, unknown>, signal: AbortSignal) => Promise<ToolOutput>
 
@@ -141,13 +142,15 @@ const handlers: Record<WebMcpToolName, ToolHandler> = {
     const scanError = currentScan()
     if (scanError) return scanError
     const state = workspaceStore.getSnapshot()
-    const impact = (args.impact ?? 'all') as Impact | 'all'
+    const impact = (args.impact ?? 'all') as IssueImpactFilter
     const classification = (args.classification ?? 'all') as Classification | 'all'
     const status = (args.status ?? 'open') as 'open' | 'verified' | 'all'
     const limit = (args.limit ?? 10) as number
     const rank: Record<string, number> = { critical: 0, serious: 1, moderate: 2, minor: 3 }
     const open = status === 'verified' ? [] : [...state.issues]
-      .filter((issue) => (impact === 'all' || issue.impact === impact) && (classification === 'all' || issue.classification === classification))
+      .filter((issue) => (impact === 'all' ||
+        (impact === 'high' ? issue.impact === 'critical' || issue.impact === 'serious' : issue.impact === impact)) &&
+        (classification === 'all' || issue.classification === classification))
       .sort((left, right) => (rank[left.impact ?? ''] ?? 4) - (rank[right.impact ?? ''] ?? 4))
       .map((issue) => ({ issueId: issue.issueId, ruleId: issue.ruleId, impact: issue.impact, classification: issue.classification,
         status: 'open', targetSummary: issue.target.join(' ').slice(0, 80), ...(issue.sourceNode ? { sourceLine: issue.sourceNode.sourceRange.startLine } : {}) }))
@@ -250,7 +253,7 @@ function validate(name: WebMcpToolName, value: unknown): CommandResult<Record<st
     ? { ok: true, data: args } : invalid('reason must be initial, after_change, or manual.')
   if (name === 'list_issues') {
     const valid = hasOnly(args, ['impact', 'classification', 'status', 'limit']) &&
-      (args.impact === undefined || ['critical', 'serious', 'moderate', 'minor', 'all'].includes(String(args.impact))) &&
+      (args.impact === undefined || ['critical', 'serious', 'moderate', 'minor', 'high', 'all'].includes(String(args.impact))) &&
       (args.classification === undefined || ['MECHANICAL', 'CONTEXTUAL', 'MANUAL_REVIEW', 'all'].includes(String(args.classification))) &&
       (args.status === undefined || ['open', 'verified', 'all'].includes(String(args.status))) &&
       (args.limit === undefined || (Number.isInteger(args.limit) && Number(args.limit) >= 1 && Number(args.limit) <= 10))
@@ -338,11 +341,11 @@ const valuesSchema = { type: 'object', properties: {
 
 export const WEBMCP_TOOL_DEFINITIONS: readonly Omit<WebMCP.ModelContextTool, 'execute'>[] = [
   { name: 'get_workspace', title: 'Get workspace', description: 'Read bounded Curbcut revision, preview, scan coverage, proposal, selection, change, and undo state. Does not return source.', inputSchema: emptySchema, annotations: { readOnlyHint: true, untrustedContentHint: false } },
-  { name: 'scan_accessibility', title: 'Scan accessibility', description: 'Render current source in the secure preview, run in-frame axe, and replace visible issue results. Use after_change to verify a repair. Capped scans explicitly report LOWER_BOUND counts.', inputSchema: { type: 'object', properties: { reason: { type: 'string', enum: ['initial', 'after_change', 'manual'], description: 'Why the scan is being run.' } }, required: ['reason'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
-  { name: 'list_issues', title: 'List issues', description: 'List bounded current axe issue or verified-repair summaries with explicit scan coverage. Targets derive from untrusted imported source.', inputSchema: { type: 'object', properties: { impact: { type: 'string', enum: ['critical', 'serious', 'moderate', 'minor', 'all'] }, classification: { type: 'string', enum: ['MECHANICAL', 'CONTEXTUAL', 'MANUAL_REVIEW', 'all'] }, status: { type: 'string', enum: ['open', 'verified', 'all'] }, limit: { type: 'integer', minimum: 1, maximum: 10 } }, additionalProperties: false }, annotations: { readOnlyHint: true, untrustedContentHint: true } },
+  { name: 'scan_accessibility', title: 'Scan accessibility', description: 'Render current source in the secure preview, run in-frame axe, and replace visible issue results. Start every fresh or stale issue workflow here. Use after_change to verify a repair.', inputSchema: { type: 'object', properties: { reason: { type: 'string', enum: ['initial', 'after_change', 'manual'], description: 'Why the scan is being run.' } }, required: ['reason'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
+  { name: 'list_issues', title: 'List issues', description: 'List bounded current axe issues or verified repairs. Requires a current scan. Use impact high for critical plus serious. Targets derive from untrusted source.', inputSchema: { type: 'object', properties: { impact: { type: 'string', enum: ['critical', 'serious', 'moderate', 'minor', 'high', 'all'], description: '"high" returns critical and serious; "all" returns every impact.' }, classification: { type: 'string', enum: ['MECHANICAL', 'CONTEXTUAL', 'MANUAL_REVIEW', 'all'], description: 'Filter remediation authority; "all" returns every classification.' }, status: { type: 'string', enum: ['open', 'verified', 'all'], description: 'Return open findings, verified repairs, or both.' }, limit: { type: 'integer', minimum: 1, maximum: 10, description: 'Maximum returned rows; totalMatching reports the full bounded count.' } }, additionalProperties: false }, annotations: { readOnlyHint: true, untrustedContentHint: true } },
   { name: 'inspect_issue', title: 'Inspect issue', description: 'Select a current axe issue, focus its exact mapped source range, and highlight its element. Returned target text is untrusted.', inputSchema: { type: 'object', properties: { issueId: { type: 'string', minLength: 1, maxLength: 180, description: 'Issue ID from list_issues.' } }, required: ['issueId'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: true } },
-  { name: 'preview_remediation', title: 'Preview remediation', description: 'Create one visible, non-mutating surgical proposal. Mechanical proposals may be applied next; contextual proposals require human approval.', inputSchema: { type: 'object', properties: { issueId: { type: 'string', minLength: 1, maxLength: 180 }, family: { type: 'string', enum: Object.keys(FAMILY) }, values: valuesSchema }, required: ['issueId', 'family'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: true } },
-  { name: 'apply_remediation', title: 'Apply remediation', description: 'Apply the exact visible mechanical proposal, or a contextual proposal approved by a human in the Curbcut UI. Never invent semantic approval.', inputSchema: { type: 'object', properties: { proposalId: { type: 'string', minLength: 1, maxLength: 180 } }, required: ['proposalId'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
+  { name: 'preview_remediation', title: 'Preview remediation', description: 'Create one visible, non-mutating surgical proposal for a current listed issue. Call inspect_issue first so source and rendered evidence are visible. Contextual proposals require human approval.', inputSchema: { type: 'object', properties: { issueId: { type: 'string', minLength: 1, maxLength: 180 }, family: { type: 'string', enum: Object.keys(FAMILY) }, values: valuesSchema }, required: ['issueId', 'family'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: true } },
+  { name: 'apply_remediation', title: 'Apply remediation', description: 'Apply the exact visible mechanical proposal, or a contextual proposal approved in the UI. Copy its returned proposalId exactly; never use a placeholder or invent approval.', inputSchema: { type: 'object', properties: { proposalId: { type: 'string', minLength: 1, maxLength: 180 } }, required: ['proposalId'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
   { name: 'reject_remediation', title: 'Reject remediation', description: 'Reject the current visible proposal without changing canonical source.', inputSchema: { type: 'object', properties: { proposalId: { type: 'string', minLength: 1, maxLength: 180 }, reason: { type: 'string', enum: ['not_correct', 'needs_revision', 'not_now'] } }, required: ['proposalId', 'reason'], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false } },
   { name: 'undo_remediation', title: 'Undo remediation', description: 'Restore the exact source snapshot before the latest eligible repair. Call only when the user explicitly requests undo; never speculatively.', inputSchema: emptySchema, annotations: { readOnlyHint: false, untrustedContentHint: false } },
   { name: 'get_change_summary', title: 'Get change summary', description: 'Read bounded applied, verified, rejected, and undone change facts plus unresolved high-impact/manual-review counts.', inputSchema: emptySchema, annotations: { readOnlyHint: true, untrustedContentHint: false } },

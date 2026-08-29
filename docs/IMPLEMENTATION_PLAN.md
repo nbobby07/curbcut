@@ -473,7 +473,7 @@ All schemas include `additionalProperties: false`.
   {
     "type":"object",
     "properties":{
-      "impact":{"type":"string","enum":["critical","serious","moderate","minor","all"]},
+      "impact":{"type":"string","enum":["critical","serious","moderate","minor","high","all"]},
       "classification":{"type":"string","enum":["MECHANICAL","CONTEXTUAL","MANUAL_REVIEW","all"]},
       "status":{"type":"string","enum":["open","verified","all"]},
       "limit":{"type":"integer","minimum":1,"maximum":10}

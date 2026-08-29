@@ -73,6 +73,9 @@ test('A — registers exactly ten static tools with exact annotations and surviv
 test('B — scan/list/inspect exercises the real sandbox, store, source selection, and highlight', async ({ page }) => {
   await page.goto('/')
   const issueId = await scanAndLabelId(page)
+  const high = await tool(page, 'list_issues', { impact: 'high', status: 'open', limit: 10 })
+  expect(high).toMatchObject({ ok: true, data: { totalMatching: 6 } })
+  expect((high.data!.issues as Array<{ impact: string }>).every(({ impact }) => ['critical', 'serious'].includes(impact))).toBe(true)
   const inspected = await tool(page, 'inspect_issue', { issueId })
   expect(inspected).toMatchObject({ ok: true, data: { ruleId: 'label', sourceLocation: { line: 16 } } })
   await expect(page.getByTestId('selected-issue')).toContainText('label')

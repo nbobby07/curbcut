@@ -77,7 +77,7 @@ try {
   }
   const listResult = text(await client.callTool({
     name: 'execute_webmcp_tool',
-    arguments: { toolName: 'list_issues', input: JSON.stringify({ impact: 'all', status: 'open', limit: 10 }) },
+    arguments: { toolName: 'list_issues', input: JSON.stringify({ impact: 'high', status: 'open', limit: 10 }) },
   }))
   const listed = completedOutput(listResult)
   const issueId = listed?.data?.issues?.[0]?.issueId

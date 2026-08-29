@@ -9,7 +9,7 @@
     "test": "node scripts/validate-evals.mjs && vitest run",
     "test:e2e": "playwright test",
     "test:webmcp": "node scripts/webmcp-smoke.mjs",
-    "eval:webmcp": "npx --yes webmcp-evals@0.0.3 --backend vercel --model openai:gpt-5.4-mini-2026-03-17 --runs 2 --max-steps 6 --reporter console json --output-dir .evals local -t evals/tools.json -e evals/webmcp-agent.json",
+    "eval:webmcp": "npx --yes webmcp-evals@0.0.4 --backend vercel --model openai:gpt-5.4-mini-2026-03-17 --runs 2 --max-steps 8 --reporter console json --output-dir .evals local -t evals/tools.json -e evals/webmcp-agent.json",
     "preview": "vite preview"
   },
   "dependencies": {
