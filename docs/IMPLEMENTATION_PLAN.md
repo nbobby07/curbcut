@@ -2,7 +2,7 @@
 
 Status: M1–M7 and the M8 production release gate are complete; owner video and Devpost submission remain pending
 Baseline: the successful Spike A and Spike B code in this repository  
-Target: production release candidate `b92ba81` deployed and verified at <https://curbcut-one.vercel.app>; submit before September 3, 2026 at 1:00 PM PT
+Target: application commit `09a342e` deployed and verified at <https://curbcut-one.vercel.app>; submit before September 3, 2026 at 1:00 PM PT
 
 ## 1. Technical baseline and governing references
 
@@ -859,7 +859,7 @@ Acceptance:
 - no unapproved contextual Apply or invented semantic value observed;
 - fixture results stay exact.
 
-Recorded release evidence: 36 deterministic trajectory cases across twelve intents and ten tools, 85/85 passing Vitest checks across eight files, and 25/25 passing Playwright checks. Browser coverage includes the real offscreen mobile iframe/requestAnimationFrame scan regression, zero horizontal overflow, all five families, authority and proposal-readiness gates, isolation, mapping, export, reload, judge-prompt copy, persistent WebMCP readiness, and schema drift. The optional OpenAI model-backed run is not an M7 completion requirement.
+Recorded release evidence: 36 deterministic trajectory cases across twelve intents and ten tools, 85/85 passing Vitest checks across eight files, 25/25 passing Playwright checks, and a 72-run OpenAI model evaluation with 214/253 strict passing rows, 59/72 exact trajectories, 69/72 operationally correct trajectories, and zero errors. Browser coverage includes the real offscreen mobile iframe/requestAnimationFrame scan regression, zero horizontal overflow, all five families, authority and proposal-readiness gates, isolation, mapping, export, reload, judge-prompt copy, persistent WebMCP readiness, and schema drift.
 
 Fallback/cut: reduce paraphrase count only after covering every intent once. Never cut security, fixture, undo, contextual approval, or primary workflow gates.
 
@@ -867,7 +867,7 @@ Fallback/cut: reduce paraphrase count only after covering every intent once. Nev
 
 Tasks:
 
-- [x] Freeze commit `b92ba81` on `codex/hackathon-ready` and deploy it with Vercel CLI 59.9.1 as `dpl_9w2FuuoUFPFWPtM1Gc7zSFVSxy9Z`.
+- [x] Deploy application commit `09a342e` with Vercel CLI 59.9.1 as `dpl_4D7xWmdFWrWfnY9nH3XUjVoSZNoy`.
 - [x] Verify the public URL, reload rediscovery, production security headers, tool discovery, and the complete native-Chrome ten-tool workflow.
 - [x] Verify production scan/list/inspect source selection and preview highlighting in the Codex in-app browser, with zero console errors.
 - [x] Capture fresh production workflow screenshots and finalize repository release evidence.
@@ -927,6 +927,6 @@ Immediate no-go conditions during release verification:
 - security tests show script/network/parent escape;
 - contextual Apply can bypass the visible approval record, or mechanical Apply can bypass the exact proposal/revision guards.
 
-Recommendation: the production release gate is complete. **PROCEED TO SUBMISSION without adding scope.** Remaining work is owner-only: record/host the under-three-minute video and submit Devpost. The optional OpenAI model-backed eval can be added if an `OPENAI_API_KEY` becomes available, but must not delay submission.
+Recommendation: the production release gate is complete. **PROCEED TO SUBMISSION without adding product scope.** The OpenAI model-backed eval is complete with 214/253 strict passing rows (84.6%), 59/72 exact trajectories, 69/72 operationally correct trajectories, three genuine argument misses, and zero errors. Remaining work is owner-only: record/host the under-three-minute video and submit Devpost.
 
-Known non-blockers: the Vite production build reports a roughly 306.69 KB gzip chunk because axe-core dominates the bundle; scan security caps expose lower-bound counts and produce inconclusive verification rather than a false pass. Impeccable review returned **SHIP** and the release code audit returned **CLEAR**.
+Known non-blockers: the Vite production build reports a roughly 307.06 KB gzip chunk because axe-core dominates the bundle; scan security caps expose lower-bound counts and produce inconclusive verification rather than a false pass. Impeccable review returned **SHIP** and the release code audit returned **CLEAR**.

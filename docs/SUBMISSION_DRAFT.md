@@ -8,7 +8,7 @@ Status: production release candidate verified; owner video upload and Devpost su
 
 **Tagline:** A browser-native accessibility repair workbench where a developer and browser agent safely repair the same live HTML/CSS artifact.
 
-**Live application:** <https://curbcut-one.vercel.app> — commit `b92ba81` on `codex/hackathon-ready`, Vercel deployment `dpl_9w2FuuoUFPFWPtM1Gc7zSFVSxy9Z`.
+**Live application:** <https://curbcut-one.vercel.app> — application commit `09a342e` on `codex/hackathon-ready`, Vercel deployment `dpl_4D7xWmdFWrWfnY9nH3XUjVoSZNoy`.
 
 **Public repository:** <https://github.com/nbobby07/curbcut>
 
@@ -64,11 +64,11 @@ Curbcut does not claim automated WCAG compliance. axe-core covers only part of a
 
 The frozen source gate passes 85/85 Vitest checks across eight files, 25/25 Playwright checks, and a validated WebMCP corpus of 36 trajectory cases across twelve intents and all ten tools. Coverage includes all five repair families, proposal-readiness and concurrent-mutation guards, the real offscreen mobile iframe/requestAnimationFrame scan regression and zero horizontal overflow, direct mechanical Apply, contextual approval, non-mutating rejection, the opaque-origin boundary, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, Apply/rescan, Undo/rescan, local import, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between registered tool schemas and the eval snapshot.
 
-Native Chrome through Chrome DevTools MCP 1.8 passed the production ten-tool workflow, including reload rediscovery, with zero console errors. The Codex in-app browser independently passed production `get_workspace`, scan, list, and inspect calls with mapped source selection, preview highlight, timeline activity, and zero console errors on August 28, 2026. Production response headers passed for CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS. Impeccable review returned **SHIP** and the release code audit returned **CLEAR**.
+Native Chrome through Chrome DevTools MCP 1.8 passed the production ten-tool workflow, including reload rediscovery, with zero console errors. The Codex in-app browser independently passed the updated production scan, `impact:"high"` listing, and mapped inspect calls with source selection, preview highlight, timeline activity, and zero console errors on August 28, 2026. Production response headers passed for CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS. Impeccable review returned **SHIP** and the release code audit returned **CLEAR**.
 
 Curbcut is not keyed to its checkout fixture. A Playwright regression imports an unrelated local profile form and stylesheet, runs axe in the same opaque preview, and receives exactly the dynamic `label` and `tabindex` findings.
 
-The optional OpenAI model-backed trajectory run remains pending only because `OPENAI_API_KEY` is absent; do not substitute an estimate. The deterministic corpus and live browser journeys are the current measured evidence. Known non-blockers are the roughly 306.69 KB gzip Vite chunk warning (axe-core dominates) and scan-cap lower-bound semantics: capped results say `≥` and cannot falsely mark Apply or Undo verified.
+The OpenAI `gpt-5.4-mini-2026-03-17` trajectory run completed 72 tests with 214/253 strict passing rows (84.6%), 59/72 exact trajectories, 69/72 operationally correct trajectories after separating harmless extra bounded state/verification reads, and zero errors. The three genuine misses were two malformed copied issue IDs and one wrong rejection reason; no contextual approval boundary was bypassed. The key was ephemeral and is not a runtime dependency. Known non-blockers are the roughly 307.06 KB gzip Vite chunk warning (axe-core dominates) and scan-cap lower-bound semantics: capped results say `≥` and cannot falsely mark Apply or Undo verified.
 
 ## Production screenshots
 
@@ -121,7 +121,7 @@ The optional OpenAI model-backed trajectory run remains pending only because `OP
 - [ ] Join/registration status is confirmed in the submitting Devpost account.
 - [x] Frozen current-source build is live in a clean target-client session and remains available without payment or credentials.
 - [x] GitHub repository is public; root license is detected; About description and homepage are set.
-- [x] `npm test` (85/85), all 25 Playwright checks, and `npm run build` pass for the release candidate.
+- [x] `npm test` (85/85), all 25 Playwright checks, `npm run build`, and the measured 72-run OpenAI WebMCP corpus are complete with documented results.
 - [ ] Final client, prompt, limitations, and measured evidence agree across README, reports, video, and Devpost text after the video is recorded.
 - [ ] Every public screenshot and the final video depict the frozen deployment; screenshots pass, video remains pending.
 - [ ] All URLs work from a signed-out browser.

@@ -9,7 +9,7 @@ Date: August 28, 2026 (PT)
 - **Native Chrome full ten-tool production workflow: PASS**
 - **Codex in-app browser production source-mapping workflow: PASS**
 - **Production security response headers: PASS**
-- **Optional automated OpenAI trajectory corpus: pending a valid `OPENAI_API_KEY`**
+- **OpenAI model-backed trajectory corpus: COMPLETED — 214/253 strict rows, 59/72 exact trajectories, 69/72 operationally correct, 0 errors**
 - **Release code audit: CLEAR; Impeccable visual review: SHIP**
 
 ## Corpus and safety gates
@@ -34,13 +34,15 @@ Each expected tool call has a bounded mock output shaped like Curbcut's parsed W
 `scripts/validate-evals.mjs` rejects:
 
 - any count other than 36 cases / 12 intents / 3 paraphrases;
-- duplicate cases, unknown tools, malformed calls, or more than six expected steps;
+- duplicate cases, unknown tools, malformed calls, or more than eight expected steps;
 - absent, oversized, source-leaking, or invalid mock outputs;
 - baseline/Undo scan metrics that differ from 3 critical, 3 serious, 0 moderate, and 5 outstanding human-decision/manual-review items;
 - post-label scan/summary metrics that differ from 2 critical, 3 serious, 0 moderate, 5 open critical-or-serious issues, and 4 outstanding human-decision/manual-review items;
 - a current change summary that omits `countsStatus:"CURRENT"`; application responses mark stale summaries `STALE` and omit stale issue totals;
 - post-mechanical scan metrics that differ from 3 critical, 2 serious, 0 moderate, and 5 outstanding human-decision/manual-review items;
 - a six-finding high-impact list that omits the serious mechanical `tabindex` issue;
+- high-impact discovery that does not use the real `impact:"high"` aggregate;
+- optional calls other than bounded `get_workspace` or `get_change_summary` observations;
 - contextual Apply outside `apply_after_approval` or before a mocked `APPROVED` proposal;
 - mechanical Apply before a visible exact `MECHANICAL` proposal;
 - a preview that exposes Apply while its exact proposed iframe is still `RENDERING`, a mechanical preview that requires semantic approval, or a contextual preview that enables Apply before approval;
@@ -49,7 +51,9 @@ Each expected tool call has a bounded mock output shaped like Curbcut's parsed W
 - button-name/document-language preview cases that omit their bounded human input, use the wrong family, or continue to Apply;
 - proposal rejection cases that skip workspace discovery, call Apply, or report a source mutation.
 
-The wrong-order cases intentionally contain a refused contextual Apply in the prior transcript. The evaluated continuation must scan, list, inspect, preview, and stop for approval; an additional Apply is an unexpected call and fails trajectory matching. The separate mechanical cases must show the proposal, poll `get_workspace` until that exact proposed iframe is `READY`, apply its exact ID without a redundant semantic approval, and run an after-change scan.
+The wrong-order cases intentionally contain a refused contextual Apply in the prior transcript. The evaluated continuation must scan, list, inspect, preview, and stop for approval; an additional Apply is an unexpected call and fails trajectory matching. The separate mechanical cases must scan, list, inspect, show the proposal, poll `get_workspace` until that exact proposed iframe is `READY`, apply its exact ID without a redundant semantic approval, and run an after-change scan.
+
+Discovery list calls immediately followed by a strict issue-ID inspection leave their filters unconstrained: broad and narrow valid filters can both return the required issue. The high-impact intent remains a strict argument test. Scan reasons, issue IDs, semantic inputs, proposal IDs, rejection reasons, Apply authority, and verification remain exact.
 
 ## Live schema drift gate
 
@@ -82,26 +86,30 @@ npm run build
 production build passed
 ```
 
-The build retains a known non-failing large-chunk warning: the JavaScript bundle is about 306.69 KB gzip, dominated by the locally bundled axe-core runtime.
+The build retains a known non-failing large-chunk warning: the JavaScript bundle is about 307.06 KB gzip, dominated by the locally bundled axe-core runtime.
 
-## Optional automated OpenAI corpus
+## Automated OpenAI corpus
 
 Configured command:
 
 ```text
 npm run eval:webmcp
-webmcp-evals 0.0.3 local
+webmcp-evals 0.0.4 local
 model openai:gpt-5.4-mini-2026-03-17
-2 runs, max 6 steps, console + JSON reporters
+2 runs, max 8 steps, console + JSON reporters
 ```
 
-This optional model-backed run requires `OPENAI_API_KEY` and has not been used as release evidence. It is not a Curbcut runtime dependency or a submission gate.
+The first diagnostic run used 0.0.3 before the tool/corpus hardening: 72 test runs produced 127/251 passing rows (50.6%), 22/72 exact trajectories, and zero infrastructure errors. Trace review found one real product gap—the tool could not request critical and serious findings together—plus strict exact-filter and optional-state matcher artifacts. Four mechanical runs were inconclusive because the older name-only mock resolver supplied a later workspace mock too early.
 
-The deterministic corpus validator, live-schema drift test, full Playwright suite, production build, and target-client smokes are the release evidence. When an optional OpenAI run is performed, report `passCount`, `failCount`, and `errorCount` from the generated JSON and preserve representative failure trajectories before changing schemas or prompts.
+That evidence drove the smallest product-level correction: `list_issues` now supports a documented `impact:"high"` filter for critical plus serious findings. The corpus moved to 0.0.4 optional-call/subset matching, treats only bounded state observations as optional, keeps meaningful identifiers and authority gates strict, and permits the real eight-call mechanical path.
+
+The final run completed 72 test runs with 214/253 passing rows (84.6%), 39 failed rows, and zero errors. Fifty-nine of 72 trajectories matched exactly. Ten of the remaining thirteen contained only a harmless extra bounded `get_workspace` read or a post-verification `list_issues` call, yielding 69/72 operationally correct trajectories. The three genuine misses were two malformed copied issue IDs and one incorrect rejection reason. There were no silent contextual Applies, no approval-boundary violations, and no infrastructure/provider errors.
+
+The API key was entered into an ephemeral process environment, removed in `finally`, and never stored in Curbcut or the repository. OpenAI is an evaluation dependency only; Curbcut's deployed runtime remains browser-only.
 
 ## Frozen production release evidence
 
-Commit `b92ba81` on branch `codex/hackathon-ready` was built and deployed with Vercel CLI 59.9.1 as deployment `dpl_9w2FuuoUFPFWPtM1Gc7zSFVSxy9Z`, publicly aliased to <https://curbcut-one.vercel.app>.
+Commit `09a342e` on branch `codex/hackathon-ready` was built and deployed with Vercel CLI 59.9.1 as deployment `dpl_4D7xWmdFWrWfnY9nH3XUjVoSZNoy`, publicly aliased to <https://curbcut-one.vercel.app>.
 
 Native Chrome through Chrome DevTools MCP 1.8 passed the complete production workflow:
 
@@ -116,6 +124,8 @@ Native Chrome through Chrome DevTools MCP 1.8 passed the complete production wor
 
 The Codex in-app browser independently exercised the same production deployment on August 28, 2026. `get_workspace`, `scan_accessibility`, `list_issues`, and `inspect_issue` passed; inspection selected the exact mapped source range, highlighted the corresponding preview node, populated the shared activity timeline, and produced zero console errors. The existing browser-local workspace already contained one persisted repair, so it correctly reported five current findings; fresh isolated production contexts were used for deterministic six-finding screenshots and regression evidence rather than overwriting local user data.
 
+After the eval-driven deployment, the in-app browser rediscovered all ten updated tools. A real `scan_accessibility` call returned 3 critical and 2 serious findings in the persisted workspace; `list_issues` with `impact:"high"` returned only critical/serious rows; and `inspect_issue` mapped `button-name` to line 32, column 11 and highlighted `cc-1-21`. The visible status remained `WebMCP · 10 tools ready`, timeline events appeared, and console errors remained zero.
+
 The public alias returned HTTP 200 and passed the configured response-header gate: CSP, `Permissions-Policy: tools=(self)`, `Origin-Agent-Cluster: ?1`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, and HSTS. Fresh production captures are stored in `docs/curbcut-scanned-workspace.png`, `docs/curbcut-mechanical-preview.png`, `docs/curbcut-verified-mechanical.png`, `docs/curbcut-remediation-preview.png`, and `docs/curbcut-medium-workspace.png`.
 
 The release also passed an independent code audit (**CLEAR**) and Impeccable visual review (**SHIP**).
@@ -126,4 +136,4 @@ The release also passed an independent code audit (**CLEAR**) and Impeccable vis
 - Playwright separately covers the real sandbox, store, all five repair families, proposal readiness, concurrent mutation guards, conditional authority, Apply/rescan, Undo/rescan, import/export, reload, and schema registration boundaries.
 - The runner scores tool trajectories, not whether the final natural-language question is well phrased. Human-judgment cases therefore enforce the stronger machine-checkable boundary: inspection is allowed, while preview and Apply are not expected.
 - Scan security caps expose `countsStatus` and coverage metadata. If a result is truncated, issue counts are rendered as lower bounds and Apply/Undo verification is inconclusive rather than falsely successful.
-- The optional OpenAI model-backed eval remains pending only because `OPENAI_API_KEY` is absent; no alternate-provider credential is required by Curbcut.
+- The 0.0.4 strict matcher still counts useful extra read-only state or verification-list calls as unexpected unless authored at that exact trajectory position. Curbcut reports both raw matcher results and the manually classified operational result instead of hiding this distinction.

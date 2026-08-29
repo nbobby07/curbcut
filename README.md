@@ -2,7 +2,7 @@
 
 [Live production release candidate](https://curbcut-one.vercel.app) · [Source code](https://github.com/nbobby07/curbcut) · [MIT license](./LICENSE)
 
-Release status: commit `b92ba81` on `codex/hackathon-ready` is deployed and verified at the public URL. Automated and target-client release gates pass. The remaining owner tasks are the narrated video and Devpost submission; the optional OpenAI model-backed eval awaits an `OPENAI_API_KEY`.
+Release status: application commit `09a342e` on `codex/hackathon-ready` is deployed and verified at the public URL as Vercel deployment `dpl_4D7xWmdFWrWfnY9nH3XUjVoSZNoy`. Automated, OpenAI model-backed, and target-client release gates are recorded. The remaining owner tasks are the narrated video and Devpost submission.
 
 Curbcut is a local-first, browser-native accessibility repair workbench for editable static HTML and CSS. A frontend developer and an external browser agent inspect and repair the same live artifact through WebMCP: the agent may apply exact mechanical patches after showing them, while the developer retains semantic and visual judgment.
 
@@ -71,7 +71,7 @@ If WebMCP is unavailable, the same workflow remains usable manually; the status 
 |---|---|
 | `get_workspace` | Read revision, scan, proposal, selection, change, and undo state without returning full source. |
 | `scan_accessibility` | Render current source and run axe inside the isolated preview. |
-| `list_issues` | Return filtered, bounded issue summaries. |
+| `list_issues` | Return filtered, bounded issue summaries; `impact:"high"` requests critical plus serious findings in one call. |
 | `inspect_issue` | Select an issue, focus its mapped source range, and highlight its preview node. |
 | `preview_remediation` | Create one visible, non-mutating surgical proposal and report whether approval is required. |
 | `apply_remediation` | After the exact proposed iframe is `READY`, apply a mechanical proposal directly or a contextual proposal after visible human approval. |
@@ -121,9 +121,9 @@ npm run test:e2e
 npm run build
 ```
 
-Release verification passed with 85/85 Vitest checks across eight files, 25/25 Playwright checks, a production Vite build, and a validated WebMCP corpus of 36 cases across twelve intents and all ten tools. Native Chrome completed the production ten-tool workflow—including proposal readiness, mechanical Apply/rescan, contextual rejection, export, Undo/rescan, reload rediscovery, and zero console errors. The Codex in-app browser independently passed production `get_workspace`, scan, list, and inspect calls with exact mapped-source selection, preview highlight, and zero console errors. Production response headers passed for CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS. See the [M7 release report](./docs/M7_REPORT.md) and [August 27 M4–M6 verification](./docs/M4_REPORT.md).
+Release verification passed with 85/85 Vitest checks across eight files, 25/25 Playwright checks, a production Vite build, and a validated WebMCP corpus of 36 cases across twelve intents and all ten tools. The OpenAI `gpt-5.4-mini-2026-03-17` run completed 72 test runs with 214/253 strict passing rows (84.6%), 59/72 exact trajectories, 69/72 operationally correct trajectories after classifying harmless extra state/verification reads, and zero infrastructure errors. The three genuine misses were two malformed copied issue IDs and one wrong rejection reason; no approval boundary was bypassed. Native Chrome completed the production ten-tool workflow—including proposal readiness, mechanical Apply/rescan, contextual rejection, export, Undo/rescan, reload rediscovery, and zero console errors. The Codex in-app browser independently passed production scan, the new high-impact list, and mapped inspection with visible highlight/timeline side effects and zero console errors. Production response headers passed for CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS. See the [M7 release report](./docs/M7_REPORT.md) and [August 27 M4–M6 verification](./docs/M4_REPORT.md).
 
-The deterministic browser and schema suites are the release evidence. The optional OpenAI model-backed trajectory run remains pending only because `OPENAI_API_KEY` is absent; it is not a runtime or submission gate. The production build retains a non-blocking Vite chunk warning at about 306.69 KB gzip because axe-core dominates the bundle. Bounded scan responses explicitly report truncation and lower-bound (`≥`) counts when security caps are reached, so a capped result cannot falsely claim verification.
+The deterministic browser/schema suites and measured OpenAI trajectory run are complementary release evidence; model evals do not replace live UI verification. The API key was ephemeral and is not a runtime dependency. The production build retains a non-blocking Vite chunk warning at about 307.06 KB gzip because axe-core dominates the bundle. Bounded scan responses explicitly report truncation and lower-bound (`≥`) counts when security caps are reached, so a capped result cannot falsely claim verification.
 
 ## Current limitations
 
