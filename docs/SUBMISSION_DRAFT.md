@@ -18,6 +18,8 @@ Status: production release candidate verified; owner video upload and Devpost su
 
 ## Ready-to-paste project description
 
+> **axe finds the evidence. Curbcut maps and patches it. Humans decide meaning.**
+
 ### The problem
 
 Accessibility scanners are good at finding many mechanical failures, but a finding is only the beginning. A developer still has to connect a rendered DOM node to the right source range, understand the evidence, choose a defensible remediation, review how it changes the interface, verify the result, and avoid treating automated output as proof of compliance.
@@ -60,9 +62,11 @@ Curbcut does not claim automated WCAG compliance. axe-core covers only part of a
 
 ### Evidence
 
-The frozen source gate passes 85/85 Vitest checks across eight files, 24/24 Playwright checks, and a validated WebMCP corpus of 33 trajectory cases across eleven intents and all ten tools. Coverage includes all five repair families, proposal-readiness and concurrent-mutation guards, the real offscreen mobile iframe/requestAnimationFrame scan regression and zero horizontal overflow, direct mechanical Apply and contextual approval, the opaque-origin boundary, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, Apply/rescan, Undo/rescan, local import, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between registered tool schemas and the eval snapshot.
+The frozen source gate passes 85/85 Vitest checks across eight files, 25/25 Playwright checks, and a validated WebMCP corpus of 36 trajectory cases across twelve intents and all ten tools. Coverage includes all five repair families, proposal-readiness and concurrent-mutation guards, the real offscreen mobile iframe/requestAnimationFrame scan regression and zero horizontal overflow, direct mechanical Apply, contextual approval, non-mutating rejection, the opaque-origin boundary, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, Apply/rescan, Undo/rescan, local import, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between registered tool schemas and the eval snapshot.
 
 Native Chrome through Chrome DevTools MCP 1.8 passed the production ten-tool workflow, including reload rediscovery, with zero console errors. The Codex in-app browser independently passed production `get_workspace`, scan, list, and inspect calls with mapped source selection, preview highlight, timeline activity, and zero console errors on August 28, 2026. Production response headers passed for CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS. Impeccable review returned **SHIP** and the release code audit returned **CLEAR**.
+
+Curbcut is not keyed to its checkout fixture. A Playwright regression imports an unrelated local profile form and stylesheet, runs axe in the same opaque preview, and receives exactly the dynamic `label` and `tabindex` findings.
 
 The optional OpenAI model-backed trajectory run remains pending only because `OPENAI_API_KEY` is absent; do not substitute an estimate. The deterministic corpus and live browser journeys are the current measured evidence. Known non-blockers are the roughly 306.69 KB gzip Vite chunk warning (axe-core dominates) and scan-cap lower-bound semantics: capped results say `≥` and cannot falsely mark Apply or Undo verified.
 
@@ -104,12 +108,20 @@ The optional OpenAI model-backed trajectory run remains pending only because `OP
 - [x] Recapture a distinct verified-result/timeline image from the frozen production deployment.
 - [ ] Use narration only or properly licensed audio; do not add third-party trademarks or copyrighted music.
 
+## Owner task — practitioner review (not submission evidence until completed)
+
+- Recruit one frontend developer and one accessibility practitioner. Give each the production URL and core prompt without coaching.
+- Ask each person to scan, inspect, explain the mechanical/contextual distinction, approve one contextual change, Undo, export, and import the profile fixture.
+- Record role, browser/client, task completion or blocker, time to first verified repair, confusing wording, trust concerns, and any concrete defect found.
+- Ask: “Would you trust this agent boundary?”, “Where did you need more evidence?”, and “Did anything imply compliance?”
+- Publish only completed observations or consented quotes. Remove this section from the pasted submission if the sessions are not completed.
+
 ## Final submission checklist
 
 - [ ] Join/registration status is confirmed in the submitting Devpost account.
 - [x] Frozen current-source build is live in a clean target-client session and remains available without payment or credentials.
 - [x] GitHub repository is public; root license is detected; About description and homepage are set.
-- [x] `npm test` (85/85), all 24 Playwright checks, and `npm run build` pass for the release candidate.
+- [x] `npm test` (85/85), all 25 Playwright checks, and `npm run build` pass for the release candidate.
 - [ ] Final client, prompt, limitations, and measured evidence agree across README, reports, video, and Devpost text after the video is recorded.
 - [ ] Every public screenshot and the final video depict the frozen deployment; screenshots pass, video remains pending.
 - [ ] All URLs work from a signed-out browser.

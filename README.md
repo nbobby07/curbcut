@@ -6,6 +6,10 @@ Release status: commit `b92ba81` on `codex/hackathon-ready` is deployed and veri
 
 Curbcut is a local-first, browser-native accessibility repair workbench for editable static HTML and CSS. A frontend developer and an external browser agent inspect and repair the same live artifact through WebMCP: the agent may apply exact mechanical patches after showing them, while the developer retains semantic and visual judgment.
 
+> **axe finds the evidence. Curbcut maps and patches it. Humans decide meaning.**
+
+Rendered DOM → exact source range → visible surgical patch → verified rescan.
+
 Curbcut does **not** claim automated WCAG compliance. axe-core reports a useful subset of accessibility problems; unresolved findings and manual testing still require accessibility expertise.
 
 ## Why WebMCP
@@ -46,15 +50,18 @@ Mechanical verification: the real axe rescan removes the repaired finding and re
 ## Judge quick start
 
 1. Open the [live application](https://curbcut-one.vercel.app) in ChatGPT's in-app browser, or a WebMCP-enabled Chrome build. The release candidate was exercised in the Codex in-app browser on August 28, 2026 and in native Chrome through Chrome DevTools MCP 1.8.
-2. If the workspace is not on the original fixture, choose **Reset demo**.
-3. Give the browser agent this prompt:
+2. Open **Site tools → Available site tools** and confirm Curbcut exposes ten tools. After the workflow begins, **Recently used** should show the real calls.
+3. If the workspace is not on the original fixture, choose **Reset demo**.
+4. Choose **Copy agent prompt** or give the browser agent this prompt:
 
    > Fix the critical and serious accessibility issues in this checkout without changing the overall visual design. Preview each change before applying it, and ask me about anything that requires semantic judgment.
 
-4. Watch the agent scan and inspect the page. The selected issue should focus the exact HTML range and highlight the same rendered element.
-5. Watch a mechanical positive-`tabindex` proposal appear and remain visible. After the proposed iframe reports `READY`, the agent may apply it directly; the finding disappears after a real rescan.
-6. When a label or image proposal needs meaning, review both previews and the source diff, then choose **Approve this exact change** in Curbcut. A tool call cannot manufacture semantic approval.
-7. Confirm that the timeline distinguishes direct mechanical Apply from human-approved contextual Apply, and that Undo restores the exact prior source.
+5. Watch the agent scan and inspect the page. The selected issue should focus the exact HTML range and highlight the same rendered element.
+6. Watch a mechanical positive-`tabindex` proposal appear and remain visible. After the proposed iframe reports `READY`, the agent may apply it directly; the finding disappears after a real rescan.
+7. When a label or image proposal needs meaning, review both previews and the source diff, then choose **Approve this exact change** in Curbcut. A tool call cannot manufacture semantic approval.
+8. Confirm that the timeline distinguishes direct mechanical Apply from human-approved contextual Apply, and that Undo restores the exact prior source.
+
+To prove the results are not stored checkout constants, import `examples/profile-form.html` and `examples/profile-form.css`, then rescan. That unrelated artifact produces its own live `label` and `tabindex` axe findings through the same sandbox and source mapper.
 
 If WebMCP is unavailable, the same workflow remains usable manually; the status bar reports that no browser-agent tools are connected.
 
@@ -114,7 +121,7 @@ npm run test:e2e
 npm run build
 ```
 
-Release verification passed with 85/85 Vitest checks across eight files, 24/24 Playwright checks, a production Vite build, and a validated WebMCP corpus of 33 cases across eleven intents and all ten tools. Native Chrome completed the production ten-tool workflow—including proposal readiness, mechanical Apply/rescan, contextual rejection, export, Undo/rescan, reload rediscovery, and zero console errors. The Codex in-app browser independently passed production `get_workspace`, scan, list, and inspect calls with exact mapped-source selection, preview highlight, and zero console errors. Production response headers passed for CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS. See the [M7 release report](./docs/M7_REPORT.md) and [August 27 M4–M6 verification](./docs/M4_REPORT.md).
+Release verification passed with 85/85 Vitest checks across eight files, 25/25 Playwright checks, a production Vite build, and a validated WebMCP corpus of 36 cases across twelve intents and all ten tools. Native Chrome completed the production ten-tool workflow—including proposal readiness, mechanical Apply/rescan, contextual rejection, export, Undo/rescan, reload rediscovery, and zero console errors. The Codex in-app browser independently passed production `get_workspace`, scan, list, and inspect calls with exact mapped-source selection, preview highlight, and zero console errors. Production response headers passed for CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS. See the [M7 release report](./docs/M7_REPORT.md) and [August 27 M4–M6 verification](./docs/M4_REPORT.md).
 
 The deterministic browser and schema suites are the release evidence. The optional OpenAI model-backed trajectory run remains pending only because `OPENAI_API_KEY` is absent; it is not a runtime or submission gate. The production build retains a non-blocking Vite chunk warning at about 306.69 KB gzip because axe-core dominates the bundle. Bounded scan responses explicitly report truncation and lower-bound (`≥`) counts when security caps are reached, so a capped result cannot falsely claim verification.
 

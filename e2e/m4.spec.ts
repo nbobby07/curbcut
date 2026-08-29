@@ -56,6 +56,7 @@ test('A — registers exactly ten static tools with exact annotations and surviv
   page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()) })
   await page.goto('/')
   await expect.poll(async () => page.evaluate(() => document.modelContext!.getTools().then((items) => items.length))).toBe(10)
+  await expect(page.getByTestId('webmcp-readiness')).toHaveText('WebMCP · 10 tools ready')
   const first = await page.evaluate(async () => (await document.modelContext!.getTools()).map(({ name, annotations }) => ({ name, annotations })))
   expect(first.map(({ name }) => name)).toEqual([
     'get_workspace', 'scan_accessibility', 'list_issues', 'inspect_issue', 'preview_remediation',
@@ -65,6 +66,7 @@ test('A — registers exactly ten static tools with exact annotations and surviv
   expect(first.find(({ name }) => name === 'apply_remediation')?.annotations).toEqual({ readOnlyHint: false, untrustedContentHint: false })
   await page.reload()
   await expect.poll(async () => page.evaluate(() => document.modelContext!.getTools().then((items) => items.length))).toBe(10)
+  await expect(page.getByTestId('webmcp-readiness')).toHaveText('WebMCP · 10 tools ready')
   expect(consoleErrors).toEqual([])
 })
 

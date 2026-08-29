@@ -832,5 +832,56 @@
         "mockOutput": { "ok": true, "data": { "proposalId": "99999999-9999-4999-8999-999999999996", "issueId": "11111111-1111-4111-8111-111111111111:violation:html-has-lang:0:cc-1-0", "family": "set_document_language", "classification": "CONTEXTUAL", "semanticJudgmentRequired": true, "editCount": 1, "diffSummary": "1 surgical source edit; exact diff is visible in Curbcut.", "validationTarget": "A real axe rescan must no longer report html-has-lang for this document.", "approvalRequired": true, "agentMayApply": false, "approvalState": "PROPOSED", "proposalPreviewStatus": "RENDERING", "next": "Poll get_workspace until proposalPreviewStatus is READY before Apply." }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
       }
     ]
+  },
+  {
+    "name": "Reject proposal — incorrect repair",
+    "intent": "reject_proposal",
+    "messages": [{ "role": "user", "type": "message", "content": "Reject the current visible remediation because it is not correct. Do not change source." }],
+    "expectedCall": [
+      {
+        "functionName": "get_workspace",
+        "arguments": {},
+        "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 1, "proposalStatus": "PROPOSED", "proposalId": "22222222-2222-4222-8222-222222222222", "proposalPreviewStatus": "READY", "canUndo": false, "webMcpAvailable": true }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      },
+      {
+        "functionName": "reject_remediation",
+        "arguments": { "proposalId": "22222222-2222-4222-8222-222222222222", "reason": "not_correct" },
+        "mockOutput": { "ok": true, "data": { "proposalId": "22222222-2222-4222-8222-222222222222", "status": "REJECTED", "sourceChanged": false }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "REJECTED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      }
+    ]
+  },
+  {
+    "name": "Reject proposal — needs revision",
+    "intent": "reject_proposal",
+    "messages": [{ "role": "user", "type": "message", "content": "This visible proposal needs revision. Reject it without applying or editing the workspace." }],
+    "expectedCall": [
+      {
+        "functionName": "get_workspace",
+        "arguments": {},
+        "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 1, "proposalStatus": "PROPOSED", "proposalId": "22222222-2222-4222-8222-222222222222", "proposalPreviewStatus": "READY", "canUndo": false, "webMcpAvailable": true }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      },
+      {
+        "functionName": "reject_remediation",
+        "arguments": { "proposalId": "22222222-2222-4222-8222-222222222222", "reason": "needs_revision" },
+        "mockOutput": { "ok": true, "data": { "proposalId": "22222222-2222-4222-8222-222222222222", "status": "REJECTED", "sourceChanged": false }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "REJECTED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      }
+    ]
+  },
+  {
+    "name": "Reject proposal — defer change",
+    "intent": "reject_proposal",
+    "messages": [{ "role": "user", "type": "message", "content": "Do not make this proposed repair now. Reject the current proposal and preserve the exact source." }],
+    "expectedCall": [
+      {
+        "functionName": "get_workspace",
+        "arguments": {},
+        "mockOutput": { "ok": true, "data": { "workspaceStatus": "READY", "previewStatus": "READY", "scanStatus": "CURRENT", "sourceRevision": 1, "proposalStatus": "PROPOSED", "proposalId": "22222222-2222-4222-8222-222222222222", "proposalPreviewStatus": "READY", "canUndo": false, "webMcpAvailable": true }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "PROPOSED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "reject_remediation"] }
+      },
+      {
+        "functionName": "reject_remediation",
+        "arguments": { "proposalId": "22222222-2222-4222-8222-222222222222", "reason": "not_now" },
+        "mockOutput": { "ok": true, "data": { "proposalId": "22222222-2222-4222-8222-222222222222", "status": "REJECTED", "sourceChanged": false }, "state": { "sourceRevision": 1, "scanStatus": "CURRENT", "proposalStatus": "REJECTED" }, "allowedNextActions": ["get_workspace", "get_change_summary", "export_source", "scan_accessibility", "list_issues", "inspect_issue", "preview_remediation"] }
+      }
+    ]
   }
 ]

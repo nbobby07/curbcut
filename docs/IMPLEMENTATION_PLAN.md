@@ -632,7 +632,7 @@ Create a small JSONL/Markdown eval corpus with expected tool sequence, required 
 | Preview button name | “Name this icon-only button, but let me approve the visible diff.” and two paraphrases | Scan/list/inspect, preview `name_button` with `buttonName`, then stop before Apply. |
 | Preview document language | “This page is US English; preview the language fix without applying it.” and two paraphrases | Scan/list/inspect, preview `set_document_language` with `languageTag`, then stop before Apply. |
 
-The implemented corpus contains exactly 33 cases: three paraphrases for each of these eleven intents, using all ten stable tools.
+The implemented corpus contains exactly 36 cases: three paraphrases for each of twelve intents, using all ten stable tools. The twelfth intent exercises non-mutating proposal rejection.
 
 ### What to record
 
@@ -859,7 +859,7 @@ Acceptance:
 - no unapproved contextual Apply or invented semantic value observed;
 - fixture results stay exact.
 
-Recorded release evidence: 33 deterministic trajectory cases across eleven intents and ten tools, 85/85 passing Vitest checks across eight files, and 24/24 passing Playwright checks. Browser coverage includes the real offscreen mobile iframe/requestAnimationFrame scan regression, zero horizontal overflow, all five families, authority and proposal-readiness gates, isolation, mapping, export, reload, and schema drift. The optional OpenAI model-backed run is not an M7 completion requirement and remains pending only because `OPENAI_API_KEY` is absent.
+Recorded release evidence: 36 deterministic trajectory cases across twelve intents and ten tools, 85/85 passing Vitest checks across eight files, and 25/25 passing Playwright checks. Browser coverage includes the real offscreen mobile iframe/requestAnimationFrame scan regression, zero horizontal overflow, all five families, authority and proposal-readiness gates, isolation, mapping, export, reload, judge-prompt copy, persistent WebMCP readiness, and schema drift. The optional OpenAI model-backed run is not an M7 completion requirement.
 
 Fallback/cut: reduce paraphrase count only after covering every intent once. Never cut security, fixture, undo, contextual approval, or primary workflow gates.
 
@@ -903,7 +903,7 @@ Use platform features for everything else: Web Crypto for IDs/hashes, `postMessa
 - [x] Rescan verifies; Undo restores exact strings and original finding.
 - [x] Export has no internal metadata.
 - [x] The M2 three-tool WebMCP vertical slice passed on deployed HTTPS before repair work; by M4 all ten tools were registered, bounded, annotated, stateful, and exercised by an agent.
-- [x] Evals include 33 paraphrased cases across eleven intents, wrong-order recovery, readiness gating, and UI state assertions.
+- [x] Evals include 36 paraphrased cases across twelve intents, all ten tools, wrong-order recovery, readiness gating, and UI state assertions.
 - [x] Curbcut is keyboard-usable and self-scanned.
 - [x] Final HTTPS URL is durable and tested in native Chrome and the Codex in-app browser.
 - [x] README, product requirements, implementation plan, evidence, and demo prompt agree on the release candidate.

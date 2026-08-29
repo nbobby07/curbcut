@@ -11,10 +11,34 @@ async function scan(page: import('@playwright/test').Page) {
   await expect(page.getByRole('button', { name: 'Scanning…' })).toBeHidden()
 }
 
+test('judge controls expose WebMCP readiness and copy the exact agent prompt', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.addInitScript(() => {
+    const tools: WebMCP.ModelContextTool[] = []
+    Object.defineProperty(document, 'modelContext', {
+      configurable: true,
+      value: {
+        registerTool: async (tool: WebMCP.ModelContextTool) => { tools.push(tool) },
+        unregisterTool: async () => {},
+        getTools: async () => tools,
+        executeTool: async () => ({ content: [] }),
+      },
+    })
+  })
+  await page.goto('/')
+  await expect(page.getByTestId('webmcp-readiness')).toContainText('WebMCP · 10 tools ready')
+  await page.getByRole('button', { name: 'Copy agent prompt' }).click()
+  await expect(page.getByRole('button', { name: 'Prompt copied' })).toBeVisible()
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(
+    'Fix the critical and serious accessibility issues in this checkout without changing the overall visual design. Preview each change before applying it, and ask me about anything that requires semantic judgment.',
+  )
+})
+
 test('stacked mobile preview completes its offscreen axe scan without horizontal overflow', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')
   await expect(page.getByRole('button', { name: 'Rescan with axe' })).toBeEnabled()
+  await expect(page.getByTestId('webmcp-readiness')).toBeVisible()
   expect(await page.locator('.issue-row').count()).toBeGreaterThanOrEqual(6)
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390)
   const sourceTab = page.getByRole('tab', { name: 'Source' })

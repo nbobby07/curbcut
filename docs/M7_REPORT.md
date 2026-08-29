@@ -14,7 +14,7 @@ Date: August 28, 2026 (PT)
 
 ## Corpus and safety gates
 
-`evals/webmcp-agent.json` contains 33 cases: three paraphrases for each of eleven intents, using the same ten stable tools as the application.
+`evals/webmcp-agent.json` contains 36 cases: three paraphrases for each of twelve intents, using the same ten stable tools as the application.
 
 1. find high-impact issues;
 2. inspect the email issue;
@@ -26,13 +26,14 @@ Date: August 28, 2026 (PT)
 8. Undo, then rescan;
 9. summarize, then export canonical HTML;
 10. preview a human-confirmed button accessible name and stop before Apply;
-11. preview a human-confirmed document language and stop before Apply.
+11. preview a human-confirmed document language and stop before Apply;
+12. discover and reject the current visible proposal without mutating source.
 
 Each expected tool call has a bounded mock output shaped like Curbcut's parsed WebMCP response. Scan IDs feed issue calls, issue IDs feed inspection/proposals, and exact proposal/change IDs feed Apply, verification, Undo, and summary calls. No mock contains canonical source or `data-curbcut-node` metadata.
 
 `scripts/validate-evals.mjs` rejects:
 
-- any count other than 33 cases / 11 intents / 3 paraphrases;
+- any count other than 36 cases / 12 intents / 3 paraphrases;
 - duplicate cases, unknown tools, malformed calls, or more than six expected steps;
 - absent, oversized, source-leaking, or invalid mock outputs;
 - baseline/Undo scan metrics that differ from 3 critical, 3 serious, 0 moderate, and 5 outstanding human-decision/manual-review items;
@@ -45,7 +46,8 @@ Each expected tool call has a bounded mock output shaped like Curbcut's parsed W
 - a preview that exposes Apply while its exact proposed iframe is still `RENDERING`, a mechanical preview that requires semantic approval, or a contextual preview that enables Apply before approval;
 - wrong-order recovery without one paired `PROPOSAL_NOT_FOUND`/`APPROVAL_REQUIRED` response;
 - preview or Apply in the human-judgment stop cases;
-- button-name/document-language preview cases that omit their bounded human input, use the wrong family, or continue to Apply.
+- button-name/document-language preview cases that omit their bounded human input, use the wrong family, or continue to Apply;
+- proposal rejection cases that skip workspace discovery, call Apply, or report a source mutation.
 
 The wrong-order cases intentionally contain a refused contextual Apply in the prior transcript. The evaluated continuation must scan, list, inspect, preview, and stop for approval; an additional Apply is an unexpected call and fails trajectory matching. The separate mechanical cases must show the proposal, poll `get_workspace` until that exact proposed iframe is `READY`, apply its exact ID without a redundant semantic approval, and run an after-change scan.
 
@@ -60,21 +62,21 @@ npx playwright test "e2e/m7-evals.spec.ts"
 1 passed
 
 npx playwright test --list
-24 tests in 5 files
+25 tests in 5 files
 ```
 
-The current suite includes a regression for the real offscreen mobile iframe/requestAnimationFrame scan failure and zero horizontal overflow. The frozen release candidate passed all 24 browser checks.
+The current suite includes regressions for persistent judge-visible WebMCP readiness, exact prompt copy, the real offscreen mobile iframe/requestAnimationFrame scan failure, and zero horizontal overflow. The frozen release candidate passed all 25 browser checks.
 
 ## Deterministic verification
 
 ```text
 npm test
-Eval corpus valid: 33 cases, 11 intents, 10 tools.
+Eval corpus valid: 36 cases, 12 intents, 10 tools.
 Test Files  8 passed (8)
 Tests       85 passed (85)
 
 npm run test:e2e
-24 passed
+25 passed
 
 npm run build
 production build passed

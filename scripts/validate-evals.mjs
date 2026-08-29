@@ -19,6 +19,7 @@ const expectedIntents = new Set([
   'export_summary',
   'preview_button_name',
   'preview_document_language',
+  'reject_proposal',
 ])
 const intents = new Map()
 const caseNames = new Set()
@@ -183,11 +184,19 @@ for (const test of cases) {
       fail(`${test.name} must scan, list, inspect, and preview ${expectedFamily} with explicit human input, then stop before Apply.`)
     }
   }
+  if (test.intent === 'reject_proposal') {
+    const sequence = test.expectedCall.map(({ functionName }) => functionName).join('>')
+    const rejection = test.expectedCall.find(({ functionName }) => functionName === 'reject_remediation')
+    if (sequence !== 'get_workspace>reject_remediation' || rejection?.mockOutput?.data?.sourceChanged !== false ||
+      test.expectedCall.some(({ functionName }) => functionName === 'apply_remediation')) {
+      fail(`${test.name} must discover and reject the current proposal without changing source.`)
+    }
+  }
 }
 
-if (!Array.isArray(cases) || cases.length !== 33 || intents.size !== expectedIntents.size ||
+if (!Array.isArray(cases) || cases.length !== 36 || intents.size !== expectedIntents.size ||
   [...expectedIntents].some((intent) => intents.get(intent) !== 3)) {
-  fail('Eval corpus must contain exactly three paraphrases for each of the eleven required intents.')
+  fail('Eval corpus must contain exactly three paraphrases for each of the twelve required intents.')
 }
 
 console.log(`Eval corpus valid: ${cases.length} cases, ${intents.size} intents, ${tools.length} tools.`)

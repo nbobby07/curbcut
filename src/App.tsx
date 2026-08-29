@@ -11,12 +11,15 @@ import { useWorkspaceState, workspaceStore } from './workspaceStore'
 type SourceTab = 'html' | 'css'
 type WorkspacePane = 'source' | 'preview' | 'evidence'
 
+const AGENT_DEMO_PROMPT = 'Fix the critical and serious accessibility issues in this checkout without changing the overall visual design. Preview each change before applying it, and ask me about anything that requires semantic judgment.'
+
 export function App() {
   const state = useWorkspaceState()
   const [sourceTab, setSourceTab] = useState<SourceTab>('html')
   const [mobilePane, setMobilePane] = useState<WorkspacePane>('source')
   const [exportKind, setExportKind] = useState<'html' | 'css' | 'workspace'>('html')
   const [importing, setImporting] = useState(false)
+  const [promptCopied, setPromptCopied] = useState(false)
   const previewRef = useRef<PreviewBridge>(null)
   const editorRef = useRef<HTMLTextAreaElement>(null)
   const lineNumbersRef = useRef<HTMLPreElement>(null)
@@ -108,6 +111,16 @@ export function App() {
     }
   }
 
+  async function copyAgentPrompt() {
+    try {
+      await navigator.clipboard.writeText(AGENT_DEMO_PROMPT)
+      setPromptCopied(true)
+      window.setTimeout(() => setPromptCopied(false), 2_000)
+    } catch {
+      workspaceStore.reportError('The agent prompt could not be copied.')
+    }
+  }
+
   return (
     <main className="app-shell">
       <header className="command-bar">
@@ -118,9 +131,6 @@ export function App() {
         </div>
         <div className="environment-status" aria-label="Workspace environment">
           <span className={state.isolationEvidence?.parentAccessBlocked ? 'healthy' : ''}>Secure sandbox</span>
-          <span className={state.registeredTools.length ? 'healthy' : ''} title={state.registeredTools.join(', ')}>
-            {state.registeredTools.length ? 'WebMCP connected' : 'Manual mode'}
-          </span>
           <span
             className={state.scanStatus === 'CURRENT' && state.mutationStatus === 'IDLE' ? 'healthy' : ''}
             data-testid="mutation-status"
@@ -130,6 +140,13 @@ export function App() {
         </div>
         <div className="command-actions">
           <div className="command-group">
+            <span
+              className={`command-readiness connection-state ${state.registeredTools.length ? 'connected' : ''}`}
+              title={state.registeredTools.join(', ')}
+              data-testid="webmcp-readiness"
+            >
+              {state.registeredTools.length ? `WebMCP · ${state.registeredTools.length} tools ready` : 'WebMCP · manual mode'}
+            </span>
             <button
               ref={scanButtonRef}
               type="button"
@@ -168,6 +185,13 @@ export function App() {
               </select>
             </label>
             <button type="button" onClick={() => void workspaceStore.exportSource(exportKind)}>Download</button>
+            <button
+              type="button"
+              className="agent-prompt-action"
+              onClick={() => void copyAgentPrompt()}
+            >
+              {promptCopied ? 'Prompt copied' : 'Copy agent prompt'}
+            </button>
             <button type="button" className="quiet-action" onClick={() => {
               if (window.confirm('Replace the current local workspace with the built-in checkout demo?')) workspaceStore.loadDemo()
             }}>Reset demo</button>

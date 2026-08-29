@@ -113,6 +113,7 @@ a { color: #0758c7; text-underline-offset: 3px; }
 .command-actions { min-width: 0; margin-left: auto; display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 .command-group { display: flex; align-items: center; gap: 6px; }
 .command-group + .command-group { padding-left: 8px; border-left: 1px solid var(--line); }
+.command-actions .command-readiness { min-height: 32px; padding-inline: 9px; }
 .command-actions button, .pane-heading button, .tabs button, .back-button, .proposal-actions button, .approve-action {
   min-height: 32px;
   border: 1px solid #b7c1ce;
@@ -126,6 +127,8 @@ a { color: #0758c7; text-underline-offset: 3px; }
 }
 .primary-action { background: var(--accent) !important; border-color: var(--accent) !important; color: white !important; font-weight: 720 !important; }
 .primary-action:not(:disabled):hover { background: var(--accent-hover) !important; }
+.agent-prompt-action { border-color: var(--accent) !important; color: var(--accent) !important; background: var(--selected) !important; }
+.agent-prompt-action:not(:disabled):hover { background: var(--surface) !important; }
 .quiet-action { color: var(--muted) !important; }
 .export-control { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; }
 .export-control select {
@@ -374,7 +377,8 @@ a { color: #0758c7; text-underline-offset: 3px; }
 
 @media (max-width: 720px) {
   .brand-lockup { width: auto; flex-basis: 100%; }
-  .command-actions { align-items: flex-start; }
+  .command-actions { align-items: flex-start; flex-wrap: wrap; overflow-x: visible; }
+  .command-group { width: 100%; max-width: 100%; flex-wrap: wrap; }
   .command-group + .command-group { padding-left: 0; border-left: 0; }
   .export-control span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .mobile-pane-tabs {

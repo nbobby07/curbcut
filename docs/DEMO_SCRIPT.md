@@ -1,11 +1,12 @@
 # Curbcut — under-three-minute demo script
 
-Target runtime: **2:45–2:55**. Record the deployed application in the actual supported browser agent. Tool calls, source changes, scan results, and conditional approval must be real. Trim idle browser latency if necessary, but do not simulate calls, hide failures, or splice unrelated sessions into a false workflow.
+Target runtime: **2:35–2:42**. Record the deployed application in the actual supported browser agent. Tool calls, source changes, scan results, and conditional approval must be real. Trim idle browser latency if necessary, but do not simulate calls, hide failures, or splice unrelated sessions into a false workflow.
 
 ## Before recording
 
 - Use a clean browser session at <https://curbcut-one.vercel.app> and choose **Reset demo**.
 - Confirm all ten tools are discoverable, the preview is ready, and a complete rehearsal succeeds.
+- Use GPT-5.6 Sol or Terra; native Site Tools are not enabled for Luna.
 - Arrange the browser-agent conversation and Curbcut so tool calls and visible UI effects can both be seen.
 - Increase zoom only enough for source, preview, evidence, and the timeline to remain legible at 1080p.
 - Turn off unrelated notifications and use narration without background music.
@@ -15,17 +16,17 @@ Target runtime: **2:45–2:55**. Record the deployed application in the actual s
 
 | Time | Screen action | Narration |
 |---|---|---|
-| **0:00–0:15** | Cold-open on a **real** positive-`tabindex` proposal. Show its one-attribute diff, then let the agent call `apply_remediation`; flash the changed source. | “Curbcut has already shown the exact mechanical patch, so the browser agent can apply it without making me click through a meaningless approval.” |
-| **0:15–0:28** | Reset the demo, show the checkout, and send the exact core prompt below with WebMCP-ready status visible. | “This is a local HTML and CSS workbench. The developer and an external browser agent operate the same live artifact through page-native WebMCP tools—there is no app backend or arbitrary code-execution tool.” |
-| **0:28–0:50** | Let the agent call `scan_accessibility`, then `list_issues`. Show factual counts and issue rows populate. | “axe runs inside an opaque sandboxed preview. These are factual rule, impact, target, and node results—not an invented accessibility score.” |
-| **0:50–1:08** | Agent calls `inspect_issue` for positive `tabindex`. Show exact source focus, rendered highlight, and the timeline entry. | “Inspect connects axe's rendered node to an exact parse5 source range. The human and agent now refer to the same element, evidence, and revision.” |
-| **1:08–1:28** | Agent calls `preview_remediation`, then `apply_remediation` and an after-change scan. Keep the visible diff/result on screen. | “The proposal is visible and non-mutating first. Because removing this exact positive tabindex invents no meaning, the agent can apply it and verify that the finding disappears.” |
-| **1:28–1:48** | Continue to the email label. Show the safe adjacent text candidate if offered, working/proposed renders, and exact diff. | “A label is different: Curbcut may reuse a safe visible-text candidate, but wording is semantic. The code is prepared; the decision stays with me.” |
-| **1:48–2:06** | Click **Approve this exact change** yourself. Tell the agent, **I've approved this contextual proposal. Apply it and verify.** Show the rescan result. | “This approval is bound to the exact contextual diff and can only come from the visible interface. The tool cannot manufacture it.” |
-| **2:06–2:22** | Pause on image-alt or contrast evidence. Do not apply an invented description or automatic color change. | “Image purpose, useful alternative text, and design-sensitive contrast work require context. The agent stops instead of silently guessing.” |
-| **2:22–2:39** | Agent calls `get_change_summary` and `export_source`. Show the timeline distinguish mechanical and human-approved actions. | “The same workflow records what applied directly, what I approved, what verified, and what still needs review, then exports clean canonical source.” |
-| **2:39–2:52** | Ask **Undo the last repair and rescan.** Show exact restoration and the original finding returning. | “Undo restores the exact previous source, and rescan restores the original evidence. The workflow remains local, inspectable, and reversible.” |
-| **2:52–2:58** | End on the workspace, timeline, and live URL. | “Curbcut gives the browser agent useful autonomy without pretending accessibility judgment is mechanical.” |
+| **0:00–0:12** | Cold-open on a **real** positive-`tabindex` proposal with the native Site Tools panel visible. Let the agent call `apply_remediation`; flash the changed source. | “axe finds the evidence. Curbcut maps and patches it. Humans decide meaning.” |
+| **0:12–0:24** | Reset the demo and send the core prompt using **Copy agent prompt**. | “A developer and an external browser agent operate this same live HTML and CSS artifact through page-native WebMCP.” |
+| **0:24–0:40** | Show **Available site tools: 10**, then let the agent scan/list and briefly show **Recently used**. | “These are ten real product tools. axe runs inside the opaque preview; the results are live evidence, not stored fixture constants or an invented score.” |
+| **0:40–0:55** | Agent inspects positive `tabindex`. Show exact source focus, rendered highlight, and timeline event. | “Inspect maps axe's rendered node to an exact parse5 source range, so the human and agent point at the same element and revision.” |
+| **0:55–1:13** | Agent previews, waits for `READY`, applies, and rescans. Show the finding disappear. | “The non-mutating proposal shows one surgical diff first. This repair invents no meaning, so the agent can apply and verify it directly.” |
+| **1:13–1:36** | Preview the email-label repair. Show prepared code and proposed render; approve the exact change yourself, then Apply/rescan. | “Label wording is semantic. Curbcut prepares the code, but my approval is bound to this exact diff and cannot be manufactured by a tool.” |
+| **1:36–1:51** | Pause on image-alt or contrast evidence. | “Image purpose and design-sensitive contrast need context. The agent stops instead of silently guessing or claiming compliance.” |
+| **1:51–2:05** | Agent summarizes and exports clean HTML. | “The timeline separates mechanical and human-approved work, and export contains canonical source with no mapping metadata.” |
+| **2:05–2:18** | Ask for Undo/rescan. Show exact restoration and the finding returning. | “Undo restores exact source bytes; a fresh axe scan restores the original evidence.” |
+| **2:18–2:34** | Import `examples/profile-form.html` and `.css`, then scan. Show only its live `label` and `tabindex` findings. | “A different artifact produces different findings through the same sandbox, source mapper, and repair engine.” |
+| **2:34–2:40** | End on the live workspace and URL. | “Rendered DOM to exact source range to visible patch to verified rescan. Humans still decide meaning.” |
 
 ## Exact prompts used on camera
 
