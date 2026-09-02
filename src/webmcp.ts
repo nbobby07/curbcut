@@ -300,6 +300,26 @@ function activityInput(name: WebMcpToolName, args: Record<string, unknown>) {
   return 'no source content'
 }
 
+function activityResult(name: WebMcpToolName, response: ToolOutput) {
+  if (!response.ok) return String(response.error?.code ?? 'error')
+  const data = response.data ?? {}
+  if (name === 'get_workspace') return `revision ${data.sourceRevision} · scan ${data.scanStatus} · proposal ${data.proposalStatus}`
+  if (name === 'scan_accessibility') return `${data.ruleCount} rules · ${data.affectedNodeCount} nodes · ${data.critical} critical · ${data.serious} serious`
+  if (name === 'list_issues') return `${data.totalMatching} matching · ${Array.isArray(data.issues) ? data.issues.length : 0} returned`
+  if (name === 'inspect_issue') {
+    const location = isRecord(data.sourceLocation) && typeof data.sourceLocation.line === 'number'
+      ? `mapped line ${data.sourceLocation.line}`
+      : 'source unmapped'
+    return `${data.ruleId} · ${location}`
+  }
+  if (name === 'preview_remediation') return `${data.classification} · ${data.editCount} edit${data.editCount === 1 ? '' : 's'} · not applied · ${data.approvalRequired ? 'approval required' : 'no approval required'}`
+  if (name === 'apply_remediation') return `source changed · revision ${data.sourceRevision} · rescan required`
+  if (name === 'reject_remediation') return 'rejected · source unchanged'
+  if (name === 'undo_remediation') return `source restored · revision ${data.sourceRevision} · rescan required`
+  if (name === 'get_change_summary') return `${data.appliedCount} applied · ${data.verifiedCount} verified · ${data.undoneCount} undone`
+  return `${String(data.filename).slice(0, 80)} downloaded · mapping metadata ${data.mappingMetadataPresent ? 'present' : 'absent'}`
+}
+
 export async function executeWorkspaceTool(name: WebMcpToolName, input: unknown, signal = new AbortController().signal) {
   let args: Record<string, unknown> = {}
   let response: ToolOutput
@@ -315,7 +335,7 @@ export async function executeWorkspaceTool(name: WebMcpToolName, input: unknown,
       : failure('INTERNAL_ERROR', error instanceof Error ? error.message : 'Unexpected WebMCP tool failure.', false)
   }
   workspaceStore.recordActivity({ actor: 'agent', action: name, inputSummary: activityInput(name, args),
-    resultSummary: response.ok ? 'success' : String(response.error?.code ?? 'error'),
+    resultSummary: activityResult(name, response),
     ...(validString(args.issueId, 180) ? { issueId: String(args.issueId) } : {}),
     ...(validString(args.proposalId, 180) ? { proposalId: String(args.proposalId) } : {}),
     ...(response.ok && typeof response.data?.changeId === 'string' ? { changeId: response.data.changeId } : {}) })

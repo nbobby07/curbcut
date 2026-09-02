@@ -199,6 +199,12 @@ export function App() {
         </div>
       </header>
 
+      <section className="responsibility-strip" aria-label="System responsibilities">
+        <p><strong>axe-core</strong> detects rendered violations</p>
+        <p><strong>Curbcut</strong> maps source, previews and applies patches, then verifies with a rescan</p>
+        <p><strong>WebMCP</strong> lets an external browser agent operate this same live workspace</p>
+      </section>
+
       <div className="mobile-pane-tabs" role="tablist" aria-label="Workspace pane">
         {(['source', 'preview', 'evidence'] as const).map((pane) => (
           <button
@@ -620,10 +626,14 @@ function ProposalPanel({ proposal, issue }: { proposal: RemediationProposal; iss
 function VerificationResult() {
   const { verificationNotice } = useWorkspaceState()
   if (!verificationNotice) return null
+  const repairVerified = verificationNotice.kind === 'APPLY' && verificationNotice.outcome === 'VERIFIED'
   return (
     <section className={`verification-result verification-${verificationNotice.outcome.toLowerCase()}`} data-testid="verification-result">
-      <strong>{verificationNotice.kind === 'UNDO' ? 'Undo' : 'Repair'}: {verificationNotice.outcome.replace('_', ' ')}</strong>
+      <strong>{repairVerified
+        ? 'Repair: VERIFIED — automated check passed'
+        : `${verificationNotice.kind === 'UNDO' ? 'Undo' : 'Repair'}: ${verificationNotice.outcome.replace('_', ' ')}`}</strong>
       <p>{verificationNotice.message}</p>
+      {repairVerified && <p>Human retesting may still be required. This verifies only the targeted automated check; it is not a WCAG conformance determination.</p>}
     </section>
   )
 }

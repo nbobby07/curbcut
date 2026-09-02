@@ -50,6 +50,9 @@ test('freezes the checkout fixture and completes label Apply/rescan/Undo', async
   await scan(page)
   await expect(page.locator('.issue-row strong')).toHaveText(rules.filter((rule) => rule !== 'label'))
   await expect(page.getByTestId('verification-result')).toContainText('VERIFIED')
+  await expect(page.getByTestId('verification-result')).toContainText('automated check passed')
+  await expect(page.getByTestId('verification-result')).toContainText('Human retesting may still be required')
+  await expect(page.getByTestId('verification-result')).toContainText('not a WCAG conformance determination')
 
   await page.getByRole('button', { name: 'Undo last repair' }).click()
   await expect(editor).toHaveValue(before)

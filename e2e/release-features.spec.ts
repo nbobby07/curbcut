@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { resolve } from 'node:path'
+import { CHECKOUT_CSS, CHECKOUT_HTML } from '../src/fixture'
 
 const issue = (page: import('@playwright/test').Page, rule: string) =>
   page.locator('.issue-row').filter({ has: page.getByText(rule, { exact: true }) })
@@ -26,6 +27,10 @@ test('judge controls expose WebMCP readiness and copy the exact agent prompt', a
     })
   })
   await page.goto('/')
+  const responsibilities = page.getByRole('region', { name: 'System responsibilities' })
+  await expect(responsibilities).toContainText('axe-core detects rendered violations')
+  await expect(responsibilities).toContainText('Curbcut maps source, previews and applies patches, then verifies with a rescan')
+  await expect(responsibilities).toContainText('WebMCP lets an external browser agent operate this same live workspace')
   await expect(page.getByTestId('webmcp-readiness')).toContainText('WebMCP · 10 tools ready')
   await page.getByRole('button', { name: 'Copy agent prompt' }).click()
   await expect(page.getByRole('button', { name: 'Prompt copied' })).toBeVisible()
@@ -96,4 +101,44 @@ test('document-language proposal uses an explicit human-confirmed BCP 47 value',
   await page.getByTestId('apply-proposal').click()
   await scan(page)
   await expect(issue(page, 'html-has-lang')).toHaveCount(0)
+})
+
+test('reset demo restores and persists a freshly scanned pristine fixture', async ({ page }) => {
+  await page.goto('/')
+  const editor = page.getByLabel('Editable HTML source')
+  const draft = CHECKOUT_HTML.replace('Complete your order', 'Temporary local draft')
+  await editor.fill(draft)
+  await expect.poll(() => page.evaluate(() => {
+    const saved = localStorage.getItem('curbcut.workspace.v1')
+    return saved ? JSON.parse(saved).html : null
+  })).toBe(draft)
+
+  await scan(page)
+  await expect(page.getByTestId('mutation-status')).toHaveText('Scan current · idle')
+  await issue(page, 'button-name').click()
+  await expect(page.getByTestId('selected-issue')).toContainText('button-name')
+
+  page.once('dialog', async (dialog) => {
+    expect(dialog.message()).toBe('Replace the current local workspace with the built-in checkout demo?')
+    await dialog.accept()
+  })
+  await page.getByRole('button', { name: 'Reset demo' }).click()
+
+  await expect(editor).toHaveValue(CHECKOUT_HTML)
+  await page.getByRole('tab', { name: 'CSS' }).click()
+  await expect(page.getByLabel('Editable CSS source')).toHaveValue(CHECKOUT_CSS)
+  await expect(page.getByTestId('mutation-status')).toHaveText('Scan current · idle')
+  await expect(issue(page, 'button-name')).toHaveCount(1)
+  await expect.poll(() => page.evaluate(() => {
+    const saved = localStorage.getItem('curbcut.workspace.v1')
+    return saved ? JSON.parse(saved) : null
+  })).toEqual({
+    version: 1,
+    html: CHECKOUT_HTML,
+    css: CHECKOUT_CSS,
+  })
+
+  await page.reload()
+  await expect(page.getByLabel('Editable HTML source')).toHaveValue(CHECKOUT_HTML)
+  await expect(page.getByTestId('mutation-status')).toHaveText('Scan current · idle')
 })

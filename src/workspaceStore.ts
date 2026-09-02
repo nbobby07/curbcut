@@ -434,15 +434,30 @@ export const workspaceStore = {
   },
   loadDemo() {
     invalidateActiveMutation()
+    automaticInitialScanRevision = null
+    if (persistenceTimer) {
+      clearTimeout(persistenceTimer)
+      persistenceTimer = null
+    }
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // Reset still restores the in-memory fixture when browser persistence is unavailable.
+    }
     update({
       htmlSource: CHECKOUT_HTML,
       cssSource: CHECKOUT_CSS,
       sourceRevision: state.sourceRevision + 1,
       workspaceStatus: 'READY',
       previewStatus: 'RENDERING',
-      scanStatus: state.scan || state.scanStatus === 'RUNNING' ? 'STALE' : 'NEVER',
+      scanStatus: 'NEVER',
+      mapping: null,
+      scan: null,
+      issues: [],
       selectedIssueId: null,
       highlightedNodeId: null,
+      lastInvocation: null,
+      activity: [],
       proposal: null,
       proposalPreview: emptyProposalPreview(),
       previewMode: 'WORKING',
