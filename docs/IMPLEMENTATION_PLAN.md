@@ -2,7 +2,7 @@
 
 Status: M1–M7 and the M8 production release gate are complete; owner video and Devpost submission remain pending
 Baseline: the successful Spike A and Spike B code in this repository  
-Target: application commit `09a342e` deployed and verified at <https://curbcut-one.vercel.app>; submit before September 3, 2026 at 1:00 PM PT
+Target: application commit `ee99300` deployed and verified at <https://curbcut-one.vercel.app>; submit before September 3, 2026 at 1:00 PM PT
 
 ## 1. Technical baseline and governing references
 
@@ -859,7 +859,7 @@ Acceptance:
 - no unapproved contextual Apply or invented semantic value observed;
 - fixture results stay exact.
 
-Recorded release evidence: 36 deterministic trajectory cases across twelve intents and ten tools, 85/85 passing Vitest checks across eight files, 25/25 passing Playwright checks, and a 72-run OpenAI model evaluation with 214/253 strict passing rows, 59/72 exact trajectories, 69/72 operationally correct trajectories, and zero errors. Browser coverage includes the real offscreen mobile iframe/requestAnimationFrame scan regression, zero horizontal overflow, all five families, authority and proposal-readiness gates, isolation, mapping, export, reload, judge-prompt copy, persistent WebMCP readiness, and schema drift.
+Recorded release evidence: 36 deterministic trajectory cases across twelve intents and ten tools, 86/86 passing Vitest checks across nine files, 26/26 passing Playwright checks, and a 72-run OpenAI model evaluation with 214/253 strict passing rows, 59/72 exact trajectories, 69/72 operationally correct trajectories, and zero errors. Browser coverage includes reliable pristine-demo reset/persistence, the real offscreen mobile iframe/requestAnimationFrame scan regression, zero horizontal overflow, all five families, authority and proposal-readiness gates, isolation, mapping, export, reload, judge-prompt copy, persistent WebMCP readiness, and schema drift.
 
 Fallback/cut: reduce paraphrase count only after covering every intent once. Never cut security, fixture, undo, contextual approval, or primary workflow gates.
 
@@ -867,7 +867,7 @@ Fallback/cut: reduce paraphrase count only after covering every intent once. Nev
 
 Tasks:
 
-- [x] Deploy application commit `09a342e` with Vercel CLI 59.9.1 as `dpl_4D7xWmdFWrWfnY9nH3XUjVoSZNoy`.
+- [x] Deploy application commit `ee99300` with Vercel CLI 59.11.1 as `dpl_4btN6y83yg2DDePr7ANfjLWGKd9i`.
 - [x] Verify the public URL, reload rediscovery, production security headers, tool discovery, and the complete native-Chrome ten-tool workflow.
 - [x] Verify production scan/list/inspect source selection and preview highlighting in the Codex in-app browser, with zero console errors.
 - [x] Capture fresh production workflow screenshots and finalize repository release evidence.
