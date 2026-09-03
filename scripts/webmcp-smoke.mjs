@@ -25,13 +25,18 @@ function text(result) {
   return result.content?.filter((item) => item.type === 'text').map((item) => item.text).join('\n') || ''
 }
 
-function completedOutput(result) {
+function toolOutput(result) {
   try {
     const parsed = JSON.parse(result)
-    return parsed.status === 'Completed' && parsed.output?.ok === true ? parsed.output : null
+    return parsed.status === 'Completed' ? parsed.output : null
   } catch {
     return null
   }
+}
+
+function completedOutput(result) {
+  const output = toolOutput(result)
+  return output?.ok === true ? output : null
 }
 
 try {
@@ -115,6 +120,16 @@ try {
     throw new Error('The contextual proposal did not become visibly READY while remaining approval-gated.')
   }
 
+  const blockedApplyText = text(await client.callTool({
+    name: 'execute_webmcp_tool',
+    arguments: { toolName: 'apply_remediation', input: JSON.stringify({ proposalId: preview.data.proposalId }) },
+  }))
+  const blockedApply = toolOutput(blockedApplyText)
+  if (blockedApply?.ok !== false || blockedApply.error?.code !== 'APPROVAL_REQUIRED' ||
+    blockedApply.state?.sourceRevision !== readyWorkspace.data.sourceRevision || blockedApply.state?.proposalStatus !== 'PROPOSED') {
+    throw new Error(`The contextual Apply was not blocked without mutation:\n${blockedApplyText}`)
+  }
+
   const rejectResult = completedOutput(text(await client.callTool({
     name: 'execute_webmcp_tool',
     arguments: { toolName: 'reject_remediation', input: JSON.stringify({ proposalId: preview.data.proposalId, reason: 'not_now' }) },
@@ -195,7 +210,7 @@ try {
     discoveredTools: productTools,
     workflow: [
       'get_workspace', 'scan_accessibility', 'list_issues', 'inspect_issue', 'preview_remediation',
-      'reject_remediation', 'inspect_issue', 'preview_remediation:mechanical', 'get_workspace:READY',
+      'apply_remediation:blocked', 'reject_remediation', 'inspect_issue', 'preview_remediation:mechanical', 'get_workspace:READY',
       'apply_remediation', 'scan_accessibility:after_change', 'get_change_summary', 'export_source',
       'undo_remediation', 'scan_accessibility:after_undo',
     ],
