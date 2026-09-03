@@ -374,7 +374,7 @@ a { color: #0758c7; text-underline-offset: 3px; }
   .activity-timeline ol { max-height: 180px; }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 820px) {
   .brand-lockup { width: auto; flex-basis: 100%; }
   .command-actions { align-items: flex-start; flex-wrap: wrap; overflow-x: visible; }
   .command-group { width: 100%; max-width: 100%; flex-wrap: wrap; }

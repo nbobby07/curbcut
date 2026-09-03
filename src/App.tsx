@@ -49,11 +49,9 @@ export function App() {
       setSourceTab('html')
       return
     }
-    const { startOffset, endOffset } = selectedIssue.sourceNode.sourceRange
-    requestAnimationFrame(() => {
-      editorRef.current?.setSelectionRange(startOffset, endOffset)
-    })
-  }, [selectedIssue, sourceTab])
+    const frame = requestAnimationFrame(() => revealMappedSource(selectedIssue))
+    return () => cancelAnimationFrame(frame)
+  }, [mobilePane, selectedIssue, sourceTab])
 
   useEffect(() => {
     if (state.verificationNotice?.outcome === 'PENDING') scanButtonRef.current?.focus()
@@ -91,6 +89,33 @@ export function App() {
     const next = panes[(panes.indexOf(mobilePane) + direction + panes.length) % panes.length]
     setMobilePane(next)
     requestAnimationFrame(() => document.getElementById(`mobile-${next}-tab`)?.focus())
+  }
+
+  function revealMappedSource(issue: AccessibilityIssue, focus = false) {
+    const editor = editorRef.current
+    if (!editor || !issue.sourceNode) return
+    const { startOffset, endOffset, startLine } = issue.sourceNode.sourceRange
+    editor.setSelectionRange(startOffset, endOffset)
+    if (!editor.offsetParent) return
+    const lineHeight = Number.parseFloat(getComputedStyle(editor).lineHeight)
+    const lineTop = (startLine - 1) * lineHeight
+    editor.scrollTop = Math.max(0, lineTop - (editor.clientHeight - lineHeight) / 2)
+    if (lineNumbersRef.current) lineNumbersRef.current.scrollTop = editor.scrollTop
+    if (focus) editor.focus({ preventScroll: true })
+    if (editor.scrollHeight <= editor.clientHeight) {
+      window.scrollTo({ top: window.scrollY + editor.getBoundingClientRect().top + lineTop - window.innerHeight / 2 })
+    }
+  }
+
+  function refocusSelectedIssue() {
+    if (!selectedIssue) return
+    if (!selectedIssue.sourceNode) {
+      void workspaceStore.inspectIssue(selectedIssue.issueId)
+      return
+    }
+    setSourceTab('html')
+    setMobilePane('source')
+    requestAnimationFrame(() => revealMappedSource(selectedIssue, true))
   }
 
   async function importWorkspace(files: FileList | null) {
@@ -164,7 +189,7 @@ export function App() {
             </button>
             <input
               ref={importRef}
-              className="visually-hidden"
+              hidden
               type="file"
               aria-label="Import local HTML, CSS, or workspace JSON"
               accept=".html,.htm,.css,.json,text/html,text/css,application/json"
@@ -300,7 +325,7 @@ export function App() {
                   : state.scan ? `${state.issues.length} evidence records · ${state.scan.metrics.affectedNodeCount} violation nodes` : 'No scan yet'}</p>
             </div>
             {selectedIssue && !pendingProposal && (
-              <button type="button" onClick={() => void workspaceStore.inspectIssue(selectedIssue.issueId)}>Refocus</button>
+              <button type="button" onClick={refocusSelectedIssue}>Refocus</button>
             )}
           </div>
 
@@ -413,6 +438,7 @@ function IssueList({ focusIssueId }: { focusIssueId?: string }) {
       )}
       {visibleIssues.map((issue) => (
         <button
+          id={`issue-${issue.issueId}`}
           type="button"
           className={`issue-row ${state.selectedIssueId === issue.issueId ? 'is-selected' : ''}`}
           key={issue.issueId}
@@ -433,7 +459,10 @@ function IssueDetail({ issue }: { issue: AccessibilityIssue }) {
   useEffect(() => detailRef.current?.focus({ preventScroll: true }), [issue.issueId])
   return (
     <article ref={detailRef} tabIndex={-1} className="issue-detail" data-testid="selected-issue">
-      <button type="button" className="back-button" onClick={() => workspaceStore.clearSelection()}>
+      <button type="button" className="back-button" onClick={() => {
+        workspaceStore.clearSelection()
+        requestAnimationFrame(() => document.getElementById(`issue-${issue.issueId}`)?.focus())
+      }}>
         ← All issues
       </button>
       <h3>{issue.ruleId}</h3>

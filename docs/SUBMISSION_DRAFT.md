@@ -1,6 +1,6 @@
 # Curbcut — Devpost submission draft
 
-Status: production release candidate verified; owner video upload and Devpost submission remain pending.
+Status: production release candidate verified; final screenshot recapture, owner video upload, and Devpost submission remain pending.
 
 ## Submission fields
 
@@ -68,19 +68,21 @@ Native Chrome through Chrome DevTools MCP 1.8 passed the production ten-tool wor
 
 Curbcut is not keyed to its checkout fixture. A Playwright regression imports an unrelated local profile form and stylesheet, runs axe in the same opaque preview, and receives exactly the dynamic `label` and `tabindex` findings.
 
-The OpenAI `gpt-5.4-mini-2026-03-17` trajectory run completed 72 tests with 214/253 strict passing rows (84.6%), 59/72 exact trajectories, 69/72 operationally correct trajectories after separating harmless extra bounded state/verification reads, and zero errors. The three genuine misses were two malformed copied issue IDs and one wrong rejection reason; no contextual approval boundary was bypassed. The key was ephemeral and is not a runtime dependency. Known non-blockers are the roughly 307.06 KB gzip Vite chunk warning (axe-core dominates) and scan-cap lower-bound semantics: capped results say `≥` and cannot falsely mark Apply or Undo verified.
+The OpenAI `gpt-5.4-mini-2026-03-17` trajectory run produced **69/72 operationally correct trajectories with zero approval-boundary violations and zero infrastructure errors**. For full transparency, strict raw scoring was 214/253 passing rows (84.6%) and 59/72 exact trajectories; ten additional trajectories differed only by harmless bounded state or verification reads. The three genuine misses were two malformed copied issue IDs and one wrong rejection reason. The key was ephemeral and is not a runtime dependency. Full raw results and classifications are preserved in `docs/M7_REPORT.md`. Known non-blockers are the roughly 307.06 KB gzip Vite chunk warning (axe-core dominates) and scan-cap lower-bound semantics: capped results say `≥` and cannot falsely mark Apply or Undo verified.
 
-## Production screenshots
+## Screenshots — stale; recapture before submission
 
-![Scanned production workspace](./curbcut-scanned-workspace.png)
+> **Do not submit these five images.** They were captured on August 28 before the final UI cleanup and are retained only as historical references. Recapture every state below from the frozen final deployment.
 
-![Mechanical remediation preview](./curbcut-mechanical-preview.png)
+![Stale reference — scanned production workspace](./curbcut-scanned-workspace.png)
 
-![Verified mechanical repair](./curbcut-verified-mechanical.png)
+![Stale reference — mechanical remediation preview](./curbcut-mechanical-preview.png)
 
-![Contextual remediation awaiting approval](./curbcut-remediation-preview.png)
+![Stale reference — verified mechanical repair](./curbcut-verified-mechanical.png)
 
-![Responsive medium-width workspace](./curbcut-medium-workspace.png)
+![Stale reference — contextual remediation awaiting approval](./curbcut-remediation-preview.png)
+
+![Stale reference — responsive medium-width workspace](./curbcut-medium-workspace.png)
 
 ## Judge testing instructions
 
@@ -102,10 +104,11 @@ The OpenAI `gpt-5.4-mini-2026-03-17` trajectory run completed 72 tests with 214/
 - [ ] Verify the video and audio from a signed-out browser.
 - [ ] Show real tool discovery/calls, not a simulated invocation.
 - [ ] Show scan evidence, synchronized source/preview focus, direct mechanical Apply, contextual visible approval, rescan, semantic review, and summary/export or Undo.
-- [x] Recapture the scanned workspace from the frozen production deployment.
-- [x] Recapture the mechanical diff and `RENDERING → READY → Apply` state from the frozen production deployment.
-- [x] Recapture the contextual proposed diff/render/approval state from the frozen production deployment.
-- [x] Recapture a distinct verified-result/timeline image from the frozen production deployment.
+- [ ] Recapture the scanned workspace from the frozen final deployment.
+- [ ] Recapture the mechanical diff and `RENDERING → READY → Apply` state from the frozen final deployment.
+- [ ] Recapture the contextual proposed diff/render/approval state from the frozen final deployment.
+- [ ] Recapture a distinct verified-result/timeline image from the frozen final deployment.
+- [ ] Recapture the responsive medium-width workspace from the frozen final deployment.
 - [ ] Use narration only or properly licensed audio; do not add third-party trademarks or copyrighted music.
 
 ## Owner task — practitioner review (not submission evidence until completed)
@@ -123,6 +126,6 @@ The OpenAI `gpt-5.4-mini-2026-03-17` trajectory run completed 72 tests with 214/
 - [x] GitHub repository is public; root license is detected; About description and homepage are set.
 - [x] `npm test` (86/86), all 26 Playwright checks, `npm run build`, and the measured 72-run OpenAI WebMCP corpus are complete with documented results.
 - [ ] Final client, prompt, limitations, and measured evidence agree across README, reports, video, and Devpost text after the video is recorded.
-- [ ] Every public screenshot and the final video depict the frozen deployment; screenshots pass, video remains pending.
+- [ ] Every public screenshot and the final video depict the frozen deployment; both screenshots and video remain pending.
 - [ ] All URLs work from a signed-out browser.
 - [ ] Submit before September 3, 2026 at 1:00 PM PT; use deadline morning only as recovery buffer.

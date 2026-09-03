@@ -559,7 +559,14 @@ export const workspaceStore = {
       }
       if (state.sourceRevision !== revision) return fail('STALE_RESPONSE', 'A newer source revision replaced this scan.')
       const message = error instanceof Error ? error.message : String(error)
-      update({ scanStatus: 'ERROR', error: message })
+      update({
+        scanStatus: 'ERROR',
+        scan: null,
+        issues: [],
+        selectedIssueId: null,
+        highlightedNodeId: null,
+        error: message,
+      })
       return fail('INTERNAL_ERROR', message)
     }
   },
@@ -589,13 +596,14 @@ export const workspaceStore = {
     }
     const issue = state.issues.find((candidate) => candidate.issueId === issueId)
     if (!issue) return fail('ISSUE_NOT_FOUND', 'That issue is not part of the current scan.')
-    update({ selectedIssueId: issue.issueId, highlightedNodeId: issue.nodeId ?? null, error: null })
+    update({ selectedIssueId: null, highlightedNodeId: null, error: null })
     try {
       if (!bridge) return fail('PREVIEW_NOT_READY', 'The secure preview is unavailable.')
       if (issue.nodeId) await bridge.highlight(state.sourceRevision, issue.nodeId, signal)
       else await bridge.clearHighlight(state.sourceRevision, signal)
       if (cancelled(signal)) return fail('CANCELLED', 'The WebMCP execution was cancelled.')
       if (state.sourceRevision !== issue.sourceRevision) return fail('STALE_RESPONSE', 'The source changed while selecting this issue.')
+      update({ selectedIssueId: issue.issueId, highlightedNodeId: issue.nodeId ?? null })
       return { ok: true, data: issue }
     } catch (error) {
       if (isAbortError(error) || cancelled(signal)) return fail('CANCELLED', 'The WebMCP execution was cancelled.')

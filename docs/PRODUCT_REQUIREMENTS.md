@@ -1,6 +1,6 @@
 # Curbcut — Product Requirements
 
-Status: MVP implementation, production freeze, and target-client verification complete; owner video and Devpost submission remain pending
+Status: MVP implementation, production freeze, and target-client verification complete; final screenshot recapture, owner video, and Devpost submission remain pending
 Planning date: August 26, 2026  
 Hackathon deadline: September 3, 2026 at 1:00 PM PT
 

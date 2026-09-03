@@ -16,7 +16,7 @@ The unrelated profile-form fixture remains strong test/README evidence, but is i
 
 ## Recording setup
 
-- Record only after the final commit is deployed and the live app visibly contains the axe / Curbcut / WebMCP responsibility strip.
+- Record only after the final commit is deployed and the live app matches the current release UI.
 - Use the current ChatGPT desktop app and GPT-5.6 Sol or Terra. Site Tools are currently unavailable with Luna.
 - Open <https://curbcut-one.vercel.app> in ChatGPT's built-in browser. Use the ChatGPT/Codex conversation attached to that open browser page—not an unrelated repository task.
 - Choose **Reset demo**, confirm the reset, and wait for the initial scan to settle before recording.
@@ -31,7 +31,7 @@ The unrelated profile-form fixture remains strong test/README evidence, but is i
 
 Before capture, leave the clean reset workspace visible with the initial evidence ledger and **WebMCP · 10 tools ready** in the header. Put the first prompt in the attached browser-agent conversation, but do not send it yet:
 
-> Use this page's Site Tools. Scan the current checkout and list its critical and serious issues. Inspect the positive tabindex issue, then preview its deterministic remediation without applying it. Stop when the exact proposal is visible.
+> Use this page's Site Tools. From the current scan, inspect the positive tabindex issue and preview its deterministic remediation without applying it. Stop when the exact proposal is visible.
 
 Start recording, hold for one second, then press Send.
 
@@ -43,30 +43,30 @@ Start recording, hold for one second, then press Send.
 
 - Send the prepared prompt.
 - Keep the agent conversation and Curbcut visible together.
-- Show `scan_accessibility`, `list_issues`, and `inspect_issue` appearing in Site Tools/Recently Used or in Curbcut's agent timeline.
-- End this beat when the source selection and rendered highlight appear on the positive-`tabindex` button.
+- Show the real `list_issues`, `inspect_issue`, and `preview_remediation` calls in Curbcut's agent timeline.
+- End this beat with the exact diff and proposed render visible by about 0:15.
 
 **Say**
 
-> This is Curbcut: a developer and ChatGPT repairing the same live HTML and CSS workspace. These are real page-defined WebMCP calls—not a chatbot simulation. axe scans the rendered checkout, and inspection selects the exact source while highlighting the same button.
+> This is Curbcut. ChatGPT calls page-defined WebMCP tools against the live workspace. It inspects axe's real finding, maps the rendered button to exact source, and produces this surgical proposal before changing canonical source.
 
 **Edit**
 
-Cut only a motionless wait. Preserve the send action, tool names, source focus, preview highlight, and their real order.
+Cut only a motionless wait. Preserve the send action, tool names, source focus, preview highlight, proposal, and their real order. The proposal must be visible by about 0:15.
 
-### 0:15–0:31 — Show the division of responsibility
+### 0:15–0:33 — Show the division of responsibility
 
 **Screen**
 
 - Briefly open **Site Tools → Available Site Tools** and show the ten tools.
-- Close it and point to the responsibility strip.
-- Pause on the selected source range, highlighted preview node, and corresponding issue evidence.
+- Close it and point to the synchronized source, rendered preview, evidence ledger, and agent timeline.
+- Keep **WebMCP · 10 tools ready** visible in the header.
 
 **Say**
 
 > axe supplies the detection. Curbcut supplies the secure preview, exact parse5 source mapping, guarded patches, and verification. WebMCP lets the external browser agent operate those same product actions through ten narrow tools—never arbitrary JavaScript or a whole-page rewrite.
 
-### 0:31–0:51 — Non-mutating remediation preview
+### 0:33–0:51 — Non-mutating remediation preview
 
 **Screen**
 
@@ -159,7 +159,7 @@ Trim only inactive waiting. Keep the approval click, Apply, fresh scan, summary,
 
 **Screen**
 
-- End on the live URL, responsibility strip, synchronized workspace, and timeline.
+- End on the live URL, synchronized workspace, WebMCP status, and timeline.
 - Hold the final frame for one second.
 
 **Say**
@@ -170,7 +170,7 @@ Trim only inactive waiting. Keep the approval click, Apply, fresh scan, summary,
 
 1. **Inspect and preview**
 
-   > Use this page's Site Tools. Scan the current checkout and list its critical and serious issues. Inspect the positive tabindex issue, then preview its deterministic remediation without applying it. Stop when the exact proposal is visible.
+   > Use this page's Site Tools. From the current scan, inspect the positive tabindex issue and preview its deterministic remediation without applying it. Stop when the exact proposal is visible.
 
 2. **Mechanical Apply and verification**
 

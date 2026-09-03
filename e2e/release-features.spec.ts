@@ -54,6 +54,51 @@ test('stacked mobile preview completes its offscreen axe scan without horizontal
   await expect(page.locator('#evidence-pane .pane-heading p')).toContainText(`${evidenceCount} evidence records`)
 })
 
+test('tablet workspace uses pane tabs without document overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 })
+  await page.goto('/')
+  await expect(page.getByRole('tab', { name: 'Source' })).toBeVisible()
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+})
+
+test('mapped issue navigation reveals source and restores keyboard focus', async ({ page }) => {
+  await page.goto('/')
+  const scanButton = page.getByRole('button', { name: 'Rescan with axe' })
+  await scanButton.focus()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Import files' })).toBeFocused()
+  await expect(page.locator('input[type="file"]')).toBeHidden()
+
+  const imageIssue = issue(page, 'image-alt')
+  const editor = page.getByLabel('Editable HTML source')
+  await imageIssue.click()
+  await expect.poll(() => editor.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
+  const selection = await editor.evaluate((element) => ({ start: element.selectionStart, end: element.selectionEnd }))
+  expect(selection.end).toBeGreaterThan(selection.start)
+
+  await page.getByRole('button', { name: /All issues/ }).click()
+  await expect(imageIssue).toBeFocused()
+})
+
+test('Refocus opens and focuses mapped source on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  await page.getByRole('tab', { name: 'Evidence' }).click()
+  await issue(page, 'image-alt').click()
+  const editor = page.getByLabel('Editable HTML source')
+  await editor.evaluate((element) => { element.scrollTop = 0 })
+
+  await page.getByRole('button', { name: 'Refocus' }).click()
+  await expect(page.getByRole('tab', { name: 'Source' })).toHaveAttribute('aria-selected', 'true')
+  await expect(editor).toBeVisible()
+  await expect(editor).toBeFocused()
+  await expect.poll(() => editor.evaluate((element) => {
+    const selectedLine = element.value.slice(0, element.selectionStart).split('\n').length - 1
+    const selectedLineTop = element.getBoundingClientRect().top + selectedLine * Number.parseFloat(getComputedStyle(element).lineHeight)
+    return selectedLineTop >= 0 && selectedLineTop <= window.innerHeight
+  })).toBe(true)
+})
+
 test('imports unrelated local HTML/CSS atomically and reports real dynamic axe findings', async ({ page }) => {
   await page.goto('/')
   await page.locator('input[type="file"]').setInputFiles([

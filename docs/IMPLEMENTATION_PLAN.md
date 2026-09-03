@@ -1,6 +1,6 @@
 # Curbcut — Implementation Plan
 
-Status: M1–M7 and the M8 production release gate are complete; owner video and Devpost submission remain pending
+Status: M1–M7 and the M8 production release gate are complete; final screenshot recapture, owner video, and Devpost submission remain pending
 Baseline: the successful Spike A and Spike B code in this repository  
 Target: application commit `7a95ee9` deployed and verified at <https://curbcut-one.vercel.app>; submit before September 3, 2026 at 1:00 PM PT
 
@@ -870,7 +870,7 @@ Tasks:
 - [x] Deploy application commit `7a95ee9` with Vercel CLI 59.11.1 as `dpl_2S1fKA8yaBpWLnYjZaaYkuDZgf8Y`.
 - [x] Verify the public URL, reload rediscovery, production security headers, tool discovery, and the complete native-Chrome ten-tool workflow.
 - [x] Verify production scan/list/inspect source selection and preview highlighting in the Codex in-app browser, with zero console errors.
-- [x] Capture fresh production workflow screenshots and finalize repository release evidence.
+- [ ] Recapture final production workflow screenshots after UI cleanup; the five August 28 images are stale references only.
 - [ ] Record and upload the under-three-minute narrated video.
 - [ ] Submit the final Devpost entry.
 
@@ -878,7 +878,7 @@ Acceptance:
 
 - [x] Clean-session deployed native-Chrome demo completes all ten tools, including Apply/rescan, Undo/rescan, export, reload, and zero console errors.
 - [x] The frozen current-source deployment is authenticated, persistent, and publicly available at <https://curbcut-one.vercel.app>.
-- [x] Exact URL, clients, prompt, limitations, screenshots, and verification evidence are documented.
+- [ ] Exact URL, clients, prompt, limitations, final screenshots, and verification evidence agree; final screenshot recapture remains pending.
 - [ ] Video/storyboard is under three minutes and first proposal appears by 15 seconds.
 
 Fallback/cut: September 2 is feature freeze. Cut nice-to-haves and incomplete families; do not add infrastructure. September 3 morning is submission/recovery buffer only.
