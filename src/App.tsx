@@ -199,12 +199,6 @@ export function App() {
         </div>
       </header>
 
-      <section className="responsibility-strip" aria-label="System responsibilities">
-        <p><strong>axe-core</strong> detects rendered violations</p>
-        <p><strong>Curbcut</strong> maps source, previews and applies patches, then verifies with a rescan</p>
-        <p><strong>WebMCP</strong> lets an external browser agent operate this same live workspace</p>
-      </section>
-
       <div className="mobile-pane-tabs" role="tablist" aria-label="Workspace pane">
         {(['source', 'preview', 'evidence'] as const).map((pane) => (
           <button
