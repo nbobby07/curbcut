@@ -18,7 +18,7 @@ Status: production release candidate and final screenshots verified; owner video
 
 ## Ready-to-paste project description
 
-> **axe finds the evidence. Curbcut maps and patches it. Humans decide meaning.**
+> **Scanners find failures. Agents can edit code. Curbcut governs who may decide meaning.**
 
 ### The problem
 
@@ -38,7 +38,7 @@ The current source ships five bounded repair families. Positive `tabindex` is me
 
 The core interaction is not “send code to an AI and accept a rewrite.” Curbcut exposes ten narrow WebMCP tools that correspond to real product actions: read workspace state, scan, list, inspect, preview, apply, reject, undo, summarize, and export. These tools call the same React store and secure preview bridge used by the visible controls.
 
-That shared boundary materially improves the experience. The browser agent can perform repetitive multi-step work against the exact artifact the developer is looking at, while every call produces a visible UI side effect and a bounded structured result. Issue IDs, source revisions, proposal IDs, classifications, and allowed next actions keep the workflow stateful instead of relying on prose. Imported snippets are marked untrusted, source is never exposed through an arbitrary execution tool, and tool calls cannot manufacture semantic approval.
+That shared boundary materially improves the experience. The browser agent can perform repetitive multi-step work against the exact artifact the developer is looking at, while every call produces a visible UI side effect and a bounded structured result. Issue IDs, source revisions, proposal IDs, classifications, and allowed next actions keep the workflow stateful instead of relying on prose. Imported snippets are marked untrusted, source is never exposed through an arbitrary execution tool, and tool calls cannot manufacture semantic approval. An unapproved contextual Apply is visibly blocked, leaves canonical source unchanged, and is recorded in the shared timeline.
 
 ### What the human and agent can do together
 
@@ -94,16 +94,17 @@ Captured September 2 from the frozen final deployment.
 
 4. Confirm that scan/list/inspect calls populate the visible issue list, focus an exact source range, highlight the same rendered node, and appear in the local timeline.
 5. Confirm the mechanical `tabindex` proposal is visible, reports `RENDERING`, becomes `READY` through `get_workspace`, then applies without a redundant semantic-approval click and clears after rescan.
-6. For a label or image proposal, supply semantic text only if you agree with it. Review the working/proposed renders and exact diff, then choose **Approve this exact change**.
-7. Confirm the intended finding disappears. Ask: **Undo the last repair and rescan.** Confirm exact source and the original finding return.
-8. Ask: **Summarize the current changes and export the HTML.** Confirm a local canonical-source download with no Curbcut mapping attribute.
+6. Before approving a label or image proposal, ask the agent to apply it. Confirm Curbcut reports **Agent action blocked**, returns `APPROVAL_REQUIRED`, and leaves the source revision unchanged.
+7. Supply semantic text only if you agree with it. Review the working/proposed renders and exact diff, then choose **Approve this exact change**.
+8. Confirm the intended finding disappears. Ask: **Undo the last repair and rescan.** Confirm exact source and the original finding return.
+9. Ask: **Summarize the current changes and export the HTML.** Confirm a local canonical-source download with no Curbcut mapping attribute.
 
 ## Media checklist
 
 - [ ] Upload a narrated video shorter than three minutes to YouTube with public visibility.
 - [ ] Verify the video and audio from a signed-out browser.
 - [ ] Show real tool discovery/calls, not a simulated invocation.
-- [ ] Show scan evidence, synchronized source/preview focus, direct mechanical Apply, contextual visible approval, rescan, semantic review, and summary/export or Undo.
+- [ ] Show scan evidence, synchronized source/preview focus, direct mechanical Apply, a blocked unapproved contextual Apply, visible human approval, rescan, semantic review, and summary/export or Undo.
 - [x] Recapture the scanned workspace from the frozen final deployment.
 - [x] Recapture the mechanical diff and `READY → Apply` state from the frozen final deployment.
 - [x] Recapture the contextual proposed diff/render/approval state from the frozen final deployment.

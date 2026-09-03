@@ -23,6 +23,12 @@ export type PreviewMode = 'WORKING' | 'PROPOSED'
 export type ProposalPreviewStatus = 'IDLE' | 'RENDERING' | 'READY' | 'ERROR'
 export type MutationStatus = 'IDLE' | 'APPLYING' | 'UNDOING'
 
+export type BlockedAction = {
+  code: 'APPROVAL_REQUIRED'
+  proposalId: string
+  message: string
+}
+
 export type ProposalPreviewState = {
   proposalId: string | null
   status: ProposalPreviewStatus
@@ -86,6 +92,7 @@ export type WorkspaceState = {
   proposalPreview: ProposalPreviewState
   previewMode: PreviewMode
   mutationStatus: MutationStatus
+  blockedAction: BlockedAction | null
   history: readonly ChangeRecord[]
   verificationNotice: VerificationNotice | null
   lastExport: ExportMetadata | null
@@ -201,6 +208,7 @@ let state: WorkspaceState = {
   proposalPreview: { proposalId: null, status: 'IDLE', error: null },
   previewMode: 'WORKING',
   mutationStatus: 'IDLE',
+  blockedAction: null,
   history: [],
   verificationNotice: null,
   lastExport: null,
@@ -357,6 +365,7 @@ function edit(kind: 'html' | 'css', value: string): CommandResult<{ sourceRevisi
     proposalPreview: emptyProposalPreview(),
     previewMode: 'WORKING',
     mutationStatus: 'IDLE',
+    blockedAction: null,
     verificationNotice: state.proposal && (state.proposal.status === 'PROPOSED' || state.proposal.status === 'APPROVED')
       ? { changeId: state.proposal.proposalId, kind: 'APPLY', outcome: 'NOT_VERIFIED', message: 'The pending proposal was invalidated by a manual source edit.' }
       : null,
@@ -420,6 +429,7 @@ export const workspaceStore = {
       proposalPreview: emptyProposalPreview(),
       previewMode: 'WORKING',
       mutationStatus: 'IDLE',
+      blockedAction: null,
       history: [],
       verificationNotice: null,
       error: null,
@@ -462,6 +472,7 @@ export const workspaceStore = {
       proposalPreview: emptyProposalPreview(),
       previewMode: 'WORKING',
       mutationStatus: 'IDLE',
+      blockedAction: null,
       history: [],
       verificationNotice: null,
       error: null,
@@ -643,6 +654,7 @@ export const workspaceStore = {
       proposal: result.data,
       proposalPreview: { proposalId: result.data.proposalId, status: 'RENDERING', error: null },
       previewMode: 'PROPOSED',
+      blockedAction: null,
       error: null,
       verificationNotice: null,
     })
@@ -704,6 +716,7 @@ export const workspaceStore = {
     }
     update({
       proposal: result.data,
+      blockedAction: null,
       error: null,
       activity: [...state.activity, approvalEvent].slice(-100),
     })
@@ -748,7 +761,14 @@ export const workspaceStore = {
     }
     if (!result.ok) {
       const code = result.error.code === 'APPROVAL_REQUIRED' ? 'APPROVAL_REQUIRED' : 'STALE_PROPOSAL'
-      update({ error: result.error.message })
+      update({
+        blockedAction: code === 'APPROVAL_REQUIRED' ? {
+          code,
+          proposalId,
+          message: 'Exact human approval is required in the UI before an agent can apply this contextual proposal. Working source is unchanged and the proposal remains proposed.',
+        } : null,
+        error: code === 'APPROVAL_REQUIRED' ? null : result.error.message,
+      })
       finishMutation(token)
       return fail(code, result.error.message)
     }
@@ -767,6 +787,7 @@ export const workspaceStore = {
       proposalPreview: emptyProposalPreview(),
       previewMode: 'WORKING',
       mutationStatus: 'IDLE',
+      blockedAction: null,
       history: [...state.history, change].slice(-20),
       verificationNotice: {
         changeId: change.changeId,
@@ -785,7 +806,7 @@ export const workspaceStore = {
     if (!state.proposal || (proposalId && state.proposal.proposalId !== proposalId)) return fail('PROPOSAL_NOT_FOUND', 'There is no matching proposal to reject.')
     const result = rejectCurrentProposal(state.proposal)
     if (!result.ok) return fail('PROPOSAL_NOT_FOUND', result.error.message)
-    update({ proposal: result.data, proposalPreview: emptyProposalPreview(), previewMode: 'WORKING', error: null })
+    update({ proposal: result.data, proposalPreview: emptyProposalPreview(), previewMode: 'WORKING', blockedAction: null, error: null })
     return { ok: true as const, data: result.data }
   },
   async undoLatest(signal?: AbortSignal) {

@@ -1,6 +1,6 @@
-# Curbcut — final 2:40 demo script
+# Curbcut — final 2:43 demo script
 
-Target runtime: **2:38–2:44**. Record the final deployed build in the actual ChatGPT desktop browser with Site Tools connected. Every tool call, source change, rescan, and approval shown must be real. Jump-cut only idle model/browser latency from the same chronological session.
+Target runtime: **2:40–2:45**. Record the final deployed build in the actual ChatGPT desktop browser with Site Tools connected. Every tool call, refusal, source change, rescan, and approval shown must be real. Jump-cut only idle model/browser latency from the same chronological session.
 
 ## What this cut proves
 
@@ -9,7 +9,7 @@ Target runtime: **2:38–2:44**. Record the final deployed build in the actual C
 3. Curbcut maps a rendered axe node to exact editable source and visibly highlights both.
 4. A deterministic code proposal renders before canonical source changes.
 5. A mechanical repair can be applied and verified by the agent.
-6. A contextual repair cannot pass its human-approval boundary silently.
+6. A real unauthorized contextual Apply is blocked with `APPROVAL_REQUIRED` while source remains unchanged.
 7. Summary, clean export, and exact Undo operate on the same workspace.
 
 The unrelated profile-form fixture remains strong test/README evidence, but is intentionally omitted from the video. One coherent workflow is more legible than a rushed second import.
@@ -24,7 +24,7 @@ The unrelated profile-form fixture remains strong test/README evidence, but is i
 - Use a clean conversation. Arrange the screen about 35% conversation and 65% Curbcut. Keep the source, preview, evidence ledger, and action timeline readable.
 - Record at 1920×1080 or higher, with browser zoom around 80–90%. Hide bookmarks, personal tabs, keys, notifications, and unrelated windows.
 - Record the real screen workflow first. Then add the narration as voice-over so tool latency can be trimmed cleanly.
-- Use no background music. Add short captions only where they clarify proof: **LIVE WEBMCP CALL**, **WORKING SOURCE UNCHANGED**, **HUMAN APPROVAL REQUIRED**, and **FRESH AXE RESCAN**.
+- Use no background music. Add short captions only where they clarify proof: **LIVE WEBMCP CALL**, **WORKING SOURCE UNCHANGED**, **AGENT ACTION BLOCKED**, **HUMAN APPROVAL REQUIRED**, and **FRESH AXE RESCAN**.
 - Record two complete takes. Upload the cleaner one only after checking public YouTube visibility, audio, legibility, and a runtime below 3:00 from a signed-out window.
 
 ## Prepare the first frame
@@ -35,7 +35,7 @@ Before capture, leave the clean reset workspace visible with the initial evidenc
 
 Start recording, hold for one second, then press Send.
 
-## Exact 2:40 timeline
+## Exact 2:43 timeline
 
 ### 0:00–0:15 — Working product immediately
 
@@ -48,13 +48,13 @@ Start recording, hold for one second, then press Send.
 
 **Say**
 
-> This is Curbcut. ChatGPT calls page-defined WebMCP tools against the live workspace. It inspects axe's real finding, maps the rendered button to exact source, and produces this surgical proposal before changing canonical source.
+> Scanners find failures, and agents can edit code—but neither defines who may decide meaning. Curbcut governs that handoff. Here ChatGPT calls page-defined WebMCP tools, maps a real axe finding to exact source, and previews a surgical change before mutation.
 
 **Edit**
 
 Cut only a motionless wait. Preserve the send action, tool names, source focus, preview highlight, proposal, and their real order. The proposal must be visible by about 0:15.
 
-### 0:15–0:33 — Show the division of responsibility
+### 0:15–0:27 — Show the division of responsibility
 
 **Screen**
 
@@ -64,9 +64,9 @@ Cut only a motionless wait. Preserve the send action, tool names, source focus, 
 
 **Say**
 
-> axe supplies the detection. Curbcut supplies the secure preview, exact parse5 source mapping, guarded patches, and verification. WebMCP lets the external browser agent operate those same product actions through ten narrow tools—never arbitrary JavaScript or a whole-page rewrite.
+> axe detects the violation. Curbcut supplies the isolated preview, exact source mapping, guarded patch, and verification. WebMCP lets ChatGPT operate those same visible product actions—never arbitrary JavaScript or a whole-page rewrite.
 
-### 0:33–0:51 — Non-mutating remediation preview
+### 0:27–0:42 — Non-mutating remediation preview
 
 **Screen**
 
@@ -77,9 +77,9 @@ Cut only a motionless wait. Preserve the send action, tool names, source focus, 
 
 **Say**
 
-> Preview is a real state, not an immediate mutation. Curbcut renders the proposed result and shows one surgical diff while canonical source remains unchanged. Removing a positive tabindex invents no meaning, so this exact mechanical proposal needs no redundant semantic approval.
+> This is a real proposal, not an immediate edit. Curbcut renders the result and shows the exact diff while working source stays unchanged. Removing positive tabindex invents no meaning, so it needs no semantic approval.
 
-### 0:51–1:14 — Apply and fresh verification
+### 0:42–1:02 — Apply and fresh verification
 
 **Screen**
 
@@ -92,9 +92,9 @@ Cut only a motionless wait. Preserve the send action, tool names, source focus, 
 
 **Say**
 
-> Now ChatGPT applies only that proposal. The source revision changes, previous evidence becomes stale, and a fresh in-frame axe scan runs. The targeted finding disappears. Curbcut reports an automated check passed—not WCAG compliance—because accessibility still requires human and assistive-technology testing.
+> ChatGPT applies only that proposal. The source revision changes and a fresh in-frame axe scan runs. The finding disappears. Curbcut reports a targeted automated check—not WCAG compliance.
 
-### 1:14–1:39 — Contextual repair and the hard human boundary
+### 1:02–1:23 — Contextual repair and the hard human boundary
 
 **Screen**
 
@@ -107,9 +107,29 @@ Cut only a motionless wait. Preserve the send action, tool names, source focus, 
 
 **Say**
 
-> The email label is different. Curbcut can reuse the adjacent visible words “Email address” and prepare the association, but whether those words express the correct meaning is a human decision. The agent can preview it, but the tool surface cannot manufacture my approval.
+> The email label is different. Curbcut can reuse the adjacent visible words, but deciding whether they express the right meaning belongs to a person. The agent can preview this association, but cannot approve it.
 
-### 1:39–2:05 — Human approval, agent completion, and export
+### 1:23–1:36 — Prove the boundary with a real refused Apply
+
+**Screen**
+
+- Send:
+
+  > Try to apply that exact contextual proposal now, before I approve it. Call apply_remediation once and show me the result. Do not create or claim approval.
+
+- Keep both panes visible while the real `apply_remediation` call returns `APPROVAL_REQUIRED`.
+- Pause on **Agent action blocked — human approval required**, the unchanged working source, the proposal still marked **PROPOSED**, and the refused event in the action timeline.
+- Add the caption **AGENT ACTION BLOCKED** only after the refusal is visible.
+
+**Say**
+
+> I ask the agent to cross the boundary. The real Apply call returns approval required. Source is unchanged and the proposal remains proposed. This is enforced product state, not prompt etiquette.
+
+**Edit**
+
+Do not fake this beat with narration or a disabled UI button. The timeline must show a real `apply_remediation` attempt and its `APPROVAL_REQUIRED` result. If the agent declines to call the tool, restart the take and use the exact prompt above.
+
+### 1:36–2:05 — Human approval, agent completion, and export
 
 **Screen**
 
@@ -123,13 +143,13 @@ Cut only a motionless wait. Preserve the send action, tool names, source focus, 
 
 **Say**
 
-> I inspect the exact diff and proposed render, then approve it in the visible UI. ChatGPT can now apply, rescan, summarize what changed, and export clean canonical HTML. Preview-only mapping metadata never contaminates the editor or download.
+> I review the exact diff and proposed render, then approve it in the UI. ChatGPT can now apply, rescan, summarize the work, and export clean HTML without preview-only mapping metadata.
 
 **Edit**
 
 Trim only inactive waiting. Keep the approval click, Apply, fresh scan, summary, and export in their true sequence.
 
-### 2:05–2:23 — Honest stopping points and shared history
+### 2:05–2:17 — Honest stopping points and shared history
 
 **Screen**
 
@@ -138,9 +158,9 @@ Trim only inactive waiting. Keep the approval click, Apply, fresh scan, summary,
 
 **Say**
 
-> Curbcut also knows where to stop. Image purpose and design-sensitive contrast still need context, so it preserves evidence instead of guessing. The local timeline records what the agent did, what the human approved, and which revision was verified.
+> Curbcut also knows when to stop. Image purpose and contrast still need context, so it preserves evidence instead of guessing. The timeline records both agent work and human approval.
 
-### 2:23–2:37 — Exact Undo
+### 2:17–2:35 — Exact Undo
 
 **Screen**
 
@@ -153,9 +173,9 @@ Trim only inactive waiting. Keep the approval click, Apply, fresh scan, summary,
 
 **Say**
 
-> Undo restores the exact previous source snapshot. Another real axe scan restores the original label finding, proving that evidence and verification remain bound to the current source revision.
+> Undo restores the exact prior source. Another axe scan brings the original label finding back, keeping verification bound to the current revision.
 
-### 2:37–2:42 — Close
+### 2:35–2:43 — Close
 
 **Screen**
 
@@ -164,7 +184,7 @@ Trim only inactive waiting. Keep the approval click, Apply, fresh scan, summary,
 
 **Say**
 
-> Curbcut: mechanics by the agent, meaning by the human, in one live browser workspace.
+> Curbcut: mechanics by the agent, meaning by the human. Today it governs one workspace; tomorrow this pattern could support reviewed accessibility contributions across the web.
 
 ## Exact prompts, in order
 
@@ -180,11 +200,15 @@ Trim only inactive waiting. Keep the approval click, Apply, fresh scan, summary,
 
    > Inspect the missing-label issue for the checkout email field. Use Curbcut's existing adjacent visible-text candidate without inventing new wording. Preview it only, and do not apply or claim approval.
 
-4. **Approved contextual completion and export**
+4. **Unauthorized contextual Apply**
+
+   > Try to apply that exact contextual proposal now, before I approve it. Call apply_remediation once and show me the result. Do not create or claim approval.
+
+5. **Approved contextual completion and export**
 
    > I approved the exact visible contextual proposal in Curbcut. Apply it, rescan, summarize applied and remaining work, then export the current HTML.
 
-5. **Undo**
+6. **Undo**
 
    > Undo the last repair, rescan the restored source, and confirm whether its original finding returned.
 
@@ -192,6 +216,7 @@ Trim only inactive waiting. Keep the approval click, Apply, fresh scan, summary,
 
 - If Curbcut says manual mode or exposes fewer than ten tools, do not record. Restart/update the supported client and verify Site Tools again.
 - If the agent answers in prose but Curbcut shows no corresponding timeline/tool event, WebMCP did not run. Do not use that footage.
+- For the blocked-Apply beat, require the visible `apply_remediation → APPROVAL_REQUIRED` timeline result, unchanged working source, and still-proposed contextual change. A prose refusal is not evidence.
 - If Apply says the proposed result is not ready, send: **“Use get_workspace until this exact proposal reports READY, then apply that proposal and rescan. Do not create a replacement.”**
 - If the wrong issue is selected, a proposal is replaced, or state becomes confusing, abandon the take. Reset and restart rather than explaining around it.
 - Keep the application URL and `WebMCP · 10 tools ready` visible whenever practical.

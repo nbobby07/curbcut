@@ -5,6 +5,7 @@ type ToolResult = {
   ok: boolean
   data?: Record<string, any>
   error?: { code: string }
+  state?: Record<string, any>
   allowedNextActions: string[]
 }
 
@@ -100,9 +101,20 @@ test('C — preview is non-mutating and apply cannot bypass visible exact approv
   await expect(page.getByTestId('apply-proposal')).toBeDisabled()
   const proposalId = String(preview.data!.proposalId)
   await waitForProposalReady(page)
-  expect(await tool(page, 'apply_remediation', { proposalId })).toMatchObject({ ok: false, error: { code: 'APPROVAL_REQUIRED' } })
+  const revision = Number(preview.state!.sourceRevision)
+  const blocked = await tool(page, 'apply_remediation', { proposalId })
+  expect(blocked).toMatchObject({
+    ok: false,
+    error: { code: 'APPROVAL_REQUIRED' },
+    state: { sourceRevision: revision, proposalStatus: 'PROPOSED' },
+  })
   expect(await editor.inputValue()).toBe(before)
+  await expect(page.getByTestId('blocked-agent-action')).toContainText('Agent action blocked')
+  await expect(page.getByTestId('blocked-agent-action')).toContainText('Exact human approval is required')
+  await expect(page.getByTestId('proposal-panel')).toContainText('proposed proposal · working source unchanged')
+  await expect(page.getByTestId('activity-timeline')).toContainText('APPROVAL_REQUIRED')
   await page.getByTestId('approve-proposal').click()
+  await expect(page.getByTestId('blocked-agent-action')).toHaveCount(0)
   expect(await tool(page, 'apply_remediation', { proposalId })).toMatchObject({ ok: true, data: { scanStatus: 'STALE' } })
   await expect(editor).toHaveValue(before.replace('            <input id="email"', '            <label for="email">Email address</label>\n            <input id="email"'))
 })

@@ -286,6 +286,9 @@ a { color: #0758c7; text-underline-offset: 3px; }
 .issue-detail pre { margin: 0; padding: 9px; background: var(--surface-subtle); white-space: pre-wrap; overflow-wrap: anywhere; font: 10.5px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
 .scope-note, .review-notice { padding: 9px; border: 1px solid var(--line); color: #465467; background: #f1f4f8; font-size: 12px; line-height: 1.45; }
 .review-notice { border-color: #ebcf9e; background: var(--proposal-bg); color: #654000; }
+.blocked-action { margin: 9px 0; padding: 9px; border: 1px solid var(--danger); background: var(--danger-bg); color: var(--danger); font-size: 12px; line-height: 1.45; }
+.blocked-action strong { display: block; }
+.blocked-action p { margin: 3px 0 0; }
 .manual-review { margin-top: 14px; padding: 11px; border: 1px solid var(--line); background: var(--surface-subtle); }
 .manual-review h4 { margin: 0 0 4px; }
 .manual-review p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }

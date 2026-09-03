@@ -571,7 +571,7 @@ function RepairControl({ issue }: { issue: AccessibilityIssue }) {
 }
 
 function ProposalPanel({ proposal, issue }: { proposal: RemediationProposal; issue?: AccessibilityIssue }) {
-  const { mutationStatus, proposalPreview } = useWorkspaceState()
+  const { mutationStatus, proposalPreview, blockedAction } = useWorkspaceState()
   const panelRef = useRef<HTMLElement>(null)
   const approvalRequired = requiresHumanApproval(proposal)
   const proposedResultReady = proposalPreview.proposalId === proposal.proposalId && proposalPreview.status === 'READY'
@@ -615,6 +615,12 @@ function ProposalPanel({ proposal, issue }: { proposal: RemediationProposal; iss
       <p className="review-notice">{approvalRequired
         ? <><strong>Your approval is required.</strong> Curbcut wrote the code, but only you can confirm its meaning. Reject and create a new proposal to change the answer.</>
         : <><strong>No semantic approval needed.</strong> This exact syntax-only diff is visible before the agent or you applies it, and exact Undo remains available.</>}</p>
+      {blockedAction?.proposalId === proposal.proposalId && (
+        <section className="blocked-action" role="alert" aria-labelledby="blocked-action-heading" data-testid="blocked-agent-action">
+          <strong id="blocked-action-heading">Agent action blocked</strong>
+          <p>{blockedAction.message}</p>
+        </section>
+      )}
       {approvalRequired && proposal.status === 'PROPOSED' && (
         <button type="button" className="approve-action" data-testid="approve-proposal"
           onClick={() => workspaceStore.approveProposal(proposal.proposalId, proposal.diffHash)}>
