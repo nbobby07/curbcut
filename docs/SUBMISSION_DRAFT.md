@@ -8,7 +8,7 @@ Status: production release candidate verified; owner video upload and Devpost su
 
 **Tagline:** A browser-native accessibility repair workbench where a developer and browser agent safely repair the same live HTML/CSS artifact.
 
-**Live application:** <https://curbcut-one.vercel.app> — application commit `ee99300`, Vercel deployment `dpl_4btN6y83yg2DDePr7ANfjLWGKd9i`.
+**Live application:** <https://curbcut-one.vercel.app> — application commit `9de7dc4`, Vercel deployment `dpl_13K66yikcFY5f6TpTvvrib7CFdy7`.
 
 **Public repository:** <https://github.com/nbobby07/curbcut>
 
