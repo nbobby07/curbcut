@@ -1,8 +1,8 @@
 # Curbcut — Implementation Plan
 
-Status: M1–M7 and the M8 production release gate are complete; final screenshot recapture, owner video, and Devpost submission remain pending
+Status: M1–M7, the M8 production release gate, and final screenshots are complete; owner video and Devpost submission remain pending
 Baseline: the successful Spike A and Spike B code in this repository  
-Target: application commit `7a95ee9` deployed and verified at <https://curbcut-one.vercel.app>; submit before September 3, 2026 at 1:00 PM PT
+Target: application commit `21838d8` deployed and verified at <https://curbcut-one.vercel.app>; submit before September 3, 2026 at 1:00 PM PT
 
 ## 1. Technical baseline and governing references
 
@@ -859,7 +859,7 @@ Acceptance:
 - no unapproved contextual Apply or invented semantic value observed;
 - fixture results stay exact.
 
-Recorded release evidence: 36 deterministic trajectory cases across twelve intents and ten tools, 86/86 passing Vitest checks across nine files, 26/26 passing Playwright checks, and a 72-run OpenAI model evaluation with 214/253 strict passing rows, 59/72 exact trajectories, 69/72 operationally correct trajectories, and zero errors. Browser coverage includes reliable pristine-demo reset/persistence, the real offscreen mobile iframe/requestAnimationFrame scan regression, zero horizontal overflow, all five families, authority and proposal-readiness gates, isolation, mapping, export, reload, judge-prompt copy, persistent WebMCP readiness, and schema drift.
+Recorded release evidence: 36 deterministic trajectory cases across twelve intents and ten tools, 88/88 passing Vitest checks across ten files, 30/30 passing Playwright checks, and a 72-run OpenAI model evaluation with 214/253 strict passing rows, 59/72 exact trajectories, 69/72 operationally correct trajectories, and zero errors. Browser coverage includes reliable pristine-demo reset/persistence, scan/highlight failure-state integrity, exact source-range reveal and focus restoration, mobile/tablet/medium-width regressions, all five families, authority and proposal-readiness gates, isolation, mapping, export, reload, judge-prompt copy, persistent WebMCP readiness, and schema drift.
 
 Fallback/cut: reduce paraphrase count only after covering every intent once. Never cut security, fixture, undo, contextual approval, or primary workflow gates.
 
@@ -867,10 +867,10 @@ Fallback/cut: reduce paraphrase count only after covering every intent once. Nev
 
 Tasks:
 
-- [x] Deploy application commit `7a95ee9` with Vercel CLI 59.11.1 as `dpl_2S1fKA8yaBpWLnYjZaaYkuDZgf8Y`.
+- [x] Deploy application commit `21838d8` with Vercel CLI 59.11.1 as `dpl_Ae3dg1396JPcP2nmygbNxNVPSnha`.
 - [x] Verify the public URL, reload rediscovery, production security headers, tool discovery, and the complete native-Chrome ten-tool workflow.
 - [x] Verify production scan/list/inspect source selection and preview highlighting in the Codex in-app browser, with zero console errors.
-- [ ] Recapture final production workflow screenshots after UI cleanup; the five August 28 images are stale references only.
+- [x] Recapture five final production workflow screenshots from the frozen September 2 deployment.
 - [ ] Record and upload the under-three-minute narrated video.
 - [ ] Submit the final Devpost entry.
 
@@ -878,7 +878,7 @@ Acceptance:
 
 - [x] Clean-session deployed native-Chrome demo completes all ten tools, including Apply/rescan, Undo/rescan, export, reload, and zero console errors.
 - [x] The frozen current-source deployment is authenticated, persistent, and publicly available at <https://curbcut-one.vercel.app>.
-- [ ] Exact URL, clients, prompt, limitations, final screenshots, and verification evidence agree; final screenshot recapture remains pending.
+- [x] Exact URL, clients, prompt, limitations, final screenshots, and verification evidence agree.
 - [ ] Video/storyboard is under three minutes and first proposal appears by 15 seconds.
 
 Fallback/cut: September 2 is feature freeze. Cut nice-to-haves and incomplete families; do not add infrastructure. September 3 morning is submission/recovery buffer only.
@@ -929,4 +929,4 @@ Immediate no-go conditions during release verification:
 
 Recommendation: the production release gate is complete. **PROCEED TO SUBMISSION without adding product scope.** The OpenAI model-backed eval is complete with 214/253 strict passing rows (84.6%), 59/72 exact trajectories, 69/72 operationally correct trajectories, three genuine argument misses, and zero errors. Remaining work is owner-only: record/host the under-three-minute video and submit Devpost.
 
-Known non-blockers: the Vite production build reports a roughly 307.06 KB gzip chunk because axe-core dominates the bundle; scan security caps expose lower-bound counts and produce inconclusive verification rather than a false pass. Impeccable review returned **SHIP** and the release code audit returned **CLEAR**.
+Known non-blockers: the Vite production build reports a roughly 307.74 KB gzip chunk because axe-core dominates the bundle; scan security caps expose lower-bound counts and produce inconclusive verification rather than a false pass. Impeccable review returned **SHIP** and the release code audit returned **CLEAR**.

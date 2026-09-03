@@ -1,6 +1,6 @@
 # Curbcut — Devpost submission draft
 
-Status: production release candidate verified; final screenshot recapture, owner video upload, and Devpost submission remain pending.
+Status: production release candidate and final screenshots verified; owner video upload and Devpost submission remain pending.
 
 ## Submission fields
 
@@ -8,7 +8,7 @@ Status: production release candidate verified; final screenshot recapture, owner
 
 **Tagline:** A browser-native accessibility repair workbench where a developer and browser agent safely repair the same live HTML/CSS artifact.
 
-**Live application:** <https://curbcut-one.vercel.app> — application commit `7a95ee9`, Vercel deployment `dpl_2S1fKA8yaBpWLnYjZaaYkuDZgf8Y`.
+**Live application:** <https://curbcut-one.vercel.app> — application commit `21838d8`, Vercel deployment `dpl_Ae3dg1396JPcP2nmygbNxNVPSnha`.
 
 **Public repository:** <https://github.com/nbobby07/curbcut>
 
@@ -62,27 +62,27 @@ Curbcut does not claim automated WCAG compliance. axe-core covers only part of a
 
 ### Evidence
 
-The frozen source gate passes 86/86 Vitest checks across nine files, 26/26 Playwright checks, and a validated WebMCP corpus of 36 trajectory cases across twelve intents and all ten tools. Coverage includes all five repair families, proposal-readiness and concurrent-mutation guards, reliable pristine-demo reset/persistence, the real offscreen mobile iframe/requestAnimationFrame scan regression and zero horizontal overflow, direct mechanical Apply, contextual approval, non-mutating rejection, the opaque-origin boundary, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, Apply/rescan, Undo/rescan, local import, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between registered tool schemas and the eval snapshot.
+The frozen source gate passes 88/88 Vitest checks across ten files, 30/30 Playwright checks, and a validated WebMCP corpus of 36 trajectory cases across twelve intents and all ten tools. Coverage includes all five repair families, proposal-readiness and concurrent-mutation guards, reliable pristine-demo reset/persistence, honest scan/highlight failure states, exact source-range reveal and keyboard focus restoration, mobile/tablet/medium-width regressions, direct mechanical Apply, contextual approval, non-mutating rejection, the opaque-origin boundary, CSP/network/script isolation, parse5-to-DOM mapping, real axe scans, WebMCP registration and state effects, Apply/rescan, Undo/rescan, local import, canonical export, reload, a self-scan of Curbcut's own UI, and exact agreement between registered tool schemas and the eval snapshot.
 
 Native Chrome through Chrome DevTools MCP 1.8 passed the production ten-tool workflow, including reload rediscovery, with zero console errors. The Codex in-app browser independently passed the updated production scan, `impact:"high"` listing, and mapped inspect calls with source selection, preview highlight, timeline activity, and zero console errors on August 28, 2026. Production response headers passed for CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS. Impeccable review returned **SHIP** and the release code audit returned **CLEAR**.
 
 Curbcut is not keyed to its checkout fixture. A Playwright regression imports an unrelated local profile form and stylesheet, runs axe in the same opaque preview, and receives exactly the dynamic `label` and `tabindex` findings.
 
-The OpenAI `gpt-5.4-mini-2026-03-17` trajectory run produced **69/72 operationally correct trajectories with zero approval-boundary violations and zero infrastructure errors**. For full transparency, strict raw scoring was 214/253 passing rows (84.6%) and 59/72 exact trajectories; ten additional trajectories differed only by harmless bounded state or verification reads. The three genuine misses were two malformed copied issue IDs and one wrong rejection reason. The key was ephemeral and is not a runtime dependency. Full raw results and classifications are preserved in `docs/M7_REPORT.md`. Known non-blockers are the roughly 307.06 KB gzip Vite chunk warning (axe-core dominates) and scan-cap lower-bound semantics: capped results say `≥` and cannot falsely mark Apply or Undo verified.
+The OpenAI `gpt-5.4-mini-2026-03-17` trajectory run produced **69/72 operationally correct trajectories with zero approval-boundary violations and zero infrastructure errors**. For full transparency, strict raw scoring was 214/253 passing rows (84.6%) and 59/72 exact trajectories; ten additional trajectories differed only by harmless bounded state or verification reads. The three genuine misses were two malformed copied issue IDs and one wrong rejection reason. The key was ephemeral and is not a runtime dependency. Full raw results and classifications are preserved in `docs/M7_REPORT.md`. Known non-blockers are the roughly 307.74 KB gzip Vite chunk warning (axe-core dominates) and scan-cap lower-bound semantics: capped results say `≥` and cannot falsely mark Apply or Undo verified.
 
-## Screenshots — stale; recapture before submission
+## Production screenshots
 
-> **Do not submit these five images.** They were captured on August 28 before the final UI cleanup and are retained only as historical references. Recapture every state below from the frozen final deployment.
+Captured September 2 from the frozen final deployment.
 
-![Stale reference — scanned production workspace](./curbcut-scanned-workspace.png)
+![Scanned production workspace](./curbcut-scanned-workspace.png)
 
-![Stale reference — mechanical remediation preview](./curbcut-mechanical-preview.png)
+![Mechanical remediation preview](./curbcut-mechanical-preview.png)
 
-![Stale reference — verified mechanical repair](./curbcut-verified-mechanical.png)
+![Verified mechanical repair](./curbcut-verified-mechanical.png)
 
-![Stale reference — contextual remediation awaiting approval](./curbcut-remediation-preview.png)
+![Contextual remediation awaiting approval](./curbcut-remediation-preview.png)
 
-![Stale reference — responsive medium-width workspace](./curbcut-medium-workspace.png)
+![Responsive medium-width workspace](./curbcut-medium-workspace.png)
 
 ## Judge testing instructions
 
@@ -104,11 +104,11 @@ The OpenAI `gpt-5.4-mini-2026-03-17` trajectory run produced **69/72 operational
 - [ ] Verify the video and audio from a signed-out browser.
 - [ ] Show real tool discovery/calls, not a simulated invocation.
 - [ ] Show scan evidence, synchronized source/preview focus, direct mechanical Apply, contextual visible approval, rescan, semantic review, and summary/export or Undo.
-- [ ] Recapture the scanned workspace from the frozen final deployment.
-- [ ] Recapture the mechanical diff and `RENDERING → READY → Apply` state from the frozen final deployment.
-- [ ] Recapture the contextual proposed diff/render/approval state from the frozen final deployment.
-- [ ] Recapture a distinct verified-result/timeline image from the frozen final deployment.
-- [ ] Recapture the responsive medium-width workspace from the frozen final deployment.
+- [x] Recapture the scanned workspace from the frozen final deployment.
+- [x] Recapture the mechanical diff and `READY → Apply` state from the frozen final deployment.
+- [x] Recapture the contextual proposed diff/render/approval state from the frozen final deployment.
+- [x] Recapture a distinct verified-result/timeline image from the frozen final deployment.
+- [x] Recapture the responsive medium-width workspace from the frozen final deployment.
 - [ ] Use narration only or properly licensed audio; do not add third-party trademarks or copyrighted music.
 
 ## Owner task — practitioner review (not submission evidence until completed)
@@ -124,8 +124,8 @@ The OpenAI `gpt-5.4-mini-2026-03-17` trajectory run produced **69/72 operational
 - [ ] Join/registration status is confirmed in the submitting Devpost account.
 - [x] Frozen current-source build is live in a clean target-client session and remains available without payment or credentials.
 - [x] GitHub repository is public; root license is detected; About description and homepage are set.
-- [x] `npm test` (86/86), all 26 Playwright checks, `npm run build`, and the measured 72-run OpenAI WebMCP corpus are complete with documented results.
+- [x] `npm test` (88/88), all 30 Playwright checks, `npm run build`, and the measured 72-run OpenAI WebMCP corpus are complete with documented results.
 - [ ] Final client, prompt, limitations, and measured evidence agree across README, reports, video, and Devpost text after the video is recorded.
-- [ ] Every public screenshot and the final video depict the frozen deployment; both screenshots and video remain pending.
+- [ ] Every public screenshot and the final video depict the frozen deployment; screenshots pass, video remains pending.
 - [ ] All URLs work from a signed-out browser.
 - [ ] Submit before September 3, 2026 at 1:00 PM PT; use deadline morning only as recovery buffer.

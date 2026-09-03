@@ -1,6 +1,6 @@
 # Curbcut — Product Requirements
 
-Status: MVP implementation, production freeze, and target-client verification complete; final screenshot recapture, owner video, and Devpost submission remain pending
+Status: MVP implementation, production freeze, target-client verification, and final screenshots complete; owner video and Devpost submission remain pending
 Planning date: August 26, 2026  
 Hackathon deadline: September 3, 2026 at 1:00 PM PT
 
@@ -25,7 +25,7 @@ The product extends, rather than replaces, the successful spike architecture:
 - Replace the spike's same-origin iframe with an opaque-origin sandbox and a validated `postMessage` bridge.
 - Register a stable tool set once. The spike observed a transient tool-list update during sequential registration, so the MVP will not dynamically add and remove tools as state changes.
 - Connect WebMCP to the real product architecture early: by the end of M2, `scan_accessibility`, `list_issues`, and `inspect_issue` must operate the real sandbox, axe results, React store, source map, source selection, and preview highlight. The complete ten-tool workflow remains M4 scope.
-- Maintain a persistent authenticated Vercel deployment from M1/M2 onward. The final application commit, `7a95ee9`, was built, deployed, and verified at <https://curbcut-one.vercel.app> as Vercel deployment `dpl_2S1fKA8yaBpWLnYjZaaYkuDZgf8Y`.
+- Maintain a persistent authenticated Vercel deployment from M1/M2 onward. The final application commit, `21838d8`, was built, deployed, and verified at <https://curbcut-one.vercel.app> as Vercel deployment `dpl_Ae3dg1396JPcP2nmygbNxNVPSnha`.
 
 ## 2. Audience and job to be done
 
@@ -573,6 +573,6 @@ The MVP is done only when a fresh deployed session can:
 11. complete the primary multi-tool browser-agent prompt on the supported client;
 12. keep Curbcut itself keyboard-usable and free of known critical/serious axe violations.
 
-Release evidence recorded August 28, 2026: 85/85 Vitest checks across eight files, 25/25 Playwright checks, 36 validated WebMCP trajectory cases across twelve intents and ten tools, a 72-run OpenAI model evaluation with 214/253 strict passing rows (84.6%), 59/72 exact trajectories, 69/72 operationally correct trajectories, and zero infrastructure errors, a complete native-Chrome production ten-tool journey with reload rediscovery and zero console errors, and a Codex in-app browser production scan/high-impact-list/inspect journey with exact source mapping, preview highlight, timeline activity, and zero console errors. Production CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS headers also passed. The Impeccable visual reviewer returned **SHIP** and the release code audit returned **CLEAR**.
+Final release evidence recorded September 2, 2026: 88/88 Vitest checks across ten files, 30/30 Playwright checks, 36 validated WebMCP trajectory cases across twelve intents and ten tools, a 72-run OpenAI model evaluation with 214/253 strict passing rows (84.6%), 59/72 exact trajectories, 69/72 operationally correct trajectories, and zero infrastructure errors, a complete native-Chrome production ten-tool journey with reload rediscovery and zero console errors, and a Codex in-app browser production scan/high-impact-list/inspect journey with exact source mapping, preview highlight, timeline activity, and zero console errors. Production CSP, `Permissions-Policy: tools=(self)`, Origin-Agent-Cluster, no-referrer, nosniff, and HSTS headers also passed. The Impeccable visual reviewer returned **SHIP** and the release code audit returned **CLEAR**.
 
-The model eval's three genuine misses were two malformed copied issue IDs and one wrong rejection reason; no approval boundary was bypassed. OpenAI remains an evaluation-only dependency and the key was never stored. Known non-blockers are the Vite bundle warning (about 307.06 KB gzip, dominated by axe-core) and bounded scan responses: when a security cap is reached, counts are explicitly lower bounds and verification is reported as inconclusive rather than as a false pass.
+The model eval's three genuine misses were two malformed copied issue IDs and one wrong rejection reason; no approval boundary was bypassed. OpenAI remains an evaluation-only dependency and the key was never stored. Known non-blockers are the Vite bundle warning (about 307.74 KB gzip, dominated by axe-core) and bounded scan responses: when a security cap is reached, counts are explicitly lower bounds and verification is reported as inconclusive rather than as a false pass.
