@@ -2,7 +2,7 @@
 
 Status: M1–M7 and the M8 production release gate are complete; owner video and Devpost submission remain pending
 Baseline: the successful Spike A and Spike B code in this repository  
-Target: application commit `9de7dc4` deployed and verified at <https://curbcut-one.vercel.app>; submit before September 3, 2026 at 1:00 PM PT
+Target: application commit `1d74df2` deployed and verified at <https://curbcut-one.vercel.app>; submit before September 3, 2026 at 1:00 PM PT
 
 ## 1. Technical baseline and governing references
 
@@ -867,7 +867,7 @@ Fallback/cut: reduce paraphrase count only after covering every intent once. Nev
 
 Tasks:
 
-- [x] Deploy application commit `9de7dc4` with Vercel CLI 59.11.1 as `dpl_13K66yikcFY5f6TpTvvrib7CFdy7`.
+- [x] Deploy application commit `1d74df2` with Vercel CLI 59.11.1 as `dpl_6mFLMM3VinYUBb2pjFnwV2zG474n`.
 - [x] Verify the public URL, reload rediscovery, production security headers, tool discovery, and the complete native-Chrome ten-tool workflow.
 - [x] Verify production scan/list/inspect source selection and preview highlighting in the Codex in-app browser, with zero console errors.
 - [x] Capture fresh production workflow screenshots and finalize repository release evidence.

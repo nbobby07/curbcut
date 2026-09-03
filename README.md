@@ -2,7 +2,7 @@
 
 [Live production release candidate](https://curbcut-one.vercel.app) · [Source code](https://github.com/nbobby07/curbcut) · [MIT license](./LICENSE)
 
-Release status: application commit `9de7dc4` is deployed and verified at the public URL as Vercel deployment `dpl_13K66yikcFY5f6TpTvvrib7CFdy7`. Automated, OpenAI model-backed, and target-client release gates are recorded. The remaining owner tasks are the narrated video and Devpost submission.
+Release status: application commit `1d74df2` is deployed and verified at the public URL as Vercel deployment `dpl_6mFLMM3VinYUBb2pjFnwV2zG474n`. Automated, OpenAI model-backed, and target-client release gates are recorded. The remaining owner tasks are the narrated video and Devpost submission.
 
 Curbcut is a local-first, browser-native accessibility repair workbench for editable static HTML and CSS. A frontend developer and an external browser agent inspect and repair the same live artifact through WebMCP: the agent may apply exact mechanical patches after showing them, while the developer retains semantic and visual judgment.
 
