@@ -25,7 +25,7 @@ The product extends, rather than replaces, the successful spike architecture:
 - Replace the spike's same-origin iframe with an opaque-origin sandbox and a validated `postMessage` bridge.
 - Register a stable tool set once. The spike observed a transient tool-list update during sequential registration, so the MVP will not dynamically add and remove tools as state changes.
 - Connect WebMCP to the real product architecture early: by the end of M2, `scan_accessibility`, `list_issues`, and `inspect_issue` must operate the real sandbox, axe results, React store, source map, source selection, and preview highlight. The complete ten-tool workflow remains M4 scope.
-- Maintain a persistent authenticated Vercel deployment from M1/M2 onward. The final application commit, `1d74df2`, was built, deployed, and verified at <https://curbcut-one.vercel.app> as Vercel deployment `dpl_6mFLMM3VinYUBb2pjFnwV2zG474n`.
+- Maintain a persistent authenticated Vercel deployment from M1/M2 onward. The final application commit, `7a95ee9`, was built, deployed, and verified at <https://curbcut-one.vercel.app> as Vercel deployment `dpl_2S1fKA8yaBpWLnYjZaaYkuDZgf8Y`.
 
 ## 2. Audience and job to be done
 
