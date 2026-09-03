@@ -61,6 +61,13 @@ test('tablet workspace uses pane tabs without document overflow', async ({ page 
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
 })
 
+test('medium command bar wraps without clipping actions', async ({ page }) => {
+  await page.setViewportSize({ width: 980, height: 900 })
+  await page.goto('/')
+  await expect(page.getByRole('button', { name: 'Reset demo' })).toBeVisible()
+  await expect.poll(() => page.locator('.command-actions').evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true)
+})
+
 test('mapped issue navigation reveals source and restores keyboard focus', async ({ page }) => {
   await page.goto('/')
   const scanButton = page.getByRole('button', { name: 'Rescan with axe' })
