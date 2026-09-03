@@ -315,7 +315,7 @@ export function App() {
           {state.lastExport && <p role="status" className="export-message">Downloaded {state.lastExport.filename} · revision {state.lastExport.sourceRevision}</p>}
           <div ref={evidenceScrollRef} className="evidence-scroll">
             <IssueList focusIssueId={selectedIssue?.issueId} />
-            {state.verificationNotice && <VerificationResult />}
+            {state.verificationNotice && !selectedIssue && <VerificationResult />}
             {pendingProposal
               ? <ProposalPanel proposal={pendingProposal} issue={selectedIssue} />
               : selectedIssue && <IssueDetail key={selectedIssue.issueId} issue={selectedIssue} />}
