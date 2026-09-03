@@ -127,7 +127,6 @@ export function App() {
         <div className="brand-lockup">
           <span className="brand-mark" aria-hidden="true">C</span>
           <h1>Curbcut</h1>
-          <span className="revision-label">rev {state.sourceRevision}</span>
         </div>
         <div className="environment-status" aria-label="Workspace environment">
           <span className={state.isolationEvidence?.parentAccessBlocked ? 'healthy' : ''}>Secure sandbox</span>
@@ -261,7 +260,7 @@ export function App() {
           <div className="pane-heading">
             <div>
               <h2 id="preview-heading">Live preview</h2>
-              <p>Opaque sandbox · source rev {state.sourceRevision}</p>
+              <p>Source rev {state.sourceRevision}</p>
             </div>
             {pendingProposal ? (
               <div className="tabs" role="tablist" aria-label="Preview state">

@@ -84,7 +84,6 @@ a { color: #0758c7; text-underline-offset: 3px; }
   font-size: 17px;
 }
 .command-bar h1 { margin: 0; font-size: 16px; letter-spacing: -.015em; }
-.revision-label { padding-left: 10px; border-left: 1px solid var(--line); color: var(--muted); font: 11px ui-monospace, SFMono-Regular, Consolas, monospace; }
 .environment-status { display: flex; align-items: center; gap: 6px; }
 .environment-status span, .connection-state {
   display: inline-flex;
